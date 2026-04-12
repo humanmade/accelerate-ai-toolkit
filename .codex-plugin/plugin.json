@@ -1,0 +1,29 @@
+{
+  "name": "accelerate-ai-toolkit",
+  "version": "1.0.0",
+  "description": "Your Accelerate site already knows what to fix. Ask it — get a diagnosis, a recommended A/B test, and a verdict on whether it worked.",
+  "author": { "name": "Human Made" },
+  "homepage": "https://www.accelerateplugin.com/",
+  "repository": "https://github.com/humanmade/accelerate-ai-toolkit",
+  "license": "MIT",
+  "keywords": ["accelerate", "wordpress", "analytics", "ab-testing", "personalization", "marketer"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Accelerate",
+    "shortDescription": "Your Accelerate site already knows what to fix. Ask it.",
+    "longDescription": "Every WordPress analytics plugin shows you numbers. This one tells you what to change, helps you change it safely, and reports back on whether it worked. Ask your Accelerate site what to fix — it diagnoses the problem, recommends a test, creates it for you, and tracks the result. One conversation, from insight to action to outcome.",
+    "developerName": "Human Made",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "logo": "./assets/icon.svg",
+    "composerIcon": "./assets/icon.svg",
+    "brandColor": "#9332FF",
+    "websiteURL": "https://www.accelerateplugin.com/",
+    "defaultPrompt": [
+      "How is my site performing this week?",
+      "Which landing page needs the most work?",
+      "What should I A/B test on the homepage?",
+      "Should I personalise content for visitors from Google?"
+    ]
+  }
+}

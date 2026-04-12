@@ -1,0 +1,27 @@
+{
+  "name": "accelerate-ai-toolkit",
+  "version": "1.0.0",
+  "description": "Conversational access to your Accelerate WordPress site from Claude Code and Codex CLI. Ask analytics questions in plain English, get answers backed by real data.",
+  "author": {
+    "name": "Human Made",
+    "url": "https://humanmade.com"
+  },
+  "homepage": "https://www.accelerateplugin.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humanmade/accelerate-ai-toolkit.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "accelerate",
+    "wordpress",
+    "analytics",
+    "ab-testing",
+    "personalization",
+    "mcp",
+    "claude-code",
+    "codex",
+    "marketer",
+    "ai-plugin"
+  ]
+}

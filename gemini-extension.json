@@ -1,0 +1,8 @@
+{
+  "_comment": "Stub placeholder for Gemini CLI support — v1.1 roadmap. See ROADMAP.md and .cursor-plugin/README.md for context. All skills live in ./skills/ and are vendor-agnostic.",
+  "name": "accelerate-ai-toolkit",
+  "version": "1.0.0",
+  "description": "Conversational access to your Accelerate WordPress site. Gemini support coming in v1.1.",
+  "author": "Human Made",
+  "license": "MIT"
+}

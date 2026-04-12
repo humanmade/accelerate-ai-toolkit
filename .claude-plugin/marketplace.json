@@ -1,0 +1,21 @@
+{
+  "name": "accelerate-ai-toolkit",
+  "owner": {
+    "name": "Human Made"
+  },
+  "metadata": {
+    "description": "Your Accelerate site already knows what to fix. Ask it."
+  },
+  "plugins": [
+    {
+      "name": "accelerate-ai-toolkit",
+      "source": "./",
+      "description": "Your Accelerate site already knows what to fix. Ask it — get a diagnosis, a recommended A/B test, and a verdict on whether it worked.",
+      "version": "1.0.0",
+      "author": { "name": "Human Made" },
+      "license": "MIT",
+      "homepage": "https://github.com/humanmade/accelerate-ai-toolkit",
+      "keywords": ["accelerate", "wordpress", "analytics", "ab-testing", "personalization", "mcp", "marketer"]
+    }
+  ]
+}
