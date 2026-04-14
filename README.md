@@ -2,7 +2,7 @@
 
 Every WordPress analytics plugin shows you numbers. None of them tell you what to change, help you change it safely, and report back on whether it worked.
 
-This toolkit closes that loop. Ask your [Accelerate](https://www.accelerateplugin.com/) site what to fix — it diagnoses the problem, recommends a test, creates it for you, and tracks the result. One conversation, from insight to action to outcome.
+This toolkit closes that loop. Ask your [Accelerate](https://www.accelerateplugin.com/) site what to fix. It diagnoses the problem, recommends a test, creates it for you, and tracks the result. One conversation, from insight to action to outcome.
 
 > Built for marketers, not developers. No dashboards. No spreadsheets. No code.
 
@@ -14,15 +14,15 @@ You open Claude Code and ask:
 
 > *"Which landing page needs the most work?"*
 
-The toolkit pulls your real traffic data, finds the page with the worst bounce-to-conversion ratio, explains why it's underperforming, and proposes 2–3 testable improvements. You say "set up that A/B test" — it creates the test, applies your brand's design standards, and confirms before publishing. A week later, you ask "did it work?" and get a plain-English verdict with the numbers behind it.
+The toolkit pulls your real traffic data, finds the page with the worst bounce-to-conversion ratio, explains why it's underperforming, and proposes 2-3 testable improvements. You say "set up that A/B test" and it creates the test, applies your brand's design standards, and confirms before publishing. A week later, you ask "did it work?" and get a clear verdict with the numbers behind it.
 
 **More things you can ask:**
 
-- *"How is my site doing this week?"* — performance snapshot, not a wall of charts
-- *"What should I do first?"* — prioritised recommendations backed by your data
-- *"What's driving the traffic spike right now?"* — real-time investigation
-- *"Should I personalise content for visitors from Google?"* — audience analysis with a clear yes/no
-- *"Which campaign is converting best this month?"* — attribution breakdown, first-touch vs last-touch
+- *"How is my site doing this week?"* - performance snapshot, not a wall of charts
+- *"What should I do first?"* - prioritised recommendations backed by your data
+- *"What's driving the traffic spike right now?"* - real-time investigation
+- *"Should I personalise content for visitors from Google?"* - audience analysis with a clear yes/no
+- *"Which campaign is converting best this month?"* - attribution breakdown, first-touch vs last-touch
 
 ---
 
@@ -70,19 +70,19 @@ The toolkit is not a wrapper around your analytics API. It's 12 purpose-built wo
 
 | Workflow | What it does |
 |----------|-------------|
-| **Review** | Site performance snapshot — visitors, bounce rate, top pages, traffic breakdown |
-| **Diagnose** | Root-cause analysis — why a page is bouncing, where traffic is mismatched |
-| **Opportunities** | The front door — synthesises everything into 3 ranked next actions |
-| **Optimize landing page** | Deep-dive on one page — engagement metrics, 2–3 testable improvements, A/B test hand-off |
-| **Test** | Full A/B test lifecycle — plan, create, monitor, review, declare a winner |
-| **Personalize** | Audience creation and content personalization — by referrer, geography, behaviour, device |
+| **Review** | Site performance snapshot: visitors, bounce rate, top pages, traffic breakdown |
+| **Diagnose** | Root-cause analysis: why a page is bouncing, where traffic is mismatched |
+| **Opportunities** | The front door: synthesises everything into 3 ranked next actions |
+| **Optimize landing page** | Deep-dive on one page: engagement metrics, 2-3 testable improvements, A/B test hand-off |
+| **Test** | Full A/B test lifecycle: plan, create, monitor, review, declare a winner |
+| **Personalize** | Audience creation and content personalization: by referrer, geography, behaviour, device |
 | **Content plan** | Proposes upcoming posts grounded in what's actually working on your site |
-| **Realtime** | What's happening right now — concurrent visitors, trending content, spike investigation |
-| **Campaigns** | Attribution analysis — source breakdown, UTM performance, channel comparison |
+| **Realtime** | What's happening right now: concurrent visitors, trending content, spike investigation |
+| **Campaigns** | Attribution analysis: source breakdown, UTM performance, channel comparison |
 
 A **router skill** reads your question and sends it to the right workflow automatically. For complex investigations ("why did conversions drop last month?"), a specialised **analyst agent** runs multi-step research across several data sources and reports back with findings, interpretation, and concrete next steps.
 
-Every workflow that creates or changes something — A/B tests, personalization rules, audiences — asks for your explicit confirmation first. Nothing ships without your say-so.
+Every workflow that creates or changes something (A/B tests, personalization rules, audiences) asks for your explicit confirmation first. Nothing ships without your say-so.
 
 ---
 
