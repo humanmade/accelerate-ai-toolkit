@@ -13,8 +13,10 @@ You are implementing a GitHub issue for the **Accelerate AI Toolkit** -- a Claud
 ## Issue context
 
 ```!
-gh issue view $ARGUMENTS --json number,title,body,labels,assignees,milestone,comments --jq '{number,title,body,labels: [.labels[].name], assignees: [.assignees[].login], milestone: .milestone.title, comments: [.comments[] | {author: .author.login, body: .body}]}'
+gh issue view $0 --json number,title,body,labels,assignees,milestone,comments --jq '{number,title,body,labels: [.labels[].name], assignees: [.assignees[].login], milestone: .milestone.title, comments: [.comments[] | {author: .author.login, body: .body}]}'
 ```
+
+**Additional instructions from the user (if any):** $ARGUMENTS
 
 ## Before you touch any code
 

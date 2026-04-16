@@ -83,7 +83,7 @@ Once confirmed and backed up:
    - `block_id`: the synced pattern / reusable block ID that holds the content to test
    - `hypothesis`: the plain-English hypothesis you agreed on
    - `goal`: `engagement`, `click_any_link`, or `submit_form` based on what the user cares about
-   - `variants`: an array of `{ title, content }` pairs. The first variant should be the control (current content); the user may need to provide the raw block markup for the variant content, or you can use plain text/HTML which Accelerate accepts
+   - `variants`: an array of `{ title, content }` pairs. The first variant should be the control (current content). Content can be full WordPress block markup (including `<!-- wp:... -->` comment delimiters) or plain text/HTML -- Accelerate parses both correctly
    - `traffic_percentage`: default to `100` unless the user asks for a gradual rollout
 
 2. **Verify the test was created correctly.** Immediately after the call succeeds, fetch the block content again and check that:

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.11
+
+- Fixed the root cause of empty A/B test variants (upstream fix in Accelerate plugin). Creating tests, adding variants, updating variants, and creating personalization rules now correctly preserve content. The backup/verify/rollback safety net in the testing skill is kept as defence-in-depth.
+
 ## 1.0.10
 
 - Fixed a bug where the A/B test safety hook interrupted Claude after every site data request, not just test creation calls. Claude now continues smoothly through multi-step analysis workflows without getting cut off.
