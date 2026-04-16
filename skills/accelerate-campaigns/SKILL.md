@@ -4,7 +4,6 @@ description: Use when the user asks about campaigns, UTMs, traffic sources, attr
 license: MIT
 category: attribution
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Campaigns and attribution

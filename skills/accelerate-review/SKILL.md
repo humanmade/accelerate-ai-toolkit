@@ -4,7 +4,6 @@ description: Use when the user wants a regular check-in on how their site is doi
 license: MIT
 category: review
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Site review

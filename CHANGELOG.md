@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6
+
+- The router skill can now properly delegate to workflow skills. Previously, all sub-skills blocked programmatic invocation, forcing the agent to work around the skill system. Setup (`/accelerate-connect`) and advanced reference remain manual-only.
+
 ## 1.0.5
 
 - README and installation docs now explicitly mention the MCP Adapter bundling and endpoint compatibility note.

@@ -4,7 +4,6 @@ description: Use when the user wants to optimise a landing page, improve a landi
 license: MIT
 category: optimization
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Optimise a landing page

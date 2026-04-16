@@ -4,7 +4,6 @@ description: Use when the user wants to plan, create, monitor, review, or end an
 license: MIT
 category: experimentation
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — A/B testing lifecycle

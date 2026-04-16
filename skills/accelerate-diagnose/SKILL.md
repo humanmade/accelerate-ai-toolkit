@@ -4,7 +4,6 @@ description: Use when the user asks why something is underperforming, what's wro
 license: MIT
 category: diagnosis
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Diagnose underperformance

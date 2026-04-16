@@ -4,7 +4,6 @@ description: Use when the user wants a content plan, editorial calendar, help de
 license: MIT
 category: content
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Content plan

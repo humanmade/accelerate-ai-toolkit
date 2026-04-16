@@ -4,7 +4,6 @@ description: Use when the user asks about what's happening on the site right now
 license: MIT
 category: realtime
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Realtime monitoring

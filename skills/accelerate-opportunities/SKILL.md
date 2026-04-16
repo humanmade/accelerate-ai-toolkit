@@ -4,7 +4,6 @@ description: Use when the user asks what to focus on, what should I improve firs
 license: MIT
 category: prioritisation
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Opportunities & operating plan

@@ -4,7 +4,6 @@ description: Use when the user asks about personalization, audiences, visitor se
 license: MIT
 category: personalization
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Personalization
