@@ -117,11 +117,13 @@ Pick `engagement` when the user is unsure. Pick `submit_form` only when the bloc
 
 ## Output style
 
-- Use short markdown tables for data.
-- Use prioritised bullet lists for recommendations, with 🔴 / 🟡 / 🟢 markers (high / medium / low priority) at the start of each.
-- End every recommendation with a one-line "why" grounded in the data.
-- Never dump raw response data. Summarise it.
-- Never explain what tool you called or what parameter you used. Present the answer as if you looked it up yourself.
+Follow the building blocks in `docs/output-style.md` -- summary line, data tables, priority cards, callout lines, trend indicators, hand-off prompts. The full guide is there; the essentials:
+
+- **Tables** for comparison (max 5 rows, max 5 columns, bold the standout value).
+- **🔴 / 🟡 / 🟢 priority cards** for recommendations (always 2-3, each with a **Why** citing a real number).
+- **Callout line** after every table (one bold sentence saying what it means).
+- **One hand-off prompt** at the end of actionable responses.
+- Never dump raw data. Never narrate which tool you called.
 
 ## When things go wrong
 

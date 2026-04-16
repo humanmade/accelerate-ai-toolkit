@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.13
+
+- Added a centralised output style guide (`docs/output-style.md`) so all skills present data consistently -- tables, priority cards, trend indicators, callouts, and hand-off prompts follow the same patterns.
+
 ## 1.0.12
 
 - Added `/accelerate` command as a guaranteed entry point — type `/accelerate` followed by your question and the router fires every time, no reliance on auto-detection.
