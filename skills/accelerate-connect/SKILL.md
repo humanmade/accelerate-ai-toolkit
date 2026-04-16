@@ -130,52 +130,71 @@ Ask the user to add that line, save the profile, and **either** open a new termi
 
 Before asking the user to restart, run two quick probes to catch the most common setup problems.
 
-**7a — Verify npx is available**
+**7a — Verify npx is the real Node.js binary**
 
 Use the Bash tool:
 
 ```bash
-NPX_PATH=$(command -v npx 2>/dev/null) && echo "npx=$NPX_PATH" && npx --version 2>&1 | head -1 || echo "npx=NOT_FOUND"
+NPX_PATH=$(command -v npx 2>/dev/null)
+NPX_VER=$(npx --version 2>&1 | head -1)
+NPX_REAL=$(realpath "$NPX_PATH" 2>/dev/null || echo "$NPX_PATH")
+echo "path=$NPX_REAL version=$NPX_VER"
 ```
 
-If `npx` is not found, or if `npx --version` returns an error or unexpected output (e.g. "Unknown command"), tell the user:
+Check **both** conditions:
+1. The version output looks like a semver number (e.g. `10.8.2`), not an error or "Unknown command"
+2. The resolved path is inside a standard Node.js location (the path contains `node`, `npm`, `nvm`, `fnm`, `volta`, or is in `/usr/local/bin`, `/usr/bin`, or a Homebrew prefix)
 
-> "The toolkit needs `npx` (part of Node.js) to connect to your site, but it doesn't seem to be available in your current shell. This can happen if Node.js isn't installed, or if another tool is intercepting the `npx` command.
+If npx is missing, returns a non-semver version, or resolves to an unexpected location, tell the user:
+
+> "The toolkit needs a working copy of `npx` (part of Node.js) to connect to your site, but the `npx` in your current shell doesn't appear to be the standard Node.js version. This usually happens when another tool in your shell is intercepting the command.
 >
-> To check: open a regular terminal and run `npx --version`. If that works, the issue is likely a shell plugin or tool overriding `npx` in your agent's environment. See the troubleshooting section in the installation guide for how to fix this."
+> To check: open a regular terminal and run `npx --version`. If that works and shows a version number, your agent's shell has something overriding it. See the troubleshooting section in the installation guide for how to point the toolkit at the real `npx` binary."
 
-If npx is fine, continue to 7b.
+If npx looks genuine, continue to 7b.
 
 **7b — Check site endpoints**
 
 Use the Bash tool to test the site's REST endpoints:
 
 ```bash
-# Probe both known endpoint paths. One should return 200 or 401 (reachable); a 404 means the route doesn't exist.
 SITE="<the normalised site root URL from step 2>"
 USER="<the username from step 4>"
 PASS="<the application password from step 4>"
 
+# First check if Accelerate is installed
+ACCEL=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/accelerate/v1" 2>/dev/null)
+# Then check both known connection addresses
 DEFAULT=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/wp/v2/wpmcp" 2>/dev/null)
 ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
 
-echo "default=$DEFAULT adapter=$ADAPTER"
+echo "accelerate=$ACCEL default=$DEFAULT adapter=$ADAPTER"
 ```
 
-Interpret the results:
+Interpret the results in order:
 
-| default | adapter | Meaning | What to tell the user |
-|---------|---------|---------|----------------------|
-| 200/401 | any | The expected endpoint works. | Everything looks good. Proceed to step 8. |
-| 404 | 200/401 | The MCP Adapter plugin is using a different address than the toolkit expects. This is common with MCP Adapter versions 0.4.1 and newer. | See "Endpoint mismatch" guidance below. |
-| 404 | 404 | Neither endpoint responds. | Accelerate or the MCP Adapter may not be installed, or the Abilities API feature flag isn't enabled. Tell the user to check that Accelerate is active on their site and that the Abilities API is turned on (see `docs/installation.md` for instructions). |
-| Other | Other | Unexpected response (network error, 500, etc.) | Tell the user the site returned an unexpected response and suggest they check the URL is correct and the site is reachable in a browser. |
+**Step 1 — Is Accelerate installed?**
 
-**Endpoint mismatch guidance:**
+If `accelerate` is `404`: Accelerate isn't active on this site, or the Abilities feature isn't turned on. Tell the user:
 
-If only the adapter endpoint responds (404 on default, 200/401 on adapter), tell the user in plain, friendly language:
+> "I can reach your site, but Accelerate doesn't seem to be active or its Abilities feature isn't turned on yet. Check that the Accelerate plugin is installed and active in your WordPress admin, and that the Abilities feature is enabled (see the installation guide for instructions)."
 
-> "Your site's connection point is set up slightly differently than what the toolkit expects out of the box. This is a known compatibility issue with recent versions of the WordPress connector plugin.
+Stop here — no point checking connection addresses if Accelerate itself isn't running.
+
+**Step 2 — Which connection address works?**
+
+| default | adapter | What to tell the user |
+|---------|---------|----------------------|
+| 200/401 | any | Everything looks good. Proceed to step 8. |
+| 404 | 200/401 | See "Connection address mismatch" guidance below. |
+| 404 | 404 | Accelerate is installed but the WordPress connector isn't registered. Tell the user: *"Accelerate is running on your site, but the WordPress connector isn't responding. This usually means it needs to be activated separately. Check with your site administrator or see the installation guide."* |
+| Other | Other | Tell the user the site returned an unexpected response and suggest they check the URL is correct and the site is reachable in a browser. |
+
+**Connection address mismatch guidance:**
+
+If only the second address responds (404 on default, 200/401 on adapter), tell the user in plain, friendly language:
+
+> "Your site's connection is set up slightly differently than what the toolkit expects out of the box. This is a known compatibility issue with recent versions of the WordPress connector.
 >
 > To fix it, your site needs a small configuration tweak. Please ask your site administrator (or developer) to create a file called `endpoint-compat.php` in your site's `wp-content/mu-plugins/` folder with this content:"
 >

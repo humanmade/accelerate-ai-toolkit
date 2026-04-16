@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.8
+
+- Setup and status diagnostics now detect shell tools that intercept Node.js commands (checks the actual binary path, not just the version number).
+- `/accelerate-status` now separates "Accelerate not installed" from "WordPress connector not registered" instead of showing a generic message when both fail.
+- Removed technical jargon from all user-facing diagnostic messages (connection checks, status output, README notes).
+- Permission diagnostic now correctly describes the two-tier access model instead of a blanket "Editor or higher".
+
 ## 1.0.7
 
 - A/B testing and landing page optimisation skills now check whether the target content is a reusable block before proposing changes. If it isn't, the toolkit explains the requirement and walks you through converting it -- instead of spending time on a hypothesis you can't test.
