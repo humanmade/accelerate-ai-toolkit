@@ -48,7 +48,27 @@ Confirm the variant text and the success metric with the user. **Never call `cre
 
 Before showing the confirmation prompt, verify the variant content against the site's brand context file (`~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`). If the file does not exist, generate it from `accelerate/get-site-context` with `include_blocks: true`. Check that all colors, font sizes, spacing, and font families use preset slugs (not hardcoded values), that all block types are registered on the site, and that no anti-pattern bans from `docs/design-standards.md` are violated. Silently correct any violations — swap a hardcoded hex to the nearest palette slug, swap a raw font size to the nearest scale step. The user should only see brand-consistent variant content in the confirmation prompt.
 
-Once confirmed:
+### Reusable block requirement
+
+A/B tests run on reusable blocks (synced patterns) — this is by design. It means the test is contained to one specific element, and nothing else on the page changes. Before proposing a test on any content:
+
+1. Confirm the target is a synced pattern / reusable block (post type `wp_block`). If the user named a page section, use `accelerate/search-content` with `post_type: "wp_block"` to find it.
+2. If the target is inline page content (not a reusable block), stop and explain: *"That section isn't a reusable block yet, so we can't test it directly. You can convert it in the WordPress editor — select the content, click the three-dot menu, and choose 'Create pattern'. Once that's done, come back and I'll set up the test."*
+
+Do not attempt to create a test on inline content. Do not proceed past this step until you have a confirmed `wp_block` post ID.
+
+### Safety: backup before mutation
+
+**Before calling `create-ab-test`, always save a backup of the current block content.** The `create-ab-test` call replaces the block's content with variant wrappers. If anything goes wrong (empty variants, malformed markup, API error), the original content is gone unless you saved it.
+
+Steps:
+1. Fetch the current block content using `accelerate/get-post-content` or equivalent (e.g., WP-CLI via SSH: `wp post get <block_id> --field=content`).
+2. Hold the original content in working memory — you will need it for rollback.
+3. Note the block ID and tell the user: *"I've saved a backup of the current content before making changes."*
+
+### Creating the test
+
+Once confirmed and backed up:
 
 1. Call `accelerate/create-ab-test` with:
    - `block_id`: the synced pattern / reusable block ID that holds the content to test
@@ -57,10 +77,17 @@ Once confirmed:
    - `variants`: an array of `{ title, content }` pairs. The first variant should be the control (current content); the user may need to provide the raw block markup for the variant content, or you can use plain text/HTML which Accelerate accepts
    - `traffic_percentage`: default to `100` unless the user asks for a gradual rollout
 
-2. When the call succeeds, confirm to the user in one sentence: *"Done. The test is live on the homepage hero."*
-3. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1–2 weeks. For lower traffic, 2–4 weeks.
+2. **Verify the test was created correctly.** Immediately after the call succeeds, fetch the block content again and check that:
+   - Both variants contain non-empty content (not self-closing `<!-- wp:altis/variant ... /-->` tags)
+   - The control variant still matches the original content
+   - The new variant contains the proposed changes
+   
+   If any variant is empty or the content looks wrong, **immediately roll back**: restore the original content you saved in the backup step (via WP-CLI: `wp post update <block_id> --post_content="<original_content>"`), tell the user the test creation failed and the original content has been restored, and do not tell the user the test is live.
 
-If the target block doesn't exist yet as a synced pattern / reusable block, explain that gently: "This element needs to be turned into a reusable block first — the Accelerate team uses these as the unit of testing. You'll need to do that step in the WordPress editor."
+3. Only after verification passes, confirm to the user: *"Done. The test is live — I've verified both versions are showing correctly."*
+4. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1–2 weeks. For lower traffic, 2–4 weeks.
+
+If the target block doesn't exist yet as a synced pattern / reusable block, explain that gently: *"That section needs to be a reusable block before we can test it. This is by design — it keeps the test contained to one element so nothing else on your page changes unexpectedly. You can convert it in the WordPress editor: select the content, click the three-dot menu, and choose 'Create pattern'. It takes about a minute."*
 
 ## Monitoring
 

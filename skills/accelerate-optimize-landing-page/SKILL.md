@@ -79,7 +79,9 @@ After presenting the recommendations, ask:
 
 > "Want me to set up an A/B test for the first one? I can create a new version with a rewritten headline, split traffic 50/50, and we can check back in a week or two to see which one wins."
 
-If they say yes, hand off mentally to `accelerate-test` with the specific recommendation as the hypothesis. Do NOT call `create-ab-test` without confirming the exact variant text with the user first.
+**Before offering a test, check whether the target section is a reusable block.** If the recommendation targets inline page content (not a `wp_block` synced pattern), say so upfront: *"To test this, the section would need to be converted into a reusable block first — this keeps the test contained so nothing else on the page changes. You can do this in the editor: select the content, click the three-dot menu, choose 'Create pattern'."* Do not offer to create the test until the block exists.
+
+If they say yes and the target is a reusable block, hand off to `accelerate-test` with the specific recommendation as the hypothesis. Do NOT call `create-ab-test` without confirming the exact variant text with the user first. The `accelerate-test` skill handles backup, creation, and verification — follow its full Creating flow.
 
 When constructing the recommendation as a potential variant, apply the design standards from `docs/design-standards.md`. The recommendation must be bold enough to pass the differentiation rubric — a specific new angle grounded in the fetched data, not a minor rewording. Variant block markup must use preset slugs for all design tokens (colors, font sizes, spacing), never hardcoded values. Check the proposed copy against the AI-slop word list before presenting.
 
