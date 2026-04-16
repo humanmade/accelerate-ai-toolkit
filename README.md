@@ -44,8 +44,11 @@ The command walks you through generating a WordPress Application Password and sa
 <summary><strong>Requirements</strong></summary>
 
 - WordPress 6.9+ with [Accelerate](https://www.accelerateplugin.com/) 4.1+ (Abilities API enabled)
+- [WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter) plugin (0.4.1+) installed and active on the site
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [Codex CLI](https://github.com/openai/codex)
 - Node.js 18+
+
+**Note:** The MCP Adapter's default endpoint (`/mcp/mcp-adapter-default-server`) does not match what the toolkit's transport layer expects (`/wp/v2/wpmcp`). You'll need to add a small mu-plugin to remap it — `/accelerate-connect` will detect this and walk you through it.
 
 </details>
 

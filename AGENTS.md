@@ -48,6 +48,8 @@ accelerate-ai-toolkit/
 │   └── accelerate-analyst.md     # Deep-dive sub-agent
 ├── commands/                     # Slash commands
 ├── docs/                         # Long-form human documentation
+├── hooks/
+│   └── hooks.json                # Claude Code safety hooks (see below)
 ├── skills/
 │   ├── accelerate/               # Router (always visible)
 │   ├── accelerate-connect/       # Setup walkthrough
@@ -84,6 +86,7 @@ accelerate-ai-toolkit/
 | `docs/ability-reference.md` | Human-readable capability catalogue. |
 | `docs/authentication.md` | Credential flow and security model. |
 | `docs/design-standards.md` | Design guardrails for variant proposals: anti-patterns, differentiation rubric, slug-first brand consistency, copy quality. |
+| `hooks/hooks.json` | Claude Code safety hooks. Enforces backup-before-mutation and verify-after-creation for A/B tests. |
 | `../altis-accelerate/inc/abilities/*.php` | **Source of truth** for capability names, inputs, outputs, and permissions. |
 
 ---
@@ -129,7 +132,7 @@ See `SKILLS-REVIEW.md` for the full analysis. The short version:
 
 ## Verification checklist (run before calling a change done)
 
-- [ ] All JSON manifests parse: `.mcp.json`, `plugin.json`, `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, `gemini-extension.json`.
+- [ ] All JSON manifests parse: `.mcp.json`, `plugin.json`, `package.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, `gemini-extension.json`, `hooks/hooks.json`.
 - [ ] Every skill has valid frontmatter (at minimum `name` and `description`).
 - [ ] Every file ends with a final newline.
 - [ ] No banned words in user-facing skill prose (grep the ban list from Hard Rule 1).
@@ -137,6 +140,23 @@ See `SKILLS-REVIEW.md` for the full analysis. The short version:
 - [ ] All cross-references updated after any rename (grep the repo for the old name).
 - [ ] Every capability referenced in a skill body exists in `../altis-accelerate/inc/abilities/*.php`.
 - [ ] The router (`skills/accelerate/SKILL.md`) mentions any new skill.
+
+---
+
+## Safety hooks (Claude Code only)
+
+The `hooks/hooks.json` file defines prompt-based `PreToolUse` and `PostToolUse` hooks that fire on `mcp__wordpress__mcp-adapter-execute-ability` calls. These are a hard safety net for mutations — they enforce guardrails even if the AI skips skill instructions.
+
+Currently implemented:
+
+| Hook | When | What it does |
+|---|---|---|
+| `PreToolUse` | Before `create-ab-test` | Blocks the call if the agent hasn't backed up the target block's content first |
+| `PostToolUse` | After `create-ab-test` | Verifies variants aren't empty; triggers rollback if they are |
+
+**Why prompt-based, not command-based:** Command hooks would need SSH/WP-CLI access on the user's machine, which isn't guaranteed. Prompt-based hooks work everywhere because they instruct the AI to do the verification using the tools already available (MCP calls, WP-CLI if configured).
+
+**Cross-vendor note:** The `hooks/` directory is Claude Code-specific. Codex CLI, Cursor, and Gemini ignore it. The skill-level guardrails in `skills/accelerate-test/SKILL.md` (backup, verify, rollback instructions) are the vendor-agnostic layer and apply everywhere. Hooks are an additional safety net for Claude Code users.
 
 ---
 
