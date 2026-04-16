@@ -8,7 +8,7 @@ The Accelerate AI Toolkit ships as a vendor-agnostic plugin that currently suppo
 
 Before you install the toolkit, confirm you have:
 
-- **A WordPress site running [Accelerate](https://www.accelerateplugin.com/)**. The Abilities API feature flag must be enabled (see [Enabling the Abilities API](#enabling-the-abilities-api) below). Accelerate bundles the WordPress MCP Adapter, so you do **not** need to install a separate `wordpress-mcp` plugin even if the upstream `@automattic/mcp-wordpress-remote` README mentions one.
+- **A WordPress site running [Accelerate](https://www.accelerateplugin.com/) 4.1 or newer**. The Abilities API feature flag must be enabled (see [Enabling the Abilities API](#enabling-the-abilities-api) below). Accelerate bundles the WordPress MCP Adapter, so you do **not** need to install a separate `wordpress-mcp` plugin even if the upstream `@automattic/mcp-wordpress-remote` README mentions one. Note: MCP Adapter versions 0.4.1+ use a different default endpoint than the toolkit expects -- `/accelerate-connect` detects this automatically and provides a fix if needed.
 - **WordPress 6.9 or newer.** The Abilities API requires WordPress core's `wp_register_ability()` function.
 - **A recent Node.js LTS runtime.** The toolkit uses `@automattic/mcp-wordpress-remote` as its MCP client, which runs on Node via `npx`. The upstream client doesn't document a specific minimum version; if you're on a current Node LTS you're fine.
 - **An agent that supports plugins:**

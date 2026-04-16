@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5
+
+- README and installation docs now explicitly mention the MCP Adapter bundling and endpoint compatibility note.
+
 ## 1.0.4
 
 - `/accelerate-status` is now a layered diagnostic that checks environment variables, npx, site reachability, authentication, endpoint compatibility, and MCP tool availability in order. It reports the first failing layer with a specific fix instead of a generic "run /accelerate-connect".
