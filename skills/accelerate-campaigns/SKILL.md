@@ -1,6 +1,6 @@
 ---
 name: accelerate-campaigns
-description: Use when the user asks about campaigns, UTMs, traffic sources, attribution, where conversions come from, which channel is working, paid vs organic, or marketing attribution. Keywords include campaign, UTM, source, attribution, first-touch, last-touch, channel, paid, organic, social, email, referrer.
+description: Which campaign is working? Where are conversions coming from? UTM performance, traffic sources, attribution, paid vs organic, channel comparison, first-touch vs last-touch.
 license: MIT
 category: attribution
 parent: accelerate

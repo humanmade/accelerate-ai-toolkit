@@ -1,6 +1,6 @@
 ---
 name: accelerate-test
-description: Use when the user wants to plan, create, monitor, review, or end an A/B test. Keywords include A/B test, split test, experiment, variant, test idea, what to test, create a test, running tests, test results, declare winner, stop test, pause test.
+description: A/B test lifecycle — plan, create, monitor, review, or end a test. What should I test? Set up a split test. How is my test doing? Is there a winner? Stop or declare a winner.
 license: MIT
 category: experimentation
 parent: accelerate

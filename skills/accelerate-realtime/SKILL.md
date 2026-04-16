@@ -1,6 +1,6 @@
 ---
 name: accelerate-realtime
-description: Use when the user asks about what's happening on the site right now, live visitors, real-time traffic, trending content, what's spiking, what's hot. Keywords include realtime, real-time, right now, live, trending, spike, current visitors, concurrent, hot, momentum, viral.
+description: What's happening on the site right now? Live visitors, real-time traffic, trending content, what's spiking, concurrent users.
 license: MIT
 category: realtime
 parent: accelerate

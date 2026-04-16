@@ -1,6 +1,6 @@
 ---
 name: accelerate-connect
-description: Walks the user through connecting the Accelerate AI Toolkit to their WordPress site. Use when the user says they want to set up, connect, install, configure credentials, generate an application password, or when they report that the toolkit is not connected yet. Also use if another skill fails because the wordpress MCP connection is not available.
+description: Connect the toolkit to your WordPress site. Set up credentials, generate an application password. Also triggered when the site connection is missing.
 license: MIT
 category: setup
 parent: accelerate

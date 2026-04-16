@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.12
+
+- Added `/accelerate` command as a guaranteed entry point — type `/accelerate` followed by your question and the router fires every time, no reliance on auto-detection.
+- Rewrote all skill descriptions to be 58% smaller and use natural trigger phrases instead of boilerplate. Skills should now auto-trigger more reliably even when many plugins are installed.
+
 ## 1.0.11
 
 - Fixed the root cause of empty A/B test variants (upstream fix in Accelerate plugin). Creating tests, adding variants, updating variants, and creating personalization rules now correctly preserve content. The backup/verify/rollback safety net in the testing skill is kept as defence-in-depth.

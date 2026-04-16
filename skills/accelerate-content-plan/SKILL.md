@@ -1,6 +1,6 @@
 ---
 name: accelerate-content-plan
-description: Use when the user wants a content plan, editorial calendar, help deciding what to write next, ideas grounded in their real data, content opportunities, topic ideas, or a data-informed content strategy. Produces a prioritised plan of 2–3 upcoming posts by default, or a single brief if the user explicitly asks for one. Keywords include content plan, content opportunities, editorial calendar, what should I write, what to write next, content ideas, next post, next posts, content strategy, topic ideas, topics, content brief, brief.
+description: What should I write next? Content plan, editorial calendar, topic ideas grounded in real site data. Produces 2-3 upcoming post recommendations or a single brief.
 license: MIT
 category: content
 parent: accelerate

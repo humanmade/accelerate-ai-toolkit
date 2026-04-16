@@ -1,6 +1,6 @@
 ---
 name: accelerate-abilities-reference
-description: Use when the user asks what the toolkit can do, what's possible, the full list of Accelerate capabilities, or wants to understand every data query available. Also use when another skill needs to check whether a specific ability exists. Keywords include capabilities, what can you do, full list, reference, features, available.
+description: What can this toolkit do? Full list of available capabilities and data queries. Advanced reference for power users.
 license: MIT
 category: reference
 parent: accelerate

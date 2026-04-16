@@ -1,6 +1,6 @@
 ---
 name: accelerate-personalize
-description: Use when the user asks about personalization, audiences, visitor segments, targeting, or showing different content to different visitors. Keywords include personalize, personalization, audience, segment, target, geo-target, referrer, UTM, visitor group, different content.
+description: Show different content to different visitors. Personalization, audiences, targeting by referrer, geography, behaviour, or device. Create visitor segments and personalization rules.
 license: MIT
 category: personalization
 parent: accelerate

@@ -1,6 +1,6 @@
 ---
 name: accelerate-optimize-landing-page
-description: Use when the user wants to optimise a landing page, improve a landing page, make a landing page convert better, or asks "what should I do about my landing page". Keywords include optimise, optimize, improve, landing page, entry page, homepage, convert better, conversion rate, first impression.
+description: Improve a landing page. Make it convert better. What should I change on my homepage? Optimise a specific page with data-grounded recommendations and A/B test hand-off.
 license: MIT
 category: optimization
 parent: accelerate

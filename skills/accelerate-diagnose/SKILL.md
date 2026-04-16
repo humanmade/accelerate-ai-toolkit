@@ -1,6 +1,6 @@
 ---
 name: accelerate-diagnose
-description: Use when the user asks why something is underperforming, what's wrong, why bounce rate is high, why conversions dropped, which page needs the most work, or anything about diagnosing content problems. Keywords include diagnose, problem, underperforming, bounce rate, dropping, not working, why, what's wrong, needs work, worst pages, fix.
+description: Why is this underperforming? Why is bounce rate high? Why did conversions drop? What's wrong with this page? Which page needs the most work? Root-cause diagnosis for content problems.
 license: MIT
 category: diagnosis
 parent: accelerate

@@ -1,6 +1,6 @@
 ---
 name: accelerate
-description: Use whenever the user asks about their website's analytics, A/B tests, audiences, personalization, campaigns, landing pages, content performance, or any question about how their Accelerate-powered WordPress site is doing. This is the router — read it to learn Accelerate terminology and then route to the right sub-skill. Keywords include analytics, performance, traffic, bounce rate, conversion, A/B test, experiment, variant, audience, personalization, broadcast, landing page, UTM, campaign, visitors, engagement.
+description: Any question about a WordPress site — analytics, traffic, bounce rate, conversions, A/B tests, landing pages, audiences, personalization, campaigns, content performance, what to improve, how the site is doing. Routes to the right workflow.
 license: MIT
 category: router
 ---

@@ -1,6 +1,6 @@
 ---
 name: accelerate-review
-description: Use when the user wants a regular check-in on how their site is doing — weekly review, monthly review, site health, status update, how are we doing, how's my site. This is the business check-in skill, not a technical analysis. Keywords include review, check-in, check in, site review, weekly review, monthly review, status, health, how are we doing, how's my site, performance, traffic overview, top pages, where we stand. Do not use for prioritisation ("what should I do next") — that belongs to accelerate-opportunities.
+description: How's my site doing? Weekly or monthly check-in, site health, performance overview, traffic summary, top pages, where we stand. Not for "what should I do next" — that's accelerate-opportunities.
 license: MIT
 category: review
 parent: accelerate

@@ -1,6 +1,6 @@
 ---
 name: accelerate-opportunities
-description: Use when the user asks what to focus on, what should I improve first, what changed and what should I do, where should I focus this week, give me a plan for this month, what matters now, what's next, what should I do, biggest wins. This is the prioritisation front door — it owns any question about what to do next. Keywords include opportunities, prioritise, prioritize, focus, plan, what next, what matters, biggest wins, where to start, improve first, what changed, weekly plan, monthly plan, this week, this month.
+description: What should I do first? What changed? Where should I focus this week? Give me a plan. What matters now? Biggest wins. Prioritised next actions for the site.
 license: MIT
 category: prioritisation
 parent: accelerate
