@@ -141,11 +141,31 @@ Without this flag, the abilities are not exposed through the MCP adapter and `/a
 
 ### "MCP server not running" or the `mcp__wordpress__*` tool isn't available
 
-The credentials didn't load. Check:
+The credentials didn't load, or the server couldn't start. Check these in order:
 
-- Did you source the env file in your shell profile? The line from `/accelerate-connect` should be in `~/.zshrc`, `~/.bash_profile`, or equivalent.
-- Did you restart your agent session after adding the line?
-- Try running `env | grep WP_API_` in a terminal. You should see three variables.
+1. **Did you source the env file in your shell profile?** The line from `/accelerate-connect` should be in `~/.zshrc`, `~/.bash_profile`, or equivalent.
+2. **Did you restart your agent session** after adding the line?
+3. **Try running `env | grep WP_API_`** in a terminal. You should see three variables.
+4. **Is `npx` working correctly?** Open a terminal and run `npx --version`. If this fails or returns unexpected output, another tool in your shell is intercepting `npx`. Common causes include shell proxy tools, custom aliases, or non-standard Node.js shim configurations. To work around this, find the real `npx` binary path (e.g. `which -a npx` or check your Node.js install directory) and create a project-level `.mcp.json` override in any directory where you run Claude Code:
+
+   ```json
+   {
+     "mcpServers": {
+       "wordpress": {
+         "command": "/absolute/path/to/npx",
+         "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+         "env": {
+           "WP_API_URL": "${WP_API_URL}",
+           "WP_API_USERNAME": "${WP_API_USERNAME}",
+           "WP_API_PASSWORD": "${WP_API_PASSWORD}",
+           "OAUTH_ENABLED": "false"
+         }
+       }
+     }
+   }
+   ```
+
+   Replace `/absolute/path/to/npx` with the real binary path (e.g. `/usr/local/bin/npx` or `~/.nvm/versions/node/v22.x.x/bin/npx`).
 
 ### "Authentication failed" / 401 errors
 

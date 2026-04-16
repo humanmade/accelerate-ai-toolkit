@@ -128,7 +128,25 @@ Ask the user to add that line, save the profile, and **either** open a new termi
 
 ### Step 7 — Quick connection check
 
-Before asking the user to restart, run a quick probe to catch the most common setup problem — an endpoint mismatch between the MCP server and the WordPress MCP Adapter plugin.
+Before asking the user to restart, run two quick probes to catch the most common setup problems.
+
+**7a — Verify npx is available**
+
+Use the Bash tool:
+
+```bash
+NPX_PATH=$(command -v npx 2>/dev/null) && echo "npx=$NPX_PATH" && npx --version 2>&1 | head -1 || echo "npx=NOT_FOUND"
+```
+
+If `npx` is not found, or if `npx --version` returns an error or unexpected output (e.g. "Unknown command"), tell the user:
+
+> "The toolkit needs `npx` (part of Node.js) to connect to your site, but it doesn't seem to be available in your current shell. This can happen if Node.js isn't installed, or if another tool is intercepting the `npx` command.
+>
+> To check: open a regular terminal and run `npx --version`. If that works, the issue is likely a shell plugin or tool overriding `npx` in your agent's environment. See the troubleshooting section in the installation guide for how to fix this."
+
+If npx is fine, continue to 7b.
+
+**7b — Check site endpoints**
 
 Use the Bash tool to test the site's REST endpoints:
 

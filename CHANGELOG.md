@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+- `/accelerate-connect` now checks that `npx` is working correctly before completing setup. If another tool in your shell is intercepting `npx`, the setup wizard explains the problem instead of failing silently.
+- `/accelerate-status` diagnoses `npx` interception when the connection appears missing.
+- Installation troubleshooting updated with workaround for `npx` interception (project-level override with the full binary path).
+
 ## 1.0.2
 
 - `/accelerate-connect` now double-quotes all values in the credentials file, fixing a bug where Application Passwords (which always contain spaces) were truncated by shell word-splitting.
