@@ -1,5 +1,6 @@
 # Local Claude Code project config (dev skills, settings)
 .claude/
+AGENTS.md
 
 # macOS
 .DS_Store
