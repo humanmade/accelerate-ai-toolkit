@@ -1,7 +1,7 @@
 {
   "name": "accelerate-ai-toolkit",
   "description": "Your Accelerate site already knows what to fix. Ask it — get a diagnosis, a recommended A/B test, and a verdict on whether it worked.",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": { "name": "Human Made" },
   "license": "MIT",
   "homepage": "https://www.accelerateplugin.com/",

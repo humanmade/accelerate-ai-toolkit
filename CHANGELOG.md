@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9
+
+- Credentials now persist reliably across session restarts. `/accelerate-connect` saves to Claude Code's `settings.local.json` (the documented mechanism for injecting environment variables into background processes) instead of relying on shell profile sourcing, which Claude Code doesn't read. The backup env file and Codex CLI shell profile flow are preserved for non-Claude-Code agents.
+- `/accelerate-status` now detects when credentials are saved but the session needs a restart to load them.
+
 ## 1.0.8
 
 - Setup and status diagnostics now detect shell tools that intercept Node.js commands (checks the actual binary path, not just the version number).

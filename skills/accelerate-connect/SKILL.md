@@ -72,17 +72,40 @@ Ask:
 
 Collect both. The username goes into `WP_API_USERNAME`. The password goes into `WP_API_PASSWORD` **exactly as WordPress displayed it** — do not strip the spaces.
 
-### Step 5 — Write the env file
+### Step 5 — Save credentials
 
-Use the Bash tool to write the credentials to `~/.config/accelerate-ai-toolkit/env`. The file format is a standard shell env file. **All values must be double-quoted** — Application Passwords contain spaces and unquoted values will break when the shell sources the file.
+Save credentials in **two places** so they work across all supported agents.
 
+**5a — Claude Code settings (primary)**
+
+This is what Claude Code reads when it starts the WordPress connector. Use the Bash tool to write the credentials into the project's `.claude/settings.local.json` (this file is gitignored and never committed):
+
+```bash
+# Read existing settings.local.json if it exists, merge env vars in
+python3 -c "
+import json, os, sys
+path = '.claude/settings.local.json'
+data = {}
+if os.path.exists(path):
+    with open(path) as f:
+        data = json.load(f)
+data.setdefault('env', {})
+data['env']['WP_API_URL'] = sys.argv[1]
+data['env']['WP_API_USERNAME'] = sys.argv[2]
+data['env']['WP_API_PASSWORD'] = sys.argv[3]
+data['env']['OAUTH_ENABLED'] = 'false'
+os.makedirs(os.path.dirname(path), exist_ok=True)
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2)
+    f.write('\n')
+" "<site_root_url>" "<username>" "<app_password>"
 ```
-WP_API_URL="https://their-site.com"
-WP_API_USERNAME="their_username"
-WP_API_PASSWORD="abcd efgh ijkl mnop"
-```
 
-Commands to run (replace the placeholders with the real values):
+Replace the three placeholders with the real values collected in steps 2-4.
+
+**5b — Backup env file (for Codex CLI and other agents)**
+
+Also write a standard env file for non-Claude-Code contexts:
 
 ```bash
 mkdir -p ~/.config/accelerate-ai-toolkit
@@ -95,20 +118,18 @@ chmod 600 ~/.config/accelerate-ai-toolkit/env
 ```
 
 **Important:**
-- **Double-quote every value.** Application Passwords always contain spaces (e.g. `Poy6 xelB xJzA wURe`). Without quotes, the shell interprets each space-separated chunk as a separate command and the password gets truncated.
-- Use a single-quoted heredoc (`<<'EOF'`) so shell doesn't try to expand anything inside the heredoc itself.
+- **Double-quote every value** in the env file. Application Passwords contain spaces.
 - `chmod 600` is required — the file holds credentials.
 - Do NOT echo the full password back to the user in chat after writing. Confirm by saying "Saved. ✓" instead.
+- The `.claude/settings.local.json` file is automatically gitignored by Claude Code. Do not commit it.
 
-### Step 6 — Add the env file to the user's shell profile
+### Step 6 — Shell profile (Codex CLI users only)
 
-Detect the user's shell by checking the `SHELL` environment variable via Bash (`echo $SHELL`). Common values:
+If the user is using **Codex CLI** (not Claude Code), they also need to source the env file from their shell profile so Codex picks up the values. Tell them:
 
-- `/bin/zsh` → profile file is `~/.zshrc`
-- `/bin/bash` → profile file is `~/.bash_profile` (macOS) or `~/.bashrc` (Linux)
-- `/bin/fish` → profile file is `~/.config/fish/config.fish`
+> "Since you're using Codex, you'll also need to add a line to your shell profile so the credentials load automatically."
 
-Tell the user they need to source the env file from their shell profile so their agent (Claude Code or Codex) picks up the values next session. Show them the exact line to add:
+Show the appropriate line based on their shell:
 
 For zsh / bash:
 ```bash
@@ -124,7 +145,7 @@ if test -f ~/.config/accelerate-ai-toolkit/env
 end
 ```
 
-Ask the user to add that line, save the profile, and **either** open a new terminal or run `source ~/.zshrc` (or equivalent) in any open terminals.
+**If the user is using Claude Code, skip this step entirely** — Claude Code reads credentials from `settings.local.json` and doesn't need shell profile changes.
 
 ### Step 7 — Quick connection check
 

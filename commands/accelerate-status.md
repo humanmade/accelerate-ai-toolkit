@@ -12,7 +12,34 @@ Use the Bash tool:
 echo "WP_API_URL=${WP_API_URL:-NOT_SET}" && echo "WP_API_USERNAME=${WP_API_USERNAME:-NOT_SET}" && echo "WP_API_PASSWORD=${WP_API_PASSWORD:+SET}"
 ```
 
-If any variable is `NOT_SET`:
+If any variable is `NOT_SET`, check whether credentials exist in `settings.local.json` but aren't loaded into the environment (common after upgrading from an older version of the toolkit):
+
+```bash
+python3 -c "
+import json, os
+path = '.claude/settings.local.json'
+if os.path.exists(path):
+    data = json.load(open(path))
+    env = data.get('env', {})
+    has_url = bool(env.get('WP_API_URL'))
+    has_user = bool(env.get('WP_API_USERNAME'))
+    has_pass = bool(env.get('WP_API_PASSWORD'))
+    print(f'settings_local=FOUND url={has_url} user={has_user} pass={has_pass}')
+else:
+    print('settings_local=NOT_FOUND')
+" 2>/dev/null || echo "settings_local=NOT_FOUND"
+```
+
+If `settings_local=FOUND` with all three values present but the env vars are still empty, the credentials are saved but the session needs a restart to pick them up:
+
+```
+❌ Credentials saved but not loaded yet
+   Your site credentials are saved, but this session started before they were written.
+   Fix: restart your agent session (close and reopen Claude Code). The credentials will
+   load automatically on next start.
+```
+
+If neither env vars nor `settings.local.json` have credentials:
 
 ```
 ❌ Credentials not loaded

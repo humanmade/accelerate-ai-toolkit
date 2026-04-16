@@ -19,9 +19,30 @@ Credentials live in `~/.config/accelerate-ai-toolkit/env`, a plain-text file wit
 
 ## What's stored, and where
 
-### `~/.config/accelerate-ai-toolkit/env`
+Credentials are stored in two places. Which one matters depends on your agent.
 
-A shell env file with three values:
+### Claude Code: `.claude/settings.local.json` (primary)
+
+For Claude Code users, credentials are saved in the project's `.claude/settings.local.json` under the `env` key:
+
+```json
+{
+  "env": {
+    "WP_API_URL": "https://your-site.com",
+    "WP_API_USERNAME": "your_wp_username",
+    "WP_API_PASSWORD": "abcd efgh ijkl mnop",
+    "OAUTH_ENABLED": "false"
+  }
+}
+```
+
+Claude Code reads this file at startup and injects these values into the environment for all MCP server processes. This is the reliable, documented mechanism — it survives session restarts without any shell profile changes.
+
+This file is automatically gitignored by Claude Code and is never committed.
+
+### `~/.config/accelerate-ai-toolkit/env` (backup / Codex CLI)
+
+A standard shell env file is also written as a backup and for Codex CLI users:
 
 ```
 WP_API_URL="https://your-site.com"
@@ -33,21 +54,15 @@ WP_API_PASSWORD="abcd efgh ijkl mnop"
 
 Permissions: `600` (read/write for you only).
 
-### Why the `env` file
+### Shell profile (Codex CLI only)
 
-- **Survives plugin updates.** If you re-clone the toolkit repository, credentials aren't affected.
-- **Not in the repository.** The toolkit's `.gitignore` excludes `.env*` files inside the repo, but we keep them outside the repo entirely to eliminate the possibility of leaks.
-- **Single source of truth.** Both Claude Code and Codex CLI can read the same env file via shell sourcing.
-
-### Your shell profile
-
-One line gets added to your shell profile (`~/.zshrc`, `~/.bash_profile`, or fish config):
+Codex CLI users need to source the env file from their shell profile so credentials load into future sessions:
 
 ```bash
 [ -f ~/.config/accelerate-ai-toolkit/env ] && set -a && . ~/.config/accelerate-ai-toolkit/env && set +a
 ```
 
-The `set -a` / `set +a` pair exports every variable the file sets, so child processes (including the agent's MCP server) inherit them.
+**Claude Code users do not need this line.** Claude Code reads credentials from `settings.local.json` directly.
 
 ### The toolkit's `.mcp.json`
 
