@@ -74,12 +74,12 @@ Collect both. The username goes into `WP_API_USERNAME`. The password goes into `
 
 ### Step 5 — Write the env file
 
-Use the Bash tool to write the credentials to `~/.config/accelerate-ai-toolkit/env`. The file format is a standard shell env file:
+Use the Bash tool to write the credentials to `~/.config/accelerate-ai-toolkit/env`. The file format is a standard shell env file. **All values must be double-quoted** — Application Passwords contain spaces and unquoted values will break when the shell sources the file.
 
 ```
-WP_API_URL=https://their-site.com
-WP_API_USERNAME=their_username
-WP_API_PASSWORD=abcd efgh ijkl mnop
+WP_API_URL="https://their-site.com"
+WP_API_USERNAME="their_username"
+WP_API_PASSWORD="abcd efgh ijkl mnop"
 ```
 
 Commands to run (replace the placeholders with the real values):
@@ -87,15 +87,16 @@ Commands to run (replace the placeholders with the real values):
 ```bash
 mkdir -p ~/.config/accelerate-ai-toolkit
 cat > ~/.config/accelerate-ai-toolkit/env <<'EOF'
-WP_API_URL=<site_root_url>
-WP_API_USERNAME=<username>
-WP_API_PASSWORD=<app_password>
+WP_API_URL="<site_root_url>"
+WP_API_USERNAME="<username>"
+WP_API_PASSWORD="<app_password>"
 EOF
 chmod 600 ~/.config/accelerate-ai-toolkit/env
 ```
 
 **Important:**
-- Use a single-quoted heredoc (`<<'EOF'`) so shell doesn't try to expand anything inside.
+- **Double-quote every value.** Application Passwords always contain spaces (e.g. `Poy6 xelB xJzA wURe`). Without quotes, the shell interprets each space-separated chunk as a separate command and the password gets truncated.
+- Use a single-quoted heredoc (`<<'EOF'`) so shell doesn't try to expand anything inside the heredoc itself.
 - `chmod 600` is required — the file holds credentials.
 - Do NOT echo the full password back to the user in chat after writing. Confirm by saying "Saved. ✓" instead.
 

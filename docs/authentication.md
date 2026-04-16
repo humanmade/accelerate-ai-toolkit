@@ -24,9 +24,9 @@ Credentials live in `~/.config/accelerate-ai-toolkit/env`, a plain-text file wit
 A shell env file with three values:
 
 ```
-WP_API_URL=https://your-site.com
-WP_API_USERNAME=your_wp_username
-WP_API_PASSWORD=abcd efgh ijkl mnop
+WP_API_URL="https://your-site.com"
+WP_API_USERNAME="your_wp_username"
+WP_API_PASSWORD="abcd efgh ijkl mnop"
 ```
 
 `WP_API_URL` is the site root — no `/wp-json/...`, no trailing slash. The upstream [`@automattic/mcp-wordpress-remote`](https://www.npmjs.com/package/@automattic/mcp-wordpress-remote) client handles endpoint routing internally.
