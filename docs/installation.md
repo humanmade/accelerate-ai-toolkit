@@ -151,12 +151,16 @@ The credentials didn't load. Check:
 
 The Application Password is wrong or has been revoked. Re-run `/accelerate-connect` and generate a fresh one.
 
-### "Not found" / 404 errors on the MCP endpoint
+### "Not found" / 404 errors on the connection
 
-Either:
+The most common cause is an **endpoint mismatch**. The toolkit expects the WordPress connector plugin (MCP Adapter) to respond at a specific address, but MCP Adapter versions 0.4.1 and newer use a different address by default.
+
+**Fix:** re-run `/accelerate-connect`. The setup wizard now detects this mismatch automatically and provides instructions for your site administrator to resolve it (a small PHP file in `wp-content/mu-plugins/`).
+
+If `/accelerate-connect` reports that the endpoint check passed, the 404 is caused by something else:
 - Accelerate isn't installed on the site you pointed at.
 - The Abilities API feature flag isn't enabled (see [Enabling the Abilities API](#enabling-the-abilities-api)).
-- The site URL is wrong — `WP_API_URL` must be the WordPress **site root** (e.g. `https://example.com`), with no `/wp-json/...` path. The `@automattic/mcp-wordpress-remote` client handles endpoint routing internally. If `/accelerate-connect` wrote anything longer into your env file, edit it back to the site root.
+- The site URL is wrong — `WP_API_URL` must be the WordPress **site root** (e.g. `https://example.com`), with no `/wp-json/...` path.
 
 ### "Permission denied" when a skill tries to fetch data
 

@@ -125,7 +125,55 @@ end
 
 Ask the user to add that line, save the profile, and **either** open a new terminal or run `source ~/.zshrc` (or equivalent) in any open terminals.
 
-### Step 7 — Remind them to restart their agent session
+### Step 7 — Quick connection check
+
+Before asking the user to restart, run a quick probe to catch the most common setup problem — an endpoint mismatch between the MCP server and the WordPress MCP Adapter plugin.
+
+Use the Bash tool to test the site's REST endpoints:
+
+```bash
+# Probe both known endpoint paths. One should return 200 or 401 (reachable); a 404 means the route doesn't exist.
+SITE="<the normalised site root URL from step 2>"
+USER="<the username from step 4>"
+PASS="<the application password from step 4>"
+
+DEFAULT=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/wp/v2/wpmcp" 2>/dev/null)
+ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
+
+echo "default=$DEFAULT adapter=$ADAPTER"
+```
+
+Interpret the results:
+
+| default | adapter | Meaning | What to tell the user |
+|---------|---------|---------|----------------------|
+| 200/401 | any | The expected endpoint works. | Everything looks good. Proceed to step 8. |
+| 404 | 200/401 | The MCP Adapter plugin is using a different address than the toolkit expects. This is common with MCP Adapter versions 0.4.1 and newer. | See "Endpoint mismatch" guidance below. |
+| 404 | 404 | Neither endpoint responds. | Accelerate or the MCP Adapter may not be installed, or the Abilities API feature flag isn't enabled. Tell the user to check that Accelerate is active on their site and that the Abilities API is turned on (see `docs/installation.md` for instructions). |
+| Other | Other | Unexpected response (network error, 500, etc.) | Tell the user the site returned an unexpected response and suggest they check the URL is correct and the site is reachable in a browser. |
+
+**Endpoint mismatch guidance:**
+
+If only the adapter endpoint responds (404 on default, 200/401 on adapter), tell the user in plain, friendly language:
+
+> "Your site's connection point is set up slightly differently than what the toolkit expects out of the box. This is a known compatibility issue with recent versions of the WordPress connector plugin.
+>
+> To fix it, your site needs a small configuration tweak. Please ask your site administrator (or developer) to create a file called `endpoint-compat.php` in your site's `wp-content/mu-plugins/` folder with this content:"
+>
+> ```php
+> <?php
+> add_filter( 'mcp_adapter_default_server_config', function( $config ) {
+>     $config['server_route_namespace'] = 'wp/v2';
+>     $config['server_route']           = 'wpmcp';
+>     return $config;
+> } );
+> ```
+>
+> "Once that file is in place, restart your agent session and run `/accelerate-status`. If you're not sure how to do this, forward these instructions to your developer — they'll know what to do."
+
+**Important:** Do not offer to create this file yourself via SSH or WP-CLI. The user may not have server access, and creating PHP files on their server without clear developer involvement is not safe. Present the snippet and let them or their developer handle it.
+
+### Step 8 — Remind them to restart their agent session
 
 Tell them:
 
