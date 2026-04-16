@@ -32,10 +32,11 @@ Do not proceed to hypothesis or variant design for inline content.
 
 ## Planning
 
+0. **Consult the learning journal first.** Derive the site slug from `get-site-context` using the site slug derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json` if it exists. If the file is missing, unreadable, or has an unknown `schema_version`, skip silently and use generic reasoning. If it's valid: bias toward patterns with `status: "won"` when proposing hypotheses. Demote patterns with `status: "lost"` -- still surface them if the user specifically asks or they're the only viable option, but flag the history: *"This pattern has lost [N] of [M] tests on your site, so I'm not leading with it -- but it might work in this specific context."* Ignore `inconclusive` and `mixed` patterns -- not enough signal to bias on.
 1. Call `accelerate/list-active-experiments` — don't propose a new test on a block that already has one running.
 2. If the user hasn't named a target, use the findings from `accelerate-review`, `accelerate-diagnose`, or `accelerate-opportunities` to suggest the block with the best impact potential. If the user has named a page, find the block using `accelerate/search-content`. **Verify the block is a synced pattern before continuing** — if it isn't, stop and explain the reusable block requirement (see above).
 3. Check site traffic volume via `accelerate/get-performance-summary` (`7d` or `30d` depending on how fast the user wants results) so you can gauge whether the test can reach significance.
-4. Propose 1–2 clear hypotheses in plain English. Each hypothesis names: the block, the change, the expected outcome, and the success metric.
+4. Propose 1–2 clear hypotheses in plain English. Each hypothesis names: the block, the change, the expected outcome, and the success metric. **Classify each hypothesis against the pattern taxonomy** in `accelerate-learn` to determine its `pattern_id` -- you'll need this when creating the test.
 5. Before presenting the hypothesis, apply the design standards from `docs/design-standards.md`. Score the proposed variant against the differentiation rubric (message change + visual change + hypothesis clarity, each 0–2). If the total is below 3/6 or any dimension scores 0, strengthen the variant — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics. Do not present a variant that fails the rubric. For low-traffic sites (under ~1,000 weekly visitors), only propose Score 2 variants.
 
 Example output:
@@ -85,6 +86,7 @@ Once confirmed and backed up:
    - `goal`: `engagement`, `click_any_link`, or `submit_form` based on what the user cares about
    - `variants`: an array of `{ title, content }` pairs. The first variant should be the control (current content). Content can be full WordPress block markup (including `<!-- wp:... -->` comment delimiters) or plain text/HTML -- Accelerate parses both correctly
    - `traffic_percentage`: default to `100` unless the user asks for a gradual rollout
+   - `annotations`: `{ "toolkit:pattern": "<pattern_id>" }` -- the pattern_id you classified in Planning step 4. This is what lets the learning loop (`/accelerate-learn`) classify the experiment reliably later. Use the taxonomy in `accelerate-learn`'s SKILL.md.
 
 2. **Verify the test was created correctly.** Immediately after the call succeeds, fetch the block content again and check that:
    - Both variants contain non-empty content (not self-closing `<!-- wp:altis/variant ... /-->` tags)

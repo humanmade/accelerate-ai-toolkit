@@ -31,6 +31,13 @@ If the user specified a window ("this week", "this month", "next 30 days"), adju
 
 You're looking for the 3 highest-leverage moves this user could make next, grounded in what the data actually shows. Apply these rules in order:
 
+### Rule 0 — Consult the learning journal first
+
+Derive the site slug from `get-site-context` using the site slug derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json` if it exists.
+
+- **File missing or unreadable:** Skip silently. Use the generic rules below.
+- **Valid journal:** Patterns with `status: "won"` get a priority bump -- when choosing between two similar-impact actions, prefer the one that maps to a won pattern. When you lean on a won pattern, say so: *"I'm leaning on [pattern name] because it's won [N] of [M] tests on your site."* Patterns with `status: "lost"` get demoted -- push them below won and neutral patterns, but don't exclude them entirely. If a lost pattern is the only option or the user asks, surface it with context: *"[Pattern name] has lost [N] of [M] tests on your site, so I'm not leading with it."* Ignore `inconclusive` and `mixed` -- not enough data to shift the ranking.
+
 ### Rule 1 — A landing page with high entries, high bounce, and low conversion is almost always the biggest lever
 
 If `get-landing-pages` shows a page with hundreds or thousands of entries but 70%+ bounce, that's the top priority. Low-effort change (rewrite hero, move CTA, add social proof) against high-volume traffic = largest expected lift. Hand off to `accelerate-optimize-landing-page`.

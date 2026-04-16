@@ -1,0 +1,59 @@
+# Accelerate AI Toolkit -- weekly learning loop
+#
+# Copy this file into your own repo at .github/workflows/accelerate-learn.yml
+# Set the following repo Secrets before enabling:
+#   - ANTHROPIC_API_KEY
+#   - WP_API_URL           (your WordPress site root, e.g. https://example.com)
+#   - WP_API_USERNAME      (your WordPress username)
+#   - WP_API_PASSWORD      (your WordPress Application Password)
+
+name: Accelerate -- weekly learning loop
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'   # Every Sunday at 03:00 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: accelerate-learn
+  cancel-in-progress: false
+
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Accelerate learning loop
+        uses: anthropics/claude-code-action@v1
+        env:
+          WP_API_URL: ${{ secrets.WP_API_URL }}
+          WP_API_USERNAME: ${{ secrets.WP_API_USERNAME }}
+          WP_API_PASSWORD: ${{ secrets.WP_API_PASSWORD }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: "--max-turns 6"
+          prompt: |
+            Run /accelerate-learn to update the learning journal for this site.
+
+            After the skill finishes, copy the generated journal files from
+            ~/.config/accelerate-ai-toolkit/ into a learnings/ directory in
+            this repo. Then commit the changes to a new branch named
+            learnings/$(date +%Y-%m-%d) and open a pull request against main
+            titled "Learnings update $(date +%Y-%m-%d)".
+
+            Do not merge the PR. The site operator will review and merge.
+
+# Optional: Slack notification on completion (uncomment and set SLACK_WEBHOOK).
+#      - name: Notify Slack
+#        if: always()
+#        uses: 8398a7/action-slack@v3
+#        with:
+#          status: ${{ job.status }}
+#          text: "Accelerate learning loop -- status ${{ job.status }}"
+#          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

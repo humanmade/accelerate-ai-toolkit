@@ -13,24 +13,19 @@ Live document of what's planned for the Accelerate AI Toolkit after v1. Items mo
 - **Gemini extension.** Same for `gemini-extension.json`.
 - **`/accelerate-update`** slash command to pull the latest skills without reinstalling.
 
-## v1.2 — Self-optimising skill loop
+## v1.2 — Self-optimising skill loop (shipped)
 
-Inspired by [karpathy/autoresearch](https://github.com/karpathy/autoresearch). Autoresearch lets an agent iterate on its own training code against a measurable outcome; we adapt the same loop pattern to marketing recommendations because Accelerate already ships the missing piece — measurable outcomes via Bayesian A/B test results.
+Inspired by [karpathy/autoresearch](https://github.com/karpathy/autoresearch). The toolkit learns what works on your specific site and tailors future suggestions accordingly.
 
-**How it works:**
+- **`/accelerate-learn`** reads completed experiment results, classifies each by suggestion pattern, writes findings to a per-site learning journal, and teaches other skills to consult it.
+- **Journal** lives as two files at `~/.config/accelerate-ai-toolkit/`: a JSON source of truth and a human-readable markdown summary. Private by default. Never sent anywhere.
+- **Four pattern states** — `won`, `lost`, `mixed`, `inconclusive` — with strict rules (minimum 3 decisive tests before classification; 75%+ hit rate for won; 25% or lower for lost; everything else is mixed). `won` patterns boost recommendations. `lost` patterns are demoted with advisory context, not silently excluded.
+- **Pattern taxonomy** — 15 canonical suggestion types. Tests created via the toolkit are tagged with `annotations['toolkit:pattern']` so classification is a pure dictionary lookup.
+- **Optional automation** via GitHub Actions template at `docs/examples/workflow-accelerate-learn.yml`. Runs weekly, creates a PR with the updated journal.
 
-1. Skills make suggestions and create A/B tests.
-2. Time passes; experiments reach statistical significance.
-3. A new `accelerate-learn` skill reads recent experiment results, groups them by suggestion pattern (e.g. *"rewrite headline to match referrer intent"*, *"move CTA above fold"*), and computes hit-rate + average lift per pattern **on this specific site**.
-4. Learnings are appended to `~/.config/accelerate-ai-toolkit/journal.md` — a per-site knowledge base.
-5. Other skills consult the journal before recommending, prioritising patterns that have won here and de-prioritising patterns that have lost.
-6. Over weeks, the toolkit's advice becomes tailored to the site's real audience instead of generic marketing playbooks.
+Upstream prerequisites shipped in Accelerate PR #605: `list-experiments` ability with pagination and annotation filters, `experiment_id` addressing on `get-experiment-results`, generic annotations primitive on `create-ab-test`, `view_accelerate_analytics` capability.
 
-**Why it's not in v1:** needs 2+ weeks of real usage to produce signal worth learning from. The journal contract (format, rotation, consultation rules) needs careful design before shipping.
-
-**Open question for v1.2:** does learning happen automatically after every experiment completes (needs a WordPress-side hook), or only when the user explicitly runs `/accelerate-learn`? The manual option ships first; automation may follow.
-
-**Blocked on upstream Accelerate changes** — see [`AR-ACC-DRAFT.md`](AR-ACC-DRAFT.md) for the full proposal (historical `list-experiments` discovery, `experiment_id`-addressable results, generic `annotations` primitive, read-only `view_accelerate_analytics` capability). `AR-CLAUDE.md` §5.1 maps each prereq to the toolkit features that depend on it.
+See `docs/self-optimising.md` for the full guide.
 
 ## v2 — Scale
 

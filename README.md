@@ -69,7 +69,7 @@ For Codex CLI: run `codex`, open `/plugins`, choose "Install from local path".
 
 ## How it works
 
-The toolkit is not a wrapper around your analytics API. It's 12 purpose-built workflows that compose raw data into decisions:
+The toolkit is not a wrapper around your analytics API. It's 13 purpose-built workflows that compose raw data into decisions:
 
 | Workflow | What it does |
 |----------|-------------|
@@ -82,6 +82,7 @@ The toolkit is not a wrapper around your analytics API. It's 12 purpose-built wo
 | **Content plan** | Proposes upcoming posts grounded in what's actually working on your site |
 | **Realtime** | What's happening right now: concurrent visitors, trending content, spike investigation |
 | **Campaigns** | Attribution analysis: source breakdown, UTM performance, channel comparison |
+| **Learn** | Self-optimising loop: reads your A/B test results, learns what works on your site, tailors future suggestions |
 
 A **router skill** reads your question and sends it to the right workflow automatically. For complex investigations ("why did conversions drop last month?"), a specialised **analyst agent** runs multi-step research across several data sources and reports back with findings, interpretation, and concrete next steps.
 

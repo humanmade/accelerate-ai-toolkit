@@ -14,7 +14,7 @@ Instructions for any agent (Claude Code, Codex, Cursor, future agents) working *
 
 4. **Prioritisation belongs to `accelerate-opportunities`.** Questions like "what should I do first?", "what changed?", "where should I focus this week?", "give me a plan for this month" route to `accelerate-opportunities`. Not `accelerate-review` (that's status). Not `accelerate-diagnose` (that's root-cause for a known problem). The router in `skills/accelerate/SKILL.md` has a dedicated disambiguation section — respect it.
 
-5. **Permission model is two tiers, not three.** `edit_posts` gates 35 analytics/experimentation capabilities. `manage_options` gates three admin capabilities (`stop-experiment`, `broadcast-content`, `export-events`). Verified in `../altis-accelerate/inc/abilities/namespace.php`. Do **not** reintroduce a fake `view_accelerate_analytics` read tier — it does not exist. A stricter read-only tier is an upstream ask tracked in `ROADMAP.md`.
+5. **Permission model is three tiers.** `view_accelerate_analytics` gates read-only analytics (shipped in PR #605). `edit_posts` gates experimentation capabilities (create/modify tests, audiences, personalisation). `manage_options` gates admin capabilities (`stop-experiment`, `broadcast-content`, `export-events`). Verified in `../altis-accelerate/inc/abilities/namespace.php`.
 
 6. **Do not add developer-facing skills.** This toolkit is for non-technical marketers. Developer workflows live in the sibling `altis-accelerate` repo's own `.claude/skills/`, not here.
 
@@ -26,7 +26,11 @@ Instructions for any agent (Claude Code, Codex, Cursor, future agents) working *
 
 10. **No telemetry, no phone-home code, no tracking.** The toolkit explicitly ships with zero telemetry in v1.
 
-11. **Never write credentials or `.env*` files inside the repo.** The canonical location is `~/.config/accelerate-ai-toolkit/env`, outside the repo, `chmod 600`.
+11. **Never write credentials or `.env*` files inside the repo.** Credentials go in `.claude/settings.local.json` (Claude Code primary) and `~/.config/accelerate-ai-toolkit/env` (backup / Codex CLI), both `chmod 600`.
+
+12. **Do not create `.github/workflows/` in this repo.** The toolkit is a plugin, not a CI project. GitHub Actions templates live under `docs/examples/` as copy-paste files the user installs into their own repo.
+
+13. **Skill invocation policy.** Workflow skills (review, opportunities, diagnose, test, etc.) do NOT have `disable-model-invocation: true` -- the router and Claude can invoke them programmatically. Only setup skills (`accelerate-connect`) and advanced reference (`accelerate-abilities-reference`) have it. User-initiated-only skills like `accelerate-learn` also have it because they write files and should be explicitly triggered.
 
 ---
 
@@ -62,14 +66,16 @@ accelerate-ai-toolkit/
 │   ├── accelerate-content-plan/  # Content planning
 │   ├── accelerate-realtime/      # Live monitoring
 │   ├── accelerate-campaigns/     # UTM + attribution
+│   ├── accelerate-learn/         # Self-optimising learning loop
 │   └── accelerate-abilities-reference/  # Advanced reference
+├── docs/examples/                # Copy-paste templates (workflow YAML, etc.)
 ├── README.md                     # User-facing quickstart
 ├── ROADMAP.md                    # Future work
 ├── SKILLS-REVIEW.md              # Shopify/PostHog benchmark (context, not a target)
 └── AGENTS.md                     # This file
 ```
 
-12 workflow skills in v1. The sibling `../altis-accelerate/` checkout is authoritative for everything about the Abilities API.
+13 skills in v1.2 (12 workflow + 1 learning). The sibling `../altis-accelerate/` checkout is authoritative for everything about the Abilities API.
 
 ---
 
@@ -97,8 +103,9 @@ Short checklist. Full tutorial lives in `docs/skill-development.md`.
 
 - Folder name is kebab-case and matches the `name:` in frontmatter.
 - Required frontmatter: `name`, `description`, `license: MIT`, `category`.
-- For sub-skills that should not occupy startup attention budget: add `parent: accelerate` and `disable-model-invocation: true`. Only the router stays always-visible.
-- `description:` must be keyword-dense. The router matches on it. Include every phrasing a user might say.
+- Add `parent: accelerate` so the skill is part of the router hierarchy.
+- Only add `disable-model-invocation: true` for setup skills, advanced reference, and file-writing skills (like `accelerate-learn`). Regular workflow skills should NOT have it -- the router needs to invoke them.
+- `description:` must be concise and front-load natural trigger phrases. See the descriptions on existing skills for the pattern.
 - User-facing prose obeys Hard Rule 1 (tone ban list).
 - Workflow body cites real capability names — grep `../altis-accelerate/inc/abilities/*.php` to confirm each one exists.
 - If the skill mutates, confirm before calling (Hard Rule 3).
@@ -145,16 +152,14 @@ See `SKILLS-REVIEW.md` for the full analysis. The short version:
 
 ## Safety hooks (Claude Code only)
 
-The `hooks/hooks.json` file defines prompt-based `PreToolUse` and `PostToolUse` hooks that fire on `mcp__wordpress__mcp-adapter-execute-ability` calls. These are a hard safety net for mutations — they enforce guardrails even if the AI skips skill instructions.
+The `hooks/hooks.json` file defines command-based `PreToolUse` and `PostToolUse` hooks that fire on `mcp__wordpress__mcp-adapter-execute-ability` calls. Shell scripts in `scripts/` filter by ability name so only `create-ab-test` calls trigger the safety checks -- all other ability calls pass through silently.
 
 Currently implemented:
 
 | Hook | When | What it does |
 |---|---|---|
-| `PreToolUse` | Before `create-ab-test` | Blocks the call if the agent hasn't backed up the target block's content first |
-| `PostToolUse` | After `create-ab-test` | Verifies variants aren't empty; triggers rollback if they are |
-
-**Why prompt-based, not command-based:** Command hooks would need SSH/WP-CLI access on the user's machine, which isn't guaranteed. Prompt-based hooks work everywhere because they instruct the AI to do the verification using the tools already available (MCP calls, WP-CLI if configured).
+| `PreToolUse` | Before `create-ab-test` | Reminds the agent to back up the target block's content first |
+| `PostToolUse` | After `create-ab-test` | Instructs the agent to verify variants aren't empty; triggers rollback if they are |
 
 **Cross-vendor note:** The `hooks/` directory is Claude Code-specific. Codex CLI, Cursor, and Gemini ignore it. The skill-level guardrails in `skills/accelerate-test/SKILL.md` (backup, verify, rollback instructions) are the vendor-agnostic layer and apply everywhere. Hooks are an additional safety net for Claude Code users.
 

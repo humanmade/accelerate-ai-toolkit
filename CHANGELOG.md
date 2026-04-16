@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0
+
+**Self-optimising recommendations.** The toolkit now learns what works on your specific site.
+
+- New `/accelerate-learn` skill reads your completed A/B test results, classifies each by suggestion pattern, and writes a per-site learning journal.
+- Other skills (opportunities, test planning, site review) consult the journal to tailor recommendations -- winning patterns get priority, losing patterns come with context.
+- 15 canonical suggestion patterns tracked, with a strict 3-test minimum before any pattern influences recommendations.
+- Optional weekly automation via a GitHub Actions template (`docs/examples/workflow-accelerate-learn.yml`) that creates a PR with journal updates for review.
+- Tests created via the toolkit are now tagged with pattern annotations for reliable classification.
+- Full guide at `docs/self-optimising.md`.
+
+Also: updated AGENTS.md with current permission model (3-tier with `view_accelerate_analytics`), corrected hook documentation (command-based, not prompt-based), clarified skill invocation policy.
+
 ## 1.0.13
 
 - Added a centralised output style guide (`docs/output-style.md`) so all skills present data consistently -- tables, priority cards, trend indicators, callouts, and hand-off prompts follow the same patterns.

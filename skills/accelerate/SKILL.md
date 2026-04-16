@@ -38,6 +38,9 @@ Internalise these so you reason correctly — but translate them before showing 
 | Lift | "% improvement" |
 | Synced pattern with active test | "element currently being tested" |
 | Bounce rate | "bounce rate" (same) |
+| Learning journal | "what the toolkit has learned about your site" or "your site's learning journal" |
+| Pattern (suggestion pattern) | "a type of change we've tested" (e.g. "rewriting headlines to match search intent") |
+| Hit rate | "win rate" or "how often this type of change has worked" |
 
 ## What you can do for the user
 
@@ -55,7 +58,15 @@ Route the user's question to the right specialised skill:
 | Plan the next batch of posts / get content ideas / write a brief | `accelerate-content-plan` |
 | See who's on the site right now or what's trending | `accelerate-realtime` |
 | Analyse UTM campaigns, sources, or attribution | `accelerate-campaigns` |
+| Update what the toolkit has learned about the site / see the learning journal / refresh tailored suggestions | `accelerate-learn` |
 | Understand every capability available | `accelerate-abilities-reference` |
+
+### Learning journal consultation
+
+Before recommending a test, a personalisation idea, or prioritised actions, check whether a learning journal exists for this site. Derive the site slug using the rule in `accelerate-learn` and attempt to read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json`.
+
+- **File missing or unreadable:** Fall back to generic reasoning silently. No error, no mention to user.
+- **Valid journal:** Only patterns with `status: "won"` should influence ranking -- weight them up and say so: *"I'm leaning on [pattern name] because it's won [N] of [M] tests on your site."* Patterns with `status: "lost"` should be demoted (pushed below won and neutral patterns) with advisory context, not silently excluded. Patterns with `status: "inconclusive"` or `"mixed"` are invisible to ranking.
 
 ### Prioritisation disambiguation (important)
 

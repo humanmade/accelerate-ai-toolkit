@@ -58,6 +58,25 @@ A short table of the top 3–5 referrers with percentage share of traffic. Highl
 
 List currently active A/B tests and personalisation rules, one sentence each. If there are none, say "No tests running right now" and note that the user can ask for test ideas.
 
+### What you've learned about your site
+
+**Only show this section if a learning journal exists with at least one pattern that has `status: "won"` or `status: "lost"`.** If the journal is missing, unreadable, or all patterns are `inconclusive`/`mixed`, skip this section entirely.
+
+Derive the site slug from `get-site-context` using the site slug derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json`.
+
+Show the top 2 `won` patterns (highest hit rate) and the top 1 `lost` pattern as one-line bullets:
+
+```
+**What's working on your site:**
+- Rewriting headlines to match search intent has won 4 of 5 tests (+23% avg improvement)
+- Adding social proof near buttons has won 3 of 4 tests (+12% avg improvement)
+
+**Not working here:**
+- Adding urgency language to buttons has lost 3 of 3 tests
+```
+
+Keep it brief. This is a status check, not a deep dive. If the user wants more, they can run `/accelerate-learn`.
+
 ### What to pay attention to
 
 End with 1–3 plain-English observations, each one grounded in a number you fetched. Examples:
