@@ -37,7 +37,63 @@ When the model constructs variant block markup, every design token must referenc
 
 ---
 
-## 2. Anti-pattern bans
+## 2. Block markup validity
+
+**Invalid markup causes "Block contains unexpected or invalid content" errors in the editor.** WordPress validates saved HTML against the expected output of each block's `save()` function. A single missing class or wrong attribute order triggers a validation failure. This is not cosmetic — it breaks the editing experience for enterprise users.
+
+### Required CSS classes from block attributes
+
+WordPress auto-generates CSS classes from block JSON attributes. The HTML element **must** include every class that WordPress would produce. Omitting any of these causes a validation mismatch.
+
+| Block attribute | Generated classes (on the HTML element) |
+|---|---|
+| `"backgroundColor":"<slug>"` | `has-<slug>-background-color has-background` |
+| `"textColor":"<slug>"` | `has-<slug>-color has-text-color` |
+| `"style":{"elements":{"link":{"color":{"text":"..."}}}}` | `has-link-color` |
+| `"fontSize":"<slug>"` (preset) | `has-<slug>-font-size` |
+| `"style":{"typography":{"fontSize":"..."}}` (custom) | `has-custom-font-size` |
+| `"fontFamily":"<slug>"` | `has-<slug>-font-family` |
+| `"gradient":"<slug>"` | `has-<slug>-gradient-background has-background` |
+
+> Source: WordPress style engine (`wp_style_engine_get_styles` with `convert_vars_to_classnames`). See [Gutenberg style engine docs](https://github.com/wordpress/gutenberg/blob/trunk/packages/style-engine/docs/using-the-style-engine-with-block-supports.md).
+
+### Class ordering rules
+
+WordPress emits classes in a deterministic order. The HTML must match.
+
+**For `core/button` `<a>` elements:**
+
+```
+wp-block-button__link [color classes] [font classes] has-custom-font-size? wp-element-button
+```
+
+- `wp-block-button__link` is always first.
+- `wp-element-button` is always last. This is the global element selector WordPress uses for button styling — see [element styles mapping](https://github.com/wordpress/gutenberg/blob/trunk/docs/how-to-guides/themes/global-settings-and-styles.md).
+- Color classes (`has-<slug>-color`, `has-<slug>-background-color`, `has-text-color`, `has-background`) come before font/typography classes.
+
+**For `core/group`, `core/heading`, `core/paragraph` elements:**
+
+```
+wp-block-<type> [alignment classes] [color classes] [font classes]
+```
+
+### Inline style attribute rules
+
+When a block uses custom (non-preset) values via the `style` attribute:
+
+- **Property order must match WordPress serialization:** `padding-top`, `padding-right`, `padding-bottom`, `padding-left`, then `font-size`, then `font-weight`.
+- The `href` attribute must come before `style` on link elements.
+- Never mix preset slugs and inline styles for the same token type. If you use `"fontSize":"medium"` (preset), do not also set `style.typography.fontSize`.
+
+### Strict enforcement
+
+- **Never approximate.** If you are unsure what classes or order a block type expects, do not guess. Instead, reference an existing variant on the same site (via `get-variants`) and mirror its class structure.
+- **Never fabricate factual content.** Do not invent numbers, costs, statistics, donation amounts, or operational claims. Use clearly generic placeholder text that the site owner can replace. Fabricating figures for a charity or enterprise site is a trust-destroying error.
+- **Validate against the control.** Before uploading a new variant, compare its HTML structure against the control variant's markup. The wrapper, class list, and style attribute format should follow the same pattern — only the content and text should differ.
+
+---
+
+## 3. Anti-pattern bans
 
 These are block-level patterns the model must never produce in variant content. Each is a known marker of generic AI-generated design.
 
@@ -53,7 +109,7 @@ These are block-level patterns the model must never produce in variant content. 
 
 ---
 
-## 3. The differentiation rubric
+## 4. The differentiation rubric
 
 **A variant that is not different enough to notice is not different enough to win.** If a visitor would need to read both versions side-by-side to spot the change, the change is too small to produce statistical significance in reasonable time.
 
@@ -99,7 +155,7 @@ This connects to the router's existing traffic-level awareness (principle §2):
 
 ---
 
-## 4. Copy quality rules
+## 5. Copy quality rules
 
 ### AI-slop word bans
 
@@ -125,7 +181,7 @@ After drafting variant copy, apply this test:
 
 ---
 
-## 5. Brand context file format
+## 6. Brand context file format
 
 The brand context file lives at `~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`. It is generated from `accelerate/get-site-context` (with `include_blocks: true`) and maps the site's design tokens to the block attribute slugs the model should use.
 
@@ -192,7 +248,7 @@ Use these slugs in block attributes — never hardcode hex values.
 
 ---
 
-## 6. When to apply these standards
+## 7. When to apply these standards
 
 These standards activate at exactly one point: **between the model drafting a variant and the model presenting it to the user for confirmation.**
 
@@ -206,17 +262,18 @@ The design check is an internal reasoning step:
 
 1. Read this document (`docs/design-standards.md`).
 2. Read the brand context file (or generate it via `get-site-context` if it does not exist).
-3. Score the variant against the differentiation rubric (§3).
-4. Check brand consistency — slug-first principle (§1).
-5. Check anti-pattern bans (§2).
-6. Scan copy for AI-slop markers (§4).
-7. **Revise silently** if anything fails — the user only ever sees the passing version.
+3. Validate block markup correctness — required classes, class order, style attribute order (§2).
+4. Score the variant against the differentiation rubric (§4).
+5. Check brand consistency — slug-first principle (§1).
+6. Check anti-pattern bans (§3).
+7. Scan copy for AI-slop markers (§5).
+8. **Revise silently** if anything fails — the user only ever sees the passing version.
 
 The marketer never sees a "quality check failed" message. They just see better variants with bolder hypotheses that match their site's visual language.
 
 ---
 
-## 7. Relationship to the learning journal (v1.2)
+## 8. Relationship to the learning journal (v1.2)
 
 These design standards are the **generic quality floor**. When the v1.2 learning journal ships, it becomes the **site-specific layer on top**:
 
