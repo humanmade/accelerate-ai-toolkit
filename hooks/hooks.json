@@ -1,13 +1,13 @@
 {
-  "description": "Safety guardrails for A/B test mutations. Ensures block content is backed up before test creation and verified after. Claude Code only — other agent harnesses ignore this directory.",
+  "description": "Safety guardrails for A/B test mutations. Ensures block content is backed up before test creation and verified after. The command scripts filter by ability name so non-create-ab-test calls pass through silently.",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "mcp__wordpress__mcp-adapter-execute-ability",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "If this call is to accelerate/create-ab-test: before proceeding, confirm you have saved a backup of the target block's current content (the full post_content of the block_id). If you have not fetched and stored the original content yet, deny this call and fetch it first. If you already have the backup in working memory, approve."
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/pre-check-ab-test.sh"
           }
         ]
       }
@@ -17,8 +17,8 @@
         "matcher": "mcp__wordpress__mcp-adapter-execute-ability",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "If this call was to accelerate/create-ab-test and it returned success: you MUST now verify the block content was saved correctly. Fetch the block content and check that no variant is empty (self-closing <!-- wp:altis/variant .../-->  tags with no inner content). If any variant is empty, immediately restore the backup you saved earlier and tell the user the test creation failed and the original content has been restored. Do not report success until verification passes."
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/post-check-ab-test.sh"
           }
         ]
       }
