@@ -28,6 +28,25 @@ In parallel:
 
 Optionally, if the user wants to understand intent: `accelerate/get-utm-performance` with `group_by: "campaign"` if the page receives paid traffic.
 
+## Check for reusable blocks before proposing changes
+
+Before spending time on recommendations, check whether the sections you want to improve are **reusable blocks** (synced patterns). Accelerate runs A/B tests on reusable blocks only — this is a safety feature, not a limitation. It means the test is contained to one specific element, and nothing else on the page changes unexpectedly.
+
+Use `accelerate/search-content` or `accelerate/get-site-context` with `include_blocks: true` to see which blocks on the page are reusable.
+
+If the section the user wants to test is **not** a reusable block, tell them before going further:
+
+> "A/B tests in Accelerate run on reusable blocks — this keeps the test contained to one element so nothing else on your page changes unexpectedly. The section you want to improve isn't a reusable block yet, but converting it takes about a minute:
+>
+> 1. Open the page in the WordPress editor
+> 2. Select the section you want to test
+> 3. Click the three-dot menu (⋮) and choose **Create pattern**
+> 4. Give it a name and toggle **Synced** on
+>
+> Once that's done, come back and we'll set up the test."
+
+Do not proceed to hypothesis or variant design for inline content. The user needs to convert it first.
+
 ## How to think about the result
 
 Apply the patterns from the `accelerate` router's audience signal priority (referrer > geo > behaviour > device) and traffic-level awareness (big changes for low traffic, small tests for high traffic).

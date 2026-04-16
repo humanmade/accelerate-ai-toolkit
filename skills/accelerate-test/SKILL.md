@@ -20,10 +20,20 @@ You handle the full lifecycle of A/B tests on an Accelerate site: planning, crea
 | "is there a winner yet" / "review results" | Reviewing |
 | "stop the test" / "declare variant B the winner" / "pause the test" | Ending |
 
+## Important: reusable block requirement
+
+Accelerate runs A/B tests on **reusable blocks** (synced patterns) only. This is a safety boundary — it means the test is contained to one specific element and nothing else on the page changes unexpectedly.
+
+Before spending time on hypotheses or variant design, verify the target content is a reusable block. If the user names a section that is inline page content (not a synced pattern), explain the constraint early:
+
+> "A/B tests in Accelerate run on reusable blocks — this keeps the test contained so nothing else on your page changes unexpectedly. The section you want to test isn't a reusable block yet, but converting it takes about a minute in the WordPress editor: select the section, click the three-dot menu (⋮), choose **Create pattern**, and toggle **Synced** on. Once that's done, come back and we'll set up the test."
+
+Do not proceed to hypothesis or variant design for inline content.
+
 ## Planning
 
 1. Call `accelerate/list-active-experiments` — don't propose a new test on a block that already has one running.
-2. If the user hasn't named a target, use the findings from `accelerate-review`, `accelerate-diagnose`, or `accelerate-opportunities` to suggest the block with the best impact potential. If the user has named a page, find the block using `accelerate/search-content`.
+2. If the user hasn't named a target, use the findings from `accelerate-review`, `accelerate-diagnose`, or `accelerate-opportunities` to suggest the block with the best impact potential. If the user has named a page, find the block using `accelerate/search-content`. **Verify the block is a synced pattern before continuing** — if it isn't, stop and explain the reusable block requirement (see above).
 3. Check site traffic volume via `accelerate/get-performance-summary` (`7d` or `30d` depending on how fast the user wants results) so you can gauge whether the test can reach significance.
 4. Propose 1–2 clear hypotheses in plain English. Each hypothesis names: the block, the change, the expected outcome, and the success metric.
 5. Before presenting the hypothesis, apply the design standards from `docs/design-standards.md`. Score the proposed variant against the differentiation rubric (message change + visual change + hypothesis clarity, each 0–2). If the total is below 3/6 or any dimension scores 0, strengthen the variant — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics. Do not present a variant that fails the rubric. For low-traffic sites (under ~1,000 weekly visitors), only propose Score 2 variants.
@@ -83,10 +93,10 @@ Once confirmed and backed up:
    
    If any variant is empty or the content looks wrong, **immediately roll back**: restore the original content you saved in the backup step (via WP-CLI: `wp post update <block_id> --post_content="<original_content>"`), tell the user the test creation failed and the original content has been restored, and do not tell the user the test is live.
 
-3. Only after verification passes, confirm to the user: *"Done. The test is live — I've verified both versions are showing correctly."*
-4. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1–2 weeks. For lower traffic, 2–4 weeks.
+3. Only after verification passes, confirm to the user: *"Done. The test is live -- I've verified both versions are showing correctly."*
+4. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1-2 weeks. For lower traffic, 2-4 weeks.
 
-If the target block doesn't exist yet as a synced pattern / reusable block, explain that gently: *"That section needs to be a reusable block before we can test it. This is by design — it keeps the test contained to one element so nothing else on your page changes unexpectedly. You can convert it in the WordPress editor: select the content, click the three-dot menu, and choose 'Create pattern'. It takes about a minute."*
+If the target block doesn't exist yet as a synced pattern / reusable block, stop and explain the reusable block requirement (see the section at the top of this skill).
 
 ## Monitoring
 
