@@ -229,18 +229,30 @@ Stop here.
 
 ## Layer 9 -- Live data check
 
-If all layers pass, call `accelerate/get-site-context` with `include_blocks: false` to grab basic site info, and call `accelerate/get-audience-fields` as a capability ping.
+If all layers pass, do all three of these in order:
 
-Present the healthy status:
+1. **Count the Accelerate surface.** Call `mcp__wordpress__mcp-adapter-discover-abilities` and count the returned entries whose `name` starts with `accelerate/`. Ignore the `mcp-adapter/*` wrapper tools — those are transport, not capabilities.
+2. **Smoke-test a read.** Call `accelerate/get-site-context` with `include_blocks: false` to grab basic site info.
+3. **Smoke-test a second read.** Call `accelerate/get-audience-fields` as a capability ping.
+
+Present the healthy status using the dynamic count from step 1:
 
 ```
 ✅ Connected to [site name]
    URL: [site URL]
-   Capabilities available: [count, e.g. "38 Accelerate capabilities"]
+   Accelerate capabilities available: [count from step 1, e.g. "39"]
    Ready for questions.
 ```
 
-If the capability call fails with a permission error:
+**Fallback:** if step 1 (`discover-abilities`) errored but both smoke tests in steps 2 and 3 succeeded, the connection is still healthy — surface success without the count line rather than guessing or printing `3`:
+
+```
+✅ Connected to [site name]
+   URL: [site URL]
+   Ready for questions.
+```
+
+If a smoke test fails with a permission error:
 
 ```
 ⚠️  Connected to [site name] with limited access

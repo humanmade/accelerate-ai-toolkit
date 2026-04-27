@@ -19,7 +19,7 @@ A stricter read-only capability for marketing-only roles is tracked as a future 
 
 ---
 
-## Discovery & context (10)
+## Discovery & context (11)
 
 ### `accelerate/get-performance-summary`
 Retrieve aggregated performance metrics for blocks, posts, experiments, or the entire site.
@@ -62,6 +62,11 @@ The site's design system: colour palette, typography, spacing, available block t
 All currently running A/B tests and personalisation rules.
 - **Inputs:** `type` (all \| abtest \| personalization, default all), `post_id`
 - **Returns:** array of { id, type, title, status, start_time, variants_count }
+
+### `accelerate/list-experiments`
+Discover historical and active experiments with filtering by status, type, date range, post, and annotations. Supports pagination — use this when you want every experiment ever run, not just the live ones.
+- **Inputs:** `status` (all \| active \| running \| completed \| paused \| draft, default all), `type` (all \| abtest \| personalization, default all), `date_range`, `subject_post_id`, `annotation_key`, `annotation_value`, `page` (default 1), `per_page` (1–100, default 50)
+- **Returns:** experiments array with { experiment_id, block_id, test_id, type, status, title, goal, started_at, ended_at, has_winner, winner_variant_index, annotations }, plus `total` and `pages` for pagination
 
 ### `accelerate/get-audience-segments`
 Defined audiences with their targeting rules.
@@ -263,9 +268,9 @@ Custom aggregations over analytics data with flexible dimensions and metrics.
 
 ---
 
-## Total: 38 capabilities
+## Total: 39 capabilities
 
-Structural breakdown by section: 10 discovery + 2 author + 1 engagement + 4 attribution + 2 realtime + 1 content search + 9 experiment management + 3 personalisation + 3 broadcasts & integration + 3 raw query = **38**.
+Structural breakdown by section: 11 discovery + 2 author + 1 engagement + 4 attribution + 2 realtime + 1 content search + 9 experiment management + 3 personalisation + 3 broadcasts & integration + 3 raw query = **39**.
 
 Permission-tier breakdown (see the Permission tiers table at the top of this file):
 

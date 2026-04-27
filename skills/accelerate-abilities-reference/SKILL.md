@@ -54,6 +54,7 @@ Every capability below is invoked via `mcp__wordpress__mcp-adapter-execute-abili
 - **`accelerate/get-site-context`** — site design system (colours, typography, spacing, blocks). Inputs: `include_blocks` (default false).
 - **`accelerate/get-engagement-metrics`** — bounce rate, time on page, scroll depth, recirculation, return visitor rate, exit pages. Inputs: `entity_type` (site|post), `entity_id`, `date_range`.
 - **`accelerate/list-active-experiments`** — running tests and personalisation rules. Inputs: `type` (all|abtest|personalization), `post_id`.
+- **`accelerate/list-experiments`** — historical and active experiments with pagination, status / type / date / annotation filters. Use this for "every experiment ever", not just live ones. Inputs: `status` (all|active|running|completed|paused|draft), `type` (all|abtest|personalization), `date_range`, `subject_post_id`, `annotation_key`, `annotation_value`, `page`, `per_page` (1–100, default 50). Returns paginated experiments with `total` and `pages`.
 - **`accelerate/get-audience-segments`** — defined audiences. Inputs: `include_estimates`.
 - **`accelerate/get-audience-fields`** — available targeting fields. Inputs: `refresh`.
 - **`accelerate/get-author-performance`** — metrics for one or all authors. Inputs: `author_id`, `date_range`, `limit`, `order_by` (views|conversions|conversion_rate|posts_count).

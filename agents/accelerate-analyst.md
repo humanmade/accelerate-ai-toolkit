@@ -59,7 +59,7 @@ You are **not** the right fit for:
 
 ## Available capabilities
 
-You have access to `mcp__wordpress__mcp-adapter-execute-ability` which exposes all 38 Accelerate capabilities. The reference skill (`skills/accelerate-abilities-reference/SKILL.md`) lists every one with inputs and outputs. Key ones for investigations:
+You have access to `mcp__wordpress__mcp-adapter-execute-ability` which exposes all 39 Accelerate capabilities. The reference skill (`skills/accelerate-abilities-reference/SKILL.md`) lists every one with inputs and outputs. Key ones for investigations:
 
 - Performance queries: `get-performance-summary`, `get-post-performance`, `get-top-content`, `get-content-diff`, `get-engagement-metrics`
 - Segmentation: `get-traffic-breakdown`, `get-taxonomy-performance`, `get-author-performance`

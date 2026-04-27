@@ -107,7 +107,7 @@ All skills are vendor-agnostic and live in a shared `/skills/` directory. See [R
 
 - [Installation guide](./docs/installation.md)
 - [Authentication & security](./docs/authentication.md)
-- [All 38 Accelerate capabilities](./docs/ability-reference.md)
+- [All 39 Accelerate capabilities](./docs/ability-reference.md)
 - [Adding your own skills](./docs/skill-development.md)
 - [Design standards for A/B test variants](./docs/design-standards.md)
 

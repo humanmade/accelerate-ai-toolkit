@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.1
+
+**`/accelerate-status` now reports the real Accelerate capability count.** Healthy connections previously surfaced "3 WordPress abilities" — that figure was the count of MCP wrapper tools, not the actual Accelerate surface, so it read as "barely working" when the toolkit was fully operational.
+
+- Layer 9 (Live data check) now calls `mcp__wordpress__mcp-adapter-discover-abilities` first, filters to `accelerate/*`, and surfaces that count. Smoke tests against `get-site-context` and `get-audience-fields` still confirm the connection is usable.
+- If `discover-abilities` errors but the smoke tests succeed, the status block stays confident — it just omits the count line rather than printing a misleading number.
+- Synced docs to the current 39-ability registry: added `accelerate/list-experiments` (paginated historical experiment discovery) to `docs/ability-reference.md` and `skills/accelerate-abilities-reference/SKILL.md`, bumped the discovery section count and the total in `README.md`, `docs/installation.md`, `agents/accelerate-analyst.md`, and `docs/skill-development.md`.
+
+Closes [#12](https://github.com/humanmade/accelerate-ai-toolkit/issues/12).
+
 ## 1.3.0
 
 **No more mu-plugin workaround for the WordPress connector address.** Recent versions of the WordPress MCP Adapter changed their default route, which previously forced users to install a server-side PHP file to bring the toolkit back online. The upstream `@automattic/mcp-wordpress-remote` client now accepts a full connector URL in `WP_API_URL`; this release teaches the toolkit to use that.

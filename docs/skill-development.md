@@ -190,6 +190,6 @@ Reviewers will check:
 
 Some ideas that sound like skills but shouldn't be:
 
-- **A skill per ability.** The toolkit deliberately does not ship a 1:1 wrapper around each of the 38 abilities. The MCP adapter already exposes each ability; skills add value by composing multiple abilities into a workflow.
+- **A skill per ability.** The toolkit deliberately does not ship a 1:1 wrapper around each of the 39 abilities. The MCP adapter already exposes each ability; skills add value by composing multiple abilities into a workflow.
 - **A developer-facing skill.** There's a separate skill bundle inside the Accelerate plugin repository itself (`altis-accelerate/.claude/skills/`) that targets developers. The toolkit is for end users.
 - **A skill that replaces the WordPress admin.** If the user just wants to see their analytics, the Accelerate admin UI is better. Skills should do things the admin UI can't: reasoning, recommending, cross-referencing, synthesising.

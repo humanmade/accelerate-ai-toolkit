@@ -103,7 +103,7 @@ A healthy response looks like:
 ```
 ✅ Connected to [your site name]
    URL: [your site URL]
-   Capabilities available: 38 Accelerate capabilities
+   Accelerate capabilities available: 39
    Ready for questions.
 ```
 
