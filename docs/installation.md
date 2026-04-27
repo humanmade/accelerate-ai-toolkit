@@ -8,7 +8,7 @@ The Accelerate AI Toolkit ships as a vendor-agnostic plugin that currently suppo
 
 Before you install the toolkit, confirm you have:
 
-- **A WordPress site running [Accelerate](https://www.accelerateplugin.com/) 4.1 or newer**. The Abilities API feature flag must be enabled (see [Enabling the Abilities API](#enabling-the-abilities-api) below). Accelerate bundles the WordPress MCP Adapter, so you do **not** need to install a separate `wordpress-mcp` plugin even if the upstream `@automattic/mcp-wordpress-remote` README mentions one. Note: MCP Adapter versions 0.4.1+ use a different default endpoint than the toolkit expects -- `/accelerate-connect` detects this automatically and provides a fix if needed.
+- **A WordPress site running [Accelerate](https://www.accelerateplugin.com/) 4.1 or newer**. The Abilities API feature flag must be enabled (see [Enabling the Abilities API](#enabling-the-abilities-api) below). Accelerate bundles the WordPress MCP Adapter, so you do **not** need to install a separate `wordpress-mcp` plugin even if the upstream `@automattic/mcp-wordpress-remote` README mentions one. `/accelerate-connect` probes both the modern adapter route and the legacy `wpmcp` route, then saves the full URL of whichever responds — no server-side configuration is required.
 - **WordPress 6.9 or newer.** The Abilities API requires WordPress core's `wp_register_ability()` function.
 - **A recent Node.js LTS runtime.** The toolkit uses `@automattic/mcp-wordpress-remote` as its MCP client, which runs on Node via `npx`. The upstream client doesn't document a specific minimum version; if you're on a current Node LTS you're fine.
 - **An agent that supports plugins:**
@@ -173,14 +173,14 @@ The Application Password is wrong or has been revoked. Re-run `/accelerate-conne
 
 ### "Not found" / 404 errors on the connection
 
-The most common cause is an **endpoint mismatch**. The toolkit expects the WordPress connector plugin (MCP Adapter) to respond at a specific address, but MCP Adapter versions 0.4.1 and newer use a different address by default.
+If you set up the toolkit before v1.3, your saved `WP_API_URL` may still be a bare site root from the older "site-root only" contract. Recent versions of the WordPress MCP Adapter no longer respond at the legacy `wp/v2/wpmcp` route that bare-root values fall back to.
 
-**Fix:** re-run `/accelerate-connect`. The setup wizard now detects this mismatch automatically and provides instructions for your site administrator to resolve it (a small PHP file in `wp-content/mu-plugins/`).
+**Fix:** re-run `/accelerate-connect`. It will probe the connector routes, save the full working URL, and the 404s should clear after restarting your agent session. This is a one-time migration — new installs go through this path automatically.
 
-If `/accelerate-connect` reports that the endpoint check passed, the 404 is caused by something else:
+If `/accelerate-status` reports that the connector address check passed, the 404 is caused by something else:
 - Accelerate isn't installed on the site you pointed at.
 - The Abilities API feature flag isn't enabled (see [Enabling the Abilities API](#enabling-the-abilities-api)).
-- The site URL is wrong — `WP_API_URL` must be the WordPress **site root** (e.g. `https://example.com`), with no `/wp-json/...` path.
+- The site URL is wrong — check that the `WP_API_URL` value saved in `.claude/settings.local.json` (or `~/.config/accelerate-ai-toolkit/env`) matches the connector URL the WordPress MCP Adapter exposes on your site.
 
 ### "Permission denied" when a skill tries to fetch data
 

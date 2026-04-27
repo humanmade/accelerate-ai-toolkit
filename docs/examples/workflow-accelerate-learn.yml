@@ -3,7 +3,8 @@
 # Copy this file into your own repo at .github/workflows/accelerate-learn.yml
 # Set the following repo Secrets before enabling:
 #   - ANTHROPIC_API_KEY
-#   - WP_API_URL           (your WordPress site root, e.g. https://example.com)
+#   - WP_API_URL           (the full WordPress MCP connector URL saved by /accelerate-connect,
+#                            e.g. https://example.com/wp-json/mcp/mcp-adapter-default-server)
 #   - WP_API_USERNAME      (your WordPress username)
 #   - WP_API_PASSWORD      (your WordPress Application Password)
 

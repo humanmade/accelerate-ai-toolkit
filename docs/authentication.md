@@ -10,7 +10,7 @@ The toolkit uses **WordPress Application Passwords** — a feature built into Wo
 
 Credentials live in `~/.config/accelerate-ai-toolkit/env`, a plain-text file with `chmod 600` permissions. Your shell profile sources the file on startup and your agent (Claude Code or Codex) picks up the values via environment variables when it launches the WordPress MCP server. Four variables are passed through:
 
-- `WP_API_URL` — the WordPress **site root** (e.g. `https://example.com`), not a full endpoint path
+- `WP_API_URL` — the **full WordPress MCP connector URL** (e.g. `https://example.com/wp-json/mcp/mcp-adapter-default-server`). `/accelerate-connect` probes the site at setup time and saves whichever connector route responds. A bare site root (`https://example.com`) is still accepted as a backwards-compatibility fallback for legacy `wordpress-mcp` installs, but new setups always store the full URL.
 - `WP_API_USERNAME` — your WordPress username
 - `WP_API_PASSWORD` — the Application Password
 - `OAUTH_ENABLED=false` — tells the upstream client to use the Application Password flow instead of its new OAuth default (set automatically by the toolkit's `.mcp.json`, not by you)
@@ -28,7 +28,7 @@ For Claude Code users, credentials are saved in the project's `.claude/settings.
 ```json
 {
   "env": {
-    "WP_API_URL": "https://your-site.com",
+    "WP_API_URL": "https://your-site.com/wp-json/mcp/mcp-adapter-default-server",
     "WP_API_USERNAME": "your_wp_username",
     "WP_API_PASSWORD": "abcd efgh ijkl mnop",
     "OAUTH_ENABLED": "false"
@@ -45,12 +45,12 @@ This file is automatically gitignored by Claude Code and is never committed.
 A standard shell env file is also written as a backup and for Codex CLI users:
 
 ```
-WP_API_URL="https://your-site.com"
+WP_API_URL="https://your-site.com/wp-json/mcp/mcp-adapter-default-server"
 WP_API_USERNAME="your_wp_username"
 WP_API_PASSWORD="abcd efgh ijkl mnop"
 ```
 
-`WP_API_URL` is the site root — no `/wp-json/...`, no trailing slash. The upstream [`@automattic/mcp-wordpress-remote`](https://www.npmjs.com/package/@automattic/mcp-wordpress-remote) client handles endpoint routing internally.
+`WP_API_URL` is the full URL of the WordPress MCP connector that responded during `/accelerate-connect`. For sites running the modern MCP Adapter that's `…/wp-json/mcp/mcp-adapter-default-server`; legacy `wordpress-mcp` sites store `…/wp-json/wp/v2/wpmcp` instead. The upstream [`@automattic/mcp-wordpress-remote`](https://www.npmjs.com/package/@automattic/mcp-wordpress-remote) client uses this URL as-is when it includes a path; a bare-root value is treated as legacy compatibility and routed to the old `wp/v2/wpmcp` endpoint.
 
 Permissions: `600` (read/write for you only).
 

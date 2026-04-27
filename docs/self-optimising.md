@@ -76,7 +76,7 @@ If you want the journal to update automatically, you can set up a weekly GitHub 
 
 2. Add four secrets to your repo (Settings > Secrets and variables > Actions):
    - `ANTHROPIC_API_KEY` -- your Claude API key
-   - `WP_API_URL` -- your site root (same value as `/accelerate-connect`)
+   - `WP_API_URL` -- the full WordPress connector URL saved by `/accelerate-connect` (e.g. `https://example.com/wp-json/mcp/mcp-adapter-default-server`)
    - `WP_API_USERNAME` -- your WordPress username
    - `WP_API_PASSWORD` -- your Application Password
 
@@ -124,7 +124,7 @@ You can delete `~/.config/accelerate-ai-toolkit/journal-<your-site>.json` and ru
 Check your repo's Actions tab for the error. Common causes:
 - Expired Application Password -- regenerate via `/accelerate-connect` and update the GitHub Secret.
 - API key issue -- verify `ANTHROPIC_API_KEY` is set and valid.
-- Site unreachable -- check that `WP_API_URL` points to a live site.
+- Site unreachable -- check that `WP_API_URL` points to a live WordPress MCP connector URL (the value `/accelerate-connect` saved locally).
 
 ### The PR never merges
 

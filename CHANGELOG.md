@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0
+
+**No more mu-plugin workaround for the WordPress connector address.** Recent versions of the WordPress MCP Adapter changed their default route, which previously forced users to install a server-side PHP file to bring the toolkit back online. The upstream `@automattic/mcp-wordpress-remote` client now accepts a full connector URL in `WP_API_URL`; this release teaches the toolkit to use that.
+
+- `/accelerate-connect` now probes both the modern adapter route and the legacy `wpmcp` route, then saves whichever full URL responds. The mu-plugin instructions are gone from the normal flow.
+- `/accelerate-status` learns to recognise both legacy bare-root and new full-URL configs, derives the site root from whichever it finds, and tells you to rerun `/accelerate-connect` if your saved value is stale.
+- Existing installs keep working: legacy `wordpress-mcp` sites with a bare-root saved value continue to pass status checks unchanged. Adapter sites that were saved as bare roots will be flagged once and fixed by a single rerun of `/accelerate-connect`.
+- Documentation (`docs/authentication.md`, `docs/installation.md`, `docs/self-optimising.md`, `docs/examples/workflow-accelerate-learn.yml`) and the upstream-asks roadmap are updated to reflect the new contract.
+
+Closes [#11](https://github.com/humanmade/accelerate-ai-toolkit/issues/11).
+
 ## 1.2.0
 
 **Self-optimising recommendations.** The toolkit now learns what works on your specific site.

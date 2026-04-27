@@ -76,31 +76,70 @@ If npx is missing, returns a non-semver version, or resolves to an unexpected lo
 
 Stop here.
 
-## Layer 3 -- Site reachability
+## Layer 3 -- Normalise the saved URL
+
+Before reaching out to the site, classify what's stored in `WP_API_URL`. The toolkit now saves the **full** connector URL (e.g. `https://example.com/wp-json/mcp/mcp-adapter-default-server`), but older installs may still hold the bare site root.
 
 Use the Bash tool:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' "$WP_API_URL/wp-json/" 2>/dev/null
+python3 - "$WP_API_URL" <<'PY'
+import sys
+from urllib.parse import urlparse, urlunparse
+raw = sys.argv[1].rstrip('/')
+parsed = urlparse(raw)
+path = parsed.path or ''
+if path.endswith('/wp-json/mcp/mcp-adapter-default-server'):
+    shape = 'full_adapter'
+    root = urlunparse(parsed._replace(path=path[:-len('/wp-json/mcp/mcp-adapter-default-server')]))
+elif path.endswith('/wp-json/wp/v2/wpmcp'):
+    shape = 'full_legacy'
+    root = urlunparse(parsed._replace(path=path[:-len('/wp-json/wp/v2/wpmcp')]))
+elif path in ('', '/'):
+    shape = 'bare_root'
+    root = urlunparse(parsed._replace(path=''))
+else:
+    shape = 'unknown'
+    root = raw
+print(f"shape={shape} root={root}")
+PY
+```
+
+Use the printed `root` value as `SITE_ROOT` for every check below. Use the printed `shape` to decide whether to nudge the user about a stale config in Layer 7.
+
+If `shape=unknown`, treat it as a bare-root for the curl checks but stop after Layer 7 with:
+
+```
+❌ Connection address looks invalid
+   The saved site address has an unrecognised path. The toolkit can't tell which
+   WordPress connector to use.
+   Fix: run /accelerate-connect to re-detect the right address.
+```
+
+## Layer 4 -- Site reachability
+
+Use the Bash tool:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}' "$SITE_ROOT/wp-json/" 2>/dev/null
 ```
 
 If the response is not `200`:
 
 ```
 ❌ Cannot reach your site
-   URL: [the site address, without showing the variable name]
+   URL: [SITE_ROOT, without showing the variable name]
    Fix: check that the address is correct and the site is reachable in a browser.
-   It should be the site root (e.g. https://example.com) with no extra path.
 ```
 
 Stop here.
 
-## Layer 4 -- Authentication
+## Layer 5 -- Authentication
 
 Use the Bash tool:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$WP_API_URL/wp-json/wp/v2/users/me" 2>/dev/null
+curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/wp/v2/users/me" 2>/dev/null
 ```
 
 If the response is `401` or `403`:
@@ -113,12 +152,12 @@ If the response is `401` or `403`:
 
 Stop here.
 
-## Layer 5a -- Accelerate installed
+## Layer 6 -- Accelerate installed
 
 Use the Bash tool:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$WP_API_URL/wp-json/accelerate/v1" 2>/dev/null
+curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/accelerate/v1" 2>/dev/null
 ```
 
 If the response is `404`:
@@ -133,38 +172,47 @@ If the response is `404`:
 
 Stop here.
 
-## Layer 5b -- Connection address
+## Layer 7 -- Connection address
 
 Use the Bash tool:
 
 ```bash
-DEFAULT=$(curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$WP_API_URL/wp-json/wp/v2/wpmcp" 2>/dev/null)
-ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$WP_API_URL/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
-echo "default=$DEFAULT adapter=$ADAPTER"
+ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
+LEGACY=$(curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/wp/v2/wpmcp" 2>/dev/null)
+echo "adapter=$ADAPTER legacy=$LEGACY shape=$shape"
 ```
 
-If `default` is `404` and `adapter` is `200` or `401`:
+Decide the outcome from `shape`, `adapter`, and `legacy`:
 
-```
-❌ Connection address mismatch
-   Accelerate is running on your site, but the WordPress connector is using a different
-   address than the toolkit expects. This is common with recent connector versions.
-   Fix: run /accelerate-connect -- the setup wizard detects this and provides instructions
-   for your site administrator to resolve it.
-```
+- **Full URL saved (`shape=full_adapter` or `shape=full_legacy`) and the matching route responds (`200` or `401`)** — healthy, proceed to Layer 8.
+- **Full URL saved but the matching route returns `404`** — the connector that was working at setup time has gone away. Surface:
 
-If both are `404`:
+  ```
+  ❌ WordPress connector not responding
+     Accelerate is running but the connector address saved during setup no longer responds.
+     Fix: run /accelerate-connect to re-detect the connector address.
+  ```
 
-```
-❌ WordPress connector not responding
-   Accelerate is running but the WordPress connector isn't registered. This usually means
-   it needs to be activated separately.
-   Fix: check with your site administrator, or see the installation guide for setup details.
-```
+- **Bare-root saved (`shape=bare_root`) and `legacy` responds** — legacy `wordpress-mcp` site, still healthy. Proceed to Layer 8 silently.
+- **Bare-root saved (`shape=bare_root`) and only `adapter` responds** — saved config is stale. The bundled client falls back to the legacy route for bare-root values, so traffic is hitting a `404`. Surface:
 
-Stop here.
+  ```
+  ❌ Saved connection is out of date
+     Your site uses a newer WordPress connector than the one the toolkit was set up against.
+     Fix: run /accelerate-connect to re-detect the right address. (One-time fix.)
+  ```
 
-## Layer 6 -- Live tool availability
+- **Both routes `404`** —
+
+  ```
+  ❌ WordPress connector not responding
+     Accelerate is running but no WordPress connector responded.
+     Fix: check with your site administrator, or see the installation guide for setup details.
+  ```
+
+Stop here unless the outcome above said to proceed.
+
+## Layer 8 -- Live tool availability
 
 Check whether the `mcp__wordpress__mcp-adapter-execute-ability` tool is available in this session.
 
@@ -179,7 +227,7 @@ If it is not available but all previous layers passed:
 
 Stop here.
 
-## Layer 7 -- Live data check
+## Layer 9 -- Live data check
 
 If all layers pass, call `accelerate/get-site-context` with `include_blocks: false` to grab basic site info, and call `accelerate/get-audience-fields` as a capability ping.
 

@@ -15,7 +15,7 @@ Your job is to get the user's WordPress site talking to the toolkit. The convers
 
 Three pieces of information need to land in `~/.config/accelerate-ai-toolkit/env`:
 
-1. **Site URL** — the WordPress site root, in the form `https://their-site.com`. Not a full path, not `/wp-json/...`, just the site root.
+1. **Connection URL** (`WP_API_URL`) — the **full** WordPress MCP server URL, e.g. `https://their-site.com/wp-json/mcp/mcp-adapter-default-server` for sites running the MCP Adapter, or `https://their-site.com/wp-json/wp/v2/wpmcp` for legacy `wordpress-mcp` sites. The user only ever gives you the bare site address; this skill probes the site and saves whichever full URL responds.
 2. **Username** — the WordPress username to authenticate as
 3. **Application password** — a WordPress Application Password (not their login password)
 
@@ -43,7 +43,7 @@ Accept whatever they give you and **normalise it to the site root**:
 - If they gave you something with a content path like `https://mysite.com/blog`, confirm whether that's the correct WordPress root or whether the WordPress install lives at `https://mysite.com`.
 - If they omitted `https://`, assume `https://`.
 
-Keep the normalised site-root value (no path, no trailing slash) in working memory — you'll write it as `WP_API_URL` in step 5. The `@automattic/mcp-wordpress-remote` client handles the endpoint routing internally; don't append any `/wp-json/...` path yourself.
+Keep the normalised site-root value (no path, no trailing slash) in working memory as `SITE_ROOT`. You'll combine it with the connector path detected in step 7b to build the full `WP_API_URL` saved in step 5.
 
 ### Step 3 — Generate an Application Password
 
@@ -72,11 +72,79 @@ Ask:
 
 Collect both. The username goes into `WP_API_USERNAME`. The password goes into `WP_API_PASSWORD` **exactly as WordPress displayed it** — do not strip the spaces.
 
-### Step 5 — Save credentials
+### Step 5 — Verify the environment and discover the connector URL
+
+Before saving anything, run two quick checks. Both must pass before you can write a working configuration.
+
+**5a — Verify npx is the real Node.js binary**
+
+Use the Bash tool:
+
+```bash
+NPX_PATH=$(command -v npx 2>/dev/null)
+NPX_VER=$(npx --version 2>&1 | head -1)
+NPX_REAL=$(realpath "$NPX_PATH" 2>/dev/null || echo "$NPX_PATH")
+echo "path=$NPX_REAL version=$NPX_VER"
+```
+
+Check **both** conditions:
+1. The version output looks like a semver number (e.g. `10.8.2`), not an error or "Unknown command"
+2. The resolved path is inside a standard Node.js location (the path contains `node`, `npm`, `nvm`, `fnm`, `volta`, or is in `/usr/local/bin`, `/usr/bin`, or a Homebrew prefix)
+
+If npx is missing, returns a non-semver version, or resolves to an unexpected location, tell the user:
+
+> "The toolkit needs a working copy of `npx` (part of Node.js) to connect to your site, but the `npx` in your current shell doesn't appear to be the standard Node.js version. This usually happens when another tool in your shell is intercepting the command.
+>
+> To check: open a regular terminal and run `npx --version`. If that works and shows a version number, your agent's shell has something overriding it. See the troubleshooting section in the installation guide for how to point the toolkit at the real `npx` binary."
+
+If npx looks genuine, continue to 5b.
+
+**5b — Probe the site to discover the connector URL**
+
+Use the Bash tool to test the site's REST endpoints:
+
+```bash
+SITE="<the normalised site root from step 2>"
+USER="<the username from step 4>"
+PASS="<the application password from step 4>"
+
+# Is Accelerate active?
+ACCEL=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/accelerate/v1" 2>/dev/null)
+# Which MCP connector route responds?
+ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
+LEGACY=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/wp/v2/wpmcp" 2>/dev/null)
+
+echo "accelerate=$ACCEL adapter=$ADAPTER legacy=$LEGACY"
+```
+
+Interpret the results in order:
+
+**Is Accelerate installed?**
+
+If `accelerate` is `404`: Accelerate isn't active on this site, or the Abilities feature isn't turned on. Tell the user:
+
+> "I can reach your site, but Accelerate doesn't seem to be active or its Abilities feature isn't turned on yet. Check that the Accelerate plugin is installed and active in your WordPress admin, and that the Abilities feature is enabled (see the installation guide for instructions)."
+
+Stop here. Do not save credentials.
+
+**Which connector responds?**
+
+Pick the connector URL using this priority — adapter wins when both respond, since `mcp-adapter` is the actively maintained route:
+
+| adapter | legacy | Action |
+|---------|--------|--------|
+| 200/401 | any | Set `WP_API_URL="$SITE/wp-json/mcp/mcp-adapter-default-server"`. Proceed to step 6. |
+| 404 | 200/401 | Set `WP_API_URL="$SITE/wp-json/wp/v2/wpmcp"`. Proceed to step 6. |
+| 404 | 404 | Stop. Accelerate is running but no MCP connector responded. Tell the user: *"Accelerate is running on your site, but the WordPress connector isn't responding. This usually means the MCP Adapter plugin needs to be installed or activated. Check with your site administrator or see the installation guide."* |
+| Other | Other | Stop. Tell the user the site returned an unexpected response and suggest they check the URL is correct and the site is reachable in a browser. |
+
+Keep the chosen full URL in working memory as `WP_API_URL`. You'll write it in step 6.
+
+### Step 6 — Save credentials
 
 Save credentials in **two places** so they work across all supported agents.
 
-**5a — Claude Code settings (primary)**
+**6a — Claude Code settings (primary)**
 
 This is what Claude Code reads when it starts the WordPress connector. Use the Bash tool to write the credentials into the project's `.claude/settings.local.json` (this file is gitignored and never committed):
 
@@ -98,19 +166,19 @@ os.makedirs(os.path.dirname(path), exist_ok=True)
 with open(path, 'w') as f:
     json.dump(data, f, indent=2)
     f.write('\n')
-" "<site_root_url>" "<username>" "<app_password>"
+" "<full_connector_url>" "<username>" "<app_password>"
 ```
 
-Replace the three placeholders with the real values collected in steps 2-4.
+Replace the three placeholders with the values from steps 4 and 5b. `<full_connector_url>` is the full URL chosen in step 5b — never the bare site root.
 
-**5b — Backup env file (for Codex CLI and other agents)**
+**6b — Backup env file (for Codex CLI and other agents)**
 
 Also write a standard env file for non-Claude-Code contexts:
 
 ```bash
 mkdir -p ~/.config/accelerate-ai-toolkit
 cat > ~/.config/accelerate-ai-toolkit/env <<'EOF'
-WP_API_URL="<site_root_url>"
+WP_API_URL="<full_connector_url>"
 WP_API_USERNAME="<username>"
 WP_API_PASSWORD="<app_password>"
 EOF
@@ -123,7 +191,7 @@ chmod 600 ~/.config/accelerate-ai-toolkit/env
 - Do NOT echo the full password back to the user in chat after writing. Confirm by saying "Saved. ✓" instead.
 - The `.claude/settings.local.json` file is automatically gitignored by Claude Code. Do not commit it.
 
-### Step 6 — Shell profile (Codex CLI users only)
+### Step 7 — Shell profile (Codex CLI users only)
 
 If the user is using **Codex CLI** (not Claude Code), they also need to source the env file from their shell profile so Codex picks up the values. Tell them:
 
@@ -147,91 +215,6 @@ end
 
 **If the user is using Claude Code, skip this step entirely** — Claude Code reads credentials from `settings.local.json` and doesn't need shell profile changes.
 
-### Step 7 — Quick connection check
-
-Before asking the user to restart, run two quick probes to catch the most common setup problems.
-
-**7a — Verify npx is the real Node.js binary**
-
-Use the Bash tool:
-
-```bash
-NPX_PATH=$(command -v npx 2>/dev/null)
-NPX_VER=$(npx --version 2>&1 | head -1)
-NPX_REAL=$(realpath "$NPX_PATH" 2>/dev/null || echo "$NPX_PATH")
-echo "path=$NPX_REAL version=$NPX_VER"
-```
-
-Check **both** conditions:
-1. The version output looks like a semver number (e.g. `10.8.2`), not an error or "Unknown command"
-2. The resolved path is inside a standard Node.js location (the path contains `node`, `npm`, `nvm`, `fnm`, `volta`, or is in `/usr/local/bin`, `/usr/bin`, or a Homebrew prefix)
-
-If npx is missing, returns a non-semver version, or resolves to an unexpected location, tell the user:
-
-> "The toolkit needs a working copy of `npx` (part of Node.js) to connect to your site, but the `npx` in your current shell doesn't appear to be the standard Node.js version. This usually happens when another tool in your shell is intercepting the command.
->
-> To check: open a regular terminal and run `npx --version`. If that works and shows a version number, your agent's shell has something overriding it. See the troubleshooting section in the installation guide for how to point the toolkit at the real `npx` binary."
-
-If npx looks genuine, continue to 7b.
-
-**7b — Check site endpoints**
-
-Use the Bash tool to test the site's REST endpoints:
-
-```bash
-SITE="<the normalised site root URL from step 2>"
-USER="<the username from step 4>"
-PASS="<the application password from step 4>"
-
-# First check if Accelerate is installed
-ACCEL=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/accelerate/v1" 2>/dev/null)
-# Then check both known connection addresses
-DEFAULT=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/wp/v2/wpmcp" 2>/dev/null)
-ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
-
-echo "accelerate=$ACCEL default=$DEFAULT adapter=$ADAPTER"
-```
-
-Interpret the results in order:
-
-**Step 1 — Is Accelerate installed?**
-
-If `accelerate` is `404`: Accelerate isn't active on this site, or the Abilities feature isn't turned on. Tell the user:
-
-> "I can reach your site, but Accelerate doesn't seem to be active or its Abilities feature isn't turned on yet. Check that the Accelerate plugin is installed and active in your WordPress admin, and that the Abilities feature is enabled (see the installation guide for instructions)."
-
-Stop here — no point checking connection addresses if Accelerate itself isn't running.
-
-**Step 2 — Which connection address works?**
-
-| default | adapter | What to tell the user |
-|---------|---------|----------------------|
-| 200/401 | any | Everything looks good. Proceed to step 8. |
-| 404 | 200/401 | See "Connection address mismatch" guidance below. |
-| 404 | 404 | Accelerate is installed but the WordPress connector isn't registered. Tell the user: *"Accelerate is running on your site, but the WordPress connector isn't responding. This usually means it needs to be activated separately. Check with your site administrator or see the installation guide."* |
-| Other | Other | Tell the user the site returned an unexpected response and suggest they check the URL is correct and the site is reachable in a browser. |
-
-**Connection address mismatch guidance:**
-
-If only the second address responds (404 on default, 200/401 on adapter), tell the user in plain, friendly language:
-
-> "Your site's connection is set up slightly differently than what the toolkit expects out of the box. This is a known compatibility issue with recent versions of the WordPress connector.
->
-> To fix it, your site needs a small configuration tweak. Please ask your site administrator (or developer) to create a file called `endpoint-compat.php` in your site's `wp-content/mu-plugins/` folder with this content:"
->
-> ```php
-> <?php
-> add_filter( 'mcp_adapter_default_server_config', function( $config ) {
->     $config['server_route_namespace'] = 'wp/v2';
->     $config['server_route']           = 'wpmcp';
->     return $config;
-> } );
-> ```
->
-> "Once that file is in place, restart your agent session and run `/accelerate-status`. If you're not sure how to do this, forward these instructions to your developer — they'll know what to do."
-
-**Important:** Do not offer to create this file yourself via SSH or WP-CLI. The user may not have server access, and creating PHP files on their server without clear developer involvement is not safe. Present the snippet and let them or their developer handle it.
-
 ### Step 8 — Remind them to restart their agent session
 
 Tell them:
@@ -241,8 +224,8 @@ Tell them:
 ## Things to watch for
 
 - **Don't skip the chmod.** Credentials must not be world-readable.
-- **Don't write the env file anywhere else.** The `.mcp.json` in the plugin root expects to find `WP_API_URL` (site root), `WP_API_USERNAME`, and `WP_API_PASSWORD` as environment variables, sourced from the `~/.config/accelerate-ai-toolkit/env` path.
-- **`WP_API_URL` is the site root, nothing more.** Never write `/wp-json/...` into the env file. If the user pastes a full endpoint URL, strip it back to the scheme+host before writing.
+- **Don't write the env file anywhere else.** The `.mcp.json` in the plugin root expects `WP_API_URL`, `WP_API_USERNAME`, and `WP_API_PASSWORD` as environment variables, sourced from the `~/.config/accelerate-ai-toolkit/env` path.
+- **`WP_API_URL` is the full connector URL.** It must include the `/wp-json/...` path discovered in step 5b. Never save just the site root — the toolkit's status check will flag it as stale and tell the user to rerun this skill.
 - **Don't embed credentials in the plugin folder.** Never write to a `.env` or `env` file inside the repository; it must go in the user's home directory.
 - **Never show the full password in chat output after writing it.** It's fine to show the first and last four characters for confirmation (e.g., `abcd **** **** mnop`), but never the whole string.
 
