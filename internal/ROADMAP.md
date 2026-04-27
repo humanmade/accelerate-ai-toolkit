@@ -7,8 +7,8 @@ Live document of what's planned for the Accelerate AI Toolkit after v1. Items mo
 ## v1.1 — Wider reach
 
 - **Design guardrails for variant proposals.** New `docs/design-standards.md` reference ensures that proposed A/B test variants are different enough from the control to be worth testing, consistent with the site's design system (slug-first principle), and free of generic AI patterns. Inspired by [Impeccable](https://github.com/pbakaus/impeccable), adapted for WordPress block-level reality. Per-site brand context files (`~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`) map `get-site-context` output to the preset slugs the model should use in block markup.
-- **Claude Code marketplace submission.** The manifest (`.claude-plugin/marketplace.json`) is already in place as a prep artifact — the remaining work is publishing it so users can install with `/plugin marketplace add` instead of cloning the repo.
-- **Codex CLI marketplace submission.** Same idea for `.codex-plugin/`.
+- **Claude Code marketplace submission (shipped).** Toolkit is published — users install with `/plugin install accelerate-ai-toolkit`.
+- **Codex CLI marketplace submission.** Same idea for `.codex-plugin/`. In progress.
 - **Cursor manifest.** Convert `.cursor-plugin/` from stub to working manifest, referencing the shared `/skills/` directory.
 - **Gemini extension.** Same for `gemini-extension.json`.
 - **`/accelerate-update`** slash command to pull the latest skills without reinstalling.
@@ -38,7 +38,6 @@ See `docs/self-optimising.md` for the full guide.
 
 These are improvements the toolkit would benefit from but that live in other codebases. Tracked here so they don't get lost.
 
-- **Real read-only permission tier in Accelerate.** Today `can_view_analytics()` and `can_create_experiments()` both resolve to `current_user_can('edit_posts')` in `../altis-accelerate/inc/abilities/namespace.php:88–101`, which means a marketer with read-only intent must still be granted experiment-creation permissions to use the toolkit. A dedicated capability (e.g. `view_accelerate_analytics` mapped to a new WordPress role or granted additively) would let teams hand out analytics access without handing out A/B-test-creation access. Upstream PR to altis-accelerate.
 - **OAuth-first onboarding.** Upstream `@automattic/mcp-wordpress-remote` has moved to OAuth as its default auth mode; the toolkit currently opts out via `OAUTH_ENABLED: "false"` for non-technical-user simplicity. A future v1.x could add an OAuth path inside `/accelerate-connect` for users who prefer it, while keeping the Application Password path as the default.
 - **Upstream endpoint auto-discovery (nice to have, no longer blocking).** `@automattic/mcp-wordpress-remote` 0.3.0+ accepts a full connector URL in `WP_API_URL` and only falls back to the hardcoded `/wp/v2/wpmcp` route when given a bare domain. The toolkit now exploits this directly — `/accelerate-connect` probes both routes and saves whichever full URL responds, so no server-side mu-plugin is needed. A future upstream improvement could probe the WordPress REST index (`/wp-json/`) to discover the route without the toolkit knowing the suffix patterns, but that's a quality-of-life upgrade rather than a blocker.
 

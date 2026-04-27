@@ -8,14 +8,15 @@ All capabilities are invoked by the toolkit via a single MCP tool (`mcp__wordpre
 
 ## Permission tiers
 
-Accelerate currently uses two WordPress capabilities as permission gates, not three. The authoritative source is `../altis-accelerate/inc/abilities/namespace.php:88–112`.
+Accelerate uses three WordPress capabilities as permission gates. The authoritative source is `../altis-accelerate/inc/abilities/namespace.php:90–115`.
 
-| Tier | WordPress capability | Unlocks |
-|---|---|---|
-| Analytics + experiments | `edit_posts` | All 35 analytics and experimentation capabilities below (discovery, author, engagement, attribution, realtime, query, variant management, A/B tests, audiences, personalisation rules) |
-| Admin | `manage_options` | Stopping experiments, broadcasting content, exporting raw event data |
+| Tier | Callback | WordPress capability | Unlocks |
+|---|---|---|---|
+| 1 | `can_view_analytics` | `view_accelerate_analytics` **or** `edit_posts` | The **27** read-only capabilities (discovery, author, engagement, attribution, realtime, query, content search, audience reads, experiment-state reads) |
+| 2 | `can_create_experiments` | `edit_posts` | The **9** experiment-creation capabilities (variant management, A/B tests, audience create/update, personalisation rules, goal & traffic settings) |
+| 3 | `can_manage_experiments` | `manage_options` | The **3** destructive or site-wide capabilities — `stop-experiment`, `broadcast-content`, `export-events` |
 
-A stricter read-only capability for marketing-only roles is tracked as a future upstream improvement in `ROADMAP.md`. Until then, any user with `edit_posts` can both read analytics and create A/B tests.
+Tier 1 is the only one that accepts the dedicated `view_accelerate_analytics` capability — that lets a marketing role read analytics without being granted `edit_posts` (and therefore without the ability to create experiments). Editors and authors satisfy both Tier 1 and Tier 2 by default via `edit_posts`. Tier 3 requires administrator access.
 
 ---
 
@@ -274,5 +275,8 @@ Structural breakdown by section: 11 discovery + 2 author + 1 engagement + 4 attr
 
 Permission-tier breakdown (see the Permission tiers table at the top of this file):
 
-- **35** abilities gated by `edit_posts` — analytics, experimentation, personalisation, reads of experiment state and export status
-- **3** abilities gated by `manage_options` — `stop-experiment`, `broadcast-content`, `export-events`
+- **27** abilities gated by `can_view_analytics` (`view_accelerate_analytics` or `edit_posts`) — read-only analytics, search, audience/experiment reads
+- **9** abilities gated by `can_create_experiments` (`edit_posts`) — variant + experiment + audience + personalisation creation
+- **3** abilities gated by `can_manage_experiments` (`manage_options`) — `stop-experiment`, `broadcast-content`, `export-events`
+
+Total: 27 + 9 + 3 = **39**, matching the section breakdown above.

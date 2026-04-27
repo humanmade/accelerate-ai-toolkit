@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.2
+
+**Repo-level sync, hygiene, and resilience.** Catch-up sweep after #11–#13 to bring docs, model instructions, release manifests, and workflow assumptions back in line with the current upstream contract.
+
+- **3-tier permission model** documented everywhere it was previously framed as 2 tiers. Added the `view_accelerate_analytics` capability (real read-only marketing role, no experiment-creation rights) to authentication, ability-reference, installation, and the router skill's permission-error guidance. Per-tier counts corrected: 27 view + 9 create + 3 manage = 39 (previously misreported as 35 + 3 = 38).
+- **Install docs aligned** with the marketplace shipping. `docs/installation.md` now leads with `claude plugin install accelerate-ai-toolkit` and shows local-checkout as a fallback for Codex CLI and development. Roadmap entry marked as shipped.
+- **Broken README link fixed** — `./prd/ROADMAP.md` (gitignored, doesn't ship) → `./internal/ROADMAP.md`.
+- **Release versions synced to 1.3.2** across `plugin.json`, `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.codex-plugin/plugin.json`, and `package.json` (was 1.3.1 / 1.2.0 / 1.3.1 / 1.0.0 / 1.0.0).
+- **Degraded-path fallbacks** added to the four skills that depend on `accelerate/get-landing-pages` — landing-page optimisation, opportunities, campaigns, diagnose. When the upstream bug `humanmade/accelerate#609` triggers, workflows continue with `get-top-content` + `get-engagement-metrics` + `search-content` instead of aborting.
+- **New `docs/maintenance.md`** — a six-item checklist for re-verifying the upstream contract, ability count, per-tier counts, version manifests, README link integrity, and workflow fallbacks before each release.
+
+Closes [#14](https://github.com/humanmade/accelerate-ai-toolkit/issues/14).
+
 ## 1.3.1
 
 **`/accelerate-status` now reports the real Accelerate capability count.** Healthy connections previously surfaced "3 WordPress abilities" — that figure was the count of MCP wrapper tools, not the actual Accelerate surface, so it read as "barely working" when the toolkit was fully operational.

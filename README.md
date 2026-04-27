@@ -99,7 +99,7 @@ Every workflow that creates or changes something (A/B tests, personalization rul
 | Cursor | 🚧 Roadmap |
 | Gemini | 🚧 Roadmap |
 
-All skills are vendor-agnostic and live in a shared `/skills/` directory. See [ROADMAP.md](./prd/ROADMAP.md) for what's coming next.
+All skills are vendor-agnostic and live in a shared `/skills/` directory. See [ROADMAP.md](./internal/ROADMAP.md) for what's coming next.
 
 ---
 

@@ -139,5 +139,5 @@ Follow the building blocks in `docs/output-style.md` -- summary line, data table
 ## When things go wrong
 
 - If the user asks about data that doesn't exist yet (e.g. a post with zero views), say so plainly and suggest how to get data.
-- If a capability fails with a permission error, tell the user their WordPress account needs `edit_posts` for analytics and experimentation capabilities, or administrator access (`manage_options`) for stopping experiments, broadcasting content, or exporting raw events. Suggest they ask their site administrator to grant the right role (Editor or higher is usually enough for everything except broadcasts/exports).
+- If a capability fails with a permission error, identify which of the three tiers the failing capability belongs to and tell the user accordingly. Tier 1 (read-only analytics) needs `view_accelerate_analytics` **or** `edit_posts` — typically satisfied by Editor or higher. Tier 2 (create experiments, audiences, personalisation) needs `edit_posts`. Tier 3 (`stop-experiment`, `broadcast-content`, `export-events`) needs `manage_options` — administrator only. Suggest they ask their site administrator to grant the appropriate role.
 - If the connection itself is broken, suggest running `/accelerate-status` and then `/accelerate-connect` if needed.

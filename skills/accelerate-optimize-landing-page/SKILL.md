@@ -16,6 +16,8 @@ If the user names a page, use `accelerate/search-content` to find it.
 
 If they don't name one, call `accelerate/get-landing-pages` first. Show them the top 5 landing pages with entries, bounce rate, and conversion rate, and ask which one they want to work on. (Or pick the one with the best effort-to-impact ratio — high entries, high bounce, low conversion — and say "I'd suggest starting with X; shall we?")
 
+**If `accelerate/get-landing-pages` returns an error** (a known upstream issue on some sites tracked at `humanmade/accelerate#609` can surface a `Cannot parse uuid` error), do not abort. Tell the user that the entry-page ranking is temporarily unavailable on their site and fall back to `accelerate/get-top-content` with `limit: 5` paired with `accelerate/get-engagement-metrics` (`entity_type: "site"`) — pick the post with the worst bounce rate among the top viewed pages and present it as a best-effort starting point. Note explicitly that this isn't the full landing-page picture and full ranking will return once the underlying analytics fix ships.
+
 ## What to fetch once you know the page
 
 In parallel:

@@ -91,6 +91,8 @@ Often the right follow-up question is "which pages do these campaigns land on?":
 1. `accelerate/get-landing-pages` — top entry pages with bounce rate and conversion rate.
 2. Cross-reference with the campaign sources to find: *"Your Twitter campaigns all land on the homepage, which has a 72% bounce rate. Worth creating a dedicated landing page for those visitors."*
 
+**If `accelerate/get-landing-pages` errors** (known upstream bug on some sites — see `humanmade/accelerate#609`), the campaign attribution itself is not affected. Skip this section, tell the user the entry-page cross-reference is temporarily unavailable on their site, and complete the campaign breakdown with the source/UTM data you already have. Offer to revisit landing-page mapping once the underlying analytics fix ships.
+
 ## Rules
 
 - Don't invent revenue numbers. Accelerate tracks conversions, not money.

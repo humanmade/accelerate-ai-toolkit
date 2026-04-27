@@ -14,38 +14,21 @@ Before you install the toolkit, confirm you have:
 - **An agent that supports plugins:**
   - [Claude Code](https://claude.com/claude-code), or
   - [Codex CLI](https://github.com/openai/codex)
-- **A WordPress account with `edit_posts`** on the target site for analytics and experimentation, or `manage_options` (administrator) if you want the toolkit to broadcast content or export raw events. See [authentication.md](./authentication.md#required-wordpress-capabilities) for the full capability breakdown.
+- **A WordPress account with the right capability tier:** `view_accelerate_analytics` (or `edit_posts`) for read-only analytics; `edit_posts` to create A/B tests and audiences; `manage_options` (administrator) to stop experiments, broadcast content, or export raw events. See [authentication.md](./authentication.md#required-wordpress-capabilities) for the full three-tier breakdown.
 
 ---
 
-## Step 1 — Clone the repository
+## Step 1 — Install into your agent
 
-```bash
-git clone https://github.com/humanmade/accelerate-ai-toolkit.git
-cd accelerate-ai-toolkit
-```
+### Claude Code (recommended)
 
-Marketplace installs are planned for v1.1 (see [ROADMAP.md](../ROADMAP.md)). Until then, installing from a local checkout is the supported path.
-
----
-
-## Step 2 — Install into your agent
-
-### Claude Code
-
-From inside the toolkit directory:
-
-```bash
-claude
-```
-
-Then, inside the Claude Code session:
+The toolkit is published to the Claude Code marketplace. From inside any Claude Code session:
 
 ```
-/plugin install ./
+/plugin install accelerate-ai-toolkit
 ```
 
-Confirm the plugin loaded by running:
+Confirm the plugin loaded:
 
 ```
 /plugin list
@@ -55,19 +38,30 @@ You should see `accelerate-ai-toolkit` in the list.
 
 ### Codex CLI
 
-From inside the toolkit directory:
+The Codex marketplace listing is in progress (see [internal/ROADMAP.md](../internal/ROADMAP.md)). Until then, install from source — see [Step 2](#step-2--install-from-source-fallback).
+
+---
+
+## Step 2 — Install from source (fallback)
+
+Use this path for Codex CLI today, for any agent if you want to track the latest `main`, or for local development of the toolkit itself.
 
 ```bash
-codex
+git clone https://github.com/humanmade/accelerate-ai-toolkit.git
+cd accelerate-ai-toolkit
 ```
 
-Then, inside the Codex session:
+### Claude Code (from local checkout)
+
+From inside the toolkit directory, run `claude`, then in the session:
 
 ```
-/plugins
+/plugin install ./
 ```
 
-Choose "Install from local path" and point it at the toolkit directory. Codex will pick up `.codex-plugin/plugin.json` and register the skills from `./skills/`.
+### Codex CLI (from local checkout)
+
+From inside the toolkit directory, run `codex`, then `/plugins` and choose "Install from local path". Point it at the toolkit directory. Codex will pick up `.codex-plugin/plugin.json` and register the skills from `./skills/`.
 
 ---
 
@@ -184,7 +178,7 @@ If `/accelerate-status` reports that the connector address check passed, the 404
 
 ### "Permission denied" when a skill tries to fetch data
 
-Your WordPress account lacks the required capability. Accelerate currently uses `edit_posts` as the permission floor for all analytics and experimentation capabilities, and `manage_options` for broadcasts, exports, and stopping experiments. Ask your site admin to grant you an Editor role (or higher) for the analytics side, or administrator access if you need broadcasts/exports. See [authentication.md](./authentication.md#required-wordpress-capabilities) for the full tier breakdown.
+Your WordPress account lacks the right capability for the failing call. Accelerate uses three tiers: `view_accelerate_analytics` (or `edit_posts`) for read-only analytics, `edit_posts` for creating experiments and audiences, and `manage_options` for stopping experiments, broadcasting, or exporting raw events. Ask your site admin to grant the appropriate role — Editor (or higher) covers analytics + experiment creation; administrator covers everything. See [authentication.md](./authentication.md#required-wordpress-capabilities) for the full tier breakdown.
 
 ### Application Passwords section is missing from your profile
 

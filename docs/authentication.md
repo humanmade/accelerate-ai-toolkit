@@ -109,22 +109,17 @@ You'll normally do this during `/accelerate-connect`, which walks you through it
 
 ## Required WordPress capabilities
 
-The toolkit calls Accelerate capabilities that map to two WordPress capability tiers:
+The toolkit calls Accelerate capabilities that map to **three** WordPress capability tiers, defined in `../altis-accelerate/inc/abilities/namespace.php`:
 
 | Tier | WordPress capability | What it unlocks |
 |---|---|---|
-| Analytics + experiments | `edit_posts` | All 35 analytics and experimentation capabilities — performance summaries, top content, traffic breakdowns, engagement metrics, attribution, realtime, author stats, taxonomy breakdowns, audiences, personalisation rules, variant management, A/B test creation and review |
-| Admin | `manage_options` | Stopping experiments, broadcasting content site-wide, exporting raw event data |
+| 1 — Read analytics | `view_accelerate_analytics` **or** `edit_posts` | All 27 read-only capabilities — performance summaries, top content, traffic breakdowns, engagement metrics, attribution, realtime, author stats, taxonomy breakdowns, audience reads, content search, raw query, experiment-state reads |
+| 2 — Create experiments | `edit_posts` | The 9 experiment-creation capabilities — variant management, A/B test creation, audience creation/update, set goal/traffic, personalisation rules |
+| 3 — Admin / publish | `manage_options` | The 3 destructive or site-wide capabilities — `stop-experiment`, `broadcast-content`, `export-events` |
 
-Any WordPress role with `edit_posts` (Editor, Author, Contributor with publishing, and above) can use the analytics and experimentation side of the toolkit. Only administrators can stop experiments, run broadcasts, or export raw events.
+Tier 1 is satisfied by either capability. Sites that want a true read-only marketing role can grant `view_accelerate_analytics` without `edit_posts`; that user can then read analytics but cannot create or modify experiments. Editors and authors automatically have `edit_posts`, so they get tiers 1 and 2 by default. Tier 3 is administrator-only.
 
-If a capability call fails with a permission error, the toolkit will surface this and tell you to ask your site administrator for the right role.
-
-### A note on read vs write
-
-Accelerate currently does not split read-only analytics into its own WordPress capability — the underlying permission callback for analytics queries is the same `edit_posts` check used for creating experiments. In practice this means a contributor who can read analytics can also create A/B tests.
-
-If your team needs a strict read-only marketing role, the current workaround is to trust users with `edit_posts` on the analytics side and rely on the admin tier (`manage_options`) to gate broadcasts and exports. A dedicated read-only capability is tracked as a future upstream improvement in `ROADMAP.md`.
+If a capability call fails with a permission error, the toolkit will surface this and tell you which tier the failing capability belongs to so you can ask your site administrator for the right role.
 
 ---
 

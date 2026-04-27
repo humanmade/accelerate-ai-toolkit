@@ -26,7 +26,7 @@ You are helping a marketer figure out why something isn't working so they can de
 2. Call `accelerate/get-post-performance` with the `post_id` for that content.
 3. Call `accelerate/get-engagement-metrics` with `entity_type: "post"` and the same `post_id` to get detailed engagement signals for that specific page.
 4. Call `accelerate/get-traffic-breakdown` with `dimension: "referrer"` to understand who's landing on this page.
-5. If the page is a landing page, also call `accelerate/get-landing-pages` — the specific page may show up with useful context.
+5. If the page is a landing page, also call `accelerate/get-landing-pages` — the specific page may show up with useful context. **If this call errors** (known upstream bug on some sites — see `humanmade/accelerate#609`), skip cleanly and proceed with the diagnosis from the four calls above. Do not retry; the diagnostic is still useful without entry-page ranking.
 
 ## What to look for
 

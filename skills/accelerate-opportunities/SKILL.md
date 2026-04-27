@@ -27,6 +27,8 @@ Make these calls via `mcp__wordpress__mcp-adapter-execute-ability` in parallel:
 
 If the user specified a window ("this week", "this month", "next 30 days"), adjust the date-range presets accordingly. Default is weekly framing.
 
+**If `accelerate/get-landing-pages` errors** (a known upstream bug on some sites tracked at `humanmade/accelerate#609` can return `Cannot parse uuid`), don't abort the whole opportunities call. Continue with the other seven data sources and skip Rule 1 on this run — the bounce-priority signal can still partially fire from `get-engagement-metrics` (site-wide bounce rate) combined with `get-top-content` (high-volume pages). Note in the final response that the entry-page lever is temporarily unavailable on this site so the user knows why landing-page-specific recommendations are absent.
+
 ## How to think
 
 You're looking for the 3 highest-leverage moves this user could make next, grounded in what the data actually shows. Apply these rules in order:
