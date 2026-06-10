@@ -1,6 +1,12 @@
 ---
+name: accelerate-status
 description: Check whether the Accelerate AI Toolkit is connected to your WordPress site and able to fetch data. Diagnoses the specific failure layer if something is wrong.
+license: MIT
+category: diagnostics
+parent: accelerate
 ---
+
+# Accelerate — Connection status
 
 Run a layered connection diagnostic on the Accelerate AI Toolkit. Check each layer in order and **stop at the first failure** -- report the specific problem and its fix, not a generic "run /accelerate-connect".
 

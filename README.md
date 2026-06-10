@@ -69,7 +69,7 @@ For Codex CLI: run `codex`, open `/plugins`, choose "Install from local path".
 
 ## How it works
 
-The toolkit is not a wrapper around your analytics API. It's 13 purpose-built workflows that compose raw data into decisions:
+The toolkit is not a wrapper around your analytics API. It's 14 purpose-built skills that compose raw data into decisions:
 
 | Workflow | What it does |
 |----------|-------------|

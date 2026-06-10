@@ -4,7 +4,6 @@ description: What can this toolkit do? Full list of available capabilities and d
 license: MIT
 category: reference
 parent: accelerate
-disable-model-invocation: true
 ---
 
 # Accelerate — Capabilities reference

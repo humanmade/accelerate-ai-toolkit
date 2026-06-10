@@ -38,7 +38,7 @@ accelerate-ai-toolkit/
 | `description` | string | Recommended | Shown in plugin manager when browsing/installing. |
 | `version` | string | Recommended | Semantic versioning (see section 4). |
 | `author` | object | Optional | `{ "name": "Human Made" }` |
-| `homepage` | string | Optional | Link to docs/website. |
+| `homepage` | string | Optional | Link to docs/website. In this repo `plugin.json` points at the product site (accelerateplugin.com) while `marketplace.json` points at the GitHub repo — that divergence is intentional, don't "fix" it. |
 | `repository` | string | Optional | Link to GitHub repo. |
 | `license` | string | Optional | SPDX identifier, e.g. `"MIT"`. |
 | `keywords` | array | Optional | Discovery tags. |

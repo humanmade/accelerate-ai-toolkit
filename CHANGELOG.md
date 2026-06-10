@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0
+
+**Commands are now skills.** Claude Code merged slash commands into the skills system and marks the `commands/` directory as legacy; this release completes the migration and removes the duplication it was causing — `/accelerate` previously appeared twice in the model's skill list (once from the command, once from the skill), wasting context and making routing ambiguous.
+
+- **`commands/` directory removed.** `/accelerate` and `/accelerate-connect` were thin delegators to their same-named skills — and the connect delegator still described the pre-1.3 env-file-first credential flow. Both deleted; the skills already provide the same slash commands.
+- **`/accelerate-status` is now a skill** (`skills/accelerate-status/SKILL.md`). Same slash name, same layered diagnostic, but the model can now invoke it on its own when it hits a connection problem, and the analyst agent's hand-off reference keeps working.
+- **Root `plugin.json` removed.** It was a byte-identical copy of `.claude-plugin/plugin.json` that no agent reads — Claude Code reads `.claude-plugin/`, Codex reads `.codex-plugin/`. The maintenance checklist's version-sync step now covers the four real manifests.
+- **`accelerate-abilities-reference` is now model-invocable** (dropped `disable-model-invocation`). The router and analyst agent both delegate to it; the flag was blocking exactly those consumers.
+- **Manifest polish:** added `displayName: "Accelerate AI Toolkit"` to the Claude Code manifest, added an `argument-hint` to the router skill so the slash-command picker shows what to pass, and reworded the Gemini stub so it no longer promises "v1.1".
+
 ## 1.3.2
 
 **Repo-level sync, hygiene, and resilience.** Catch-up sweep after #11–#13 to bring docs, model instructions, release manifests, and workflow assumptions back in line with the current upstream contract.

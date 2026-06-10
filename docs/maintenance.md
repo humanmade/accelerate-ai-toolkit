@@ -47,11 +47,11 @@ The view + create + manage totals should add up to the result of step 2.
 ## 4. Release versions agree across all manifests
 
 ```bash
-grep -E '"version"' plugin.json .claude-plugin/plugin.json .claude-plugin/marketplace.json \
+grep -E '"version"' .claude-plugin/plugin.json .claude-plugin/marketplace.json \
   .codex-plugin/plugin.json package.json
 ```
 
-All five must match. Bump them together when releasing.
+All four must match. Bump them together when releasing.
 
 ## 5. `README.md` `./` links resolve against the working tree
 

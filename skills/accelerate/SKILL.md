@@ -1,6 +1,7 @@
 ---
 name: accelerate
 description: Any question about a WordPress site — analytics, traffic, bounce rate, conversions, A/B tests, landing pages, audiences, personalization, campaigns, content performance, what to improve, how the site is doing. Routes to the right workflow.
+argument-hint: "<question about your site>"
 license: MIT
 category: router
 ---
