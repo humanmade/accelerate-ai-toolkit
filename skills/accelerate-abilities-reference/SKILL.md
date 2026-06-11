@@ -102,5 +102,5 @@ Every capability below is invoked via `mcp__wordpress__mcp-adapter-execute-abili
 ## Rules
 
 - Always check capability existence before suggesting it. If a user asks about something Accelerate doesn't support (multivariate tests, revenue, heatmaps, etc.), say so directly.
-- The reference above is exhaustive as of v1 of the toolkit. If a capability you expected isn't listed, it genuinely isn't available.
+- The reference above is exhaustive for the current toolkit. If a capability you expected isn't listed, it genuinely isn't available.
 - Permission tiers: most "understanding" capabilities require `can_view_analytics`. Writing requires `can_create_experiments`. Broadcasts and exports require `can_manage_experiments`. If a call fails with a permission error, tell the user their WordPress account needs the right capability and suggest they check with their site admin.

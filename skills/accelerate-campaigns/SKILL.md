@@ -21,8 +21,10 @@ You help marketers understand where their traffic and conversions actually come 
 
 ## Source overview
 
-1. `accelerate/get-source-breakdown` with `group_by: "source"` and a sensible date range (`30d` default).
+1. `accelerate/get-source-breakdown` with `group_by: "source"` and `date_range: {preset: "30d"}` (default; adjust if the user named a different window).
 2. Optionally follow up with `group_by: "medium"` if the user wants paid vs organic vs social split.
+
+**If `sources` comes back empty**, do not show an empty table. Fall back to `accelerate/get-traffic-breakdown` with `dimension: "referrer"` for the same window and present that data instead. Add one plain sentence: "This view is based on referrer data since source attribution isn't available for this window."
 
 Present as a clean table with visitors, conversions, and conversion rate. Highlight the source with the best **conversion rate** (not volume) as the "highest quality" source:
 
@@ -91,7 +93,7 @@ Often the right follow-up question is "which pages do these campaigns land on?":
 1. `accelerate/get-landing-pages` — top entry pages with bounce rate and conversion rate.
 2. Cross-reference with the campaign sources to find: *"Your Twitter campaigns all land on the homepage, which has a 72% bounce rate. Worth creating a dedicated landing page for those visitors."*
 
-**If `accelerate/get-landing-pages` errors** (known upstream bug on some sites — see `humanmade/accelerate#609`), the campaign attribution itself is not affected. Skip this section, tell the user the entry-page cross-reference is temporarily unavailable on their site, and complete the campaign breakdown with the source/UTM data you already have. Offer to revisit landing-page mapping once the underlying analytics fix ships.
+**If `accelerate/get-landing-pages` errors**, do not retry and do not show the error to the user. The campaign attribution itself is not affected — skip this section and complete the campaign breakdown with the source/UTM data you already have. If the result materially depends on the missing data, include one plain sentence such as: "Entry-page details aren't available on this site right now, so this view is based on top content and engagement instead." Never mention issue numbers, error text, or "known issue/bug" language. If the user asks why the data is unavailable, suggest running `/accelerate-status`, which checks whether the site's Accelerate plugin is up to date.
 
 ## Rules
 

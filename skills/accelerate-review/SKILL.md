@@ -16,16 +16,18 @@ This is the "status" surface, not the "prioritisation" surface. If the user asks
 
 Make these calls via `mcp__wordpress__mcp-adapter-execute-ability` in parallel where possible:
 
-1. `accelerate/get-performance-summary` with `entity_type: "site"` and a sensible `date_range_preset` (default to `7d` unless the user asked for a different window). This gives you total views, visitors, bounce rate, time series.
-2. `accelerate/get-top-content` with `limit: 10` for the same date range. Top performing content.
-3. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` for the same date range. Where visitors are coming from.
+1. `accelerate/get-performance-summary` with `entity_type: "site"` and `date_range_preset: "7d"` (default; adjust if the user named a different window). This gives you total views, visitors, bounce rate, time series.
+2. `accelerate/get-top-content` with `limit: 10` and `date_range: {preset: "7d"}` (match the window from step 1). Top performing content.
+3. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` and `date_range: {preset: "7d"}` (match the window from step 1). Where visitors are coming from.
 4. `accelerate/list-active-experiments` to see what tests and personalisation rules are currently running.
 
-If the user asked about a specific time window (e.g. "this month", "last 30 days", "yesterday"), map it to the closest `date_range_preset`:
+If the user asked about a specific time window (e.g. "this month", "last 30 days", "yesterday"), use the matching preset for `date_range_preset` on `get-performance-summary` and the equivalent `date_range: {preset: "..."}` on the other calls:
 - "today" / "last hour" → `1h`, `4h`, `12h`, or `24h`
 - "this week" / "last 7 days" → `7d`
 - "this month" / "last 30 days" → `30d`
 - "last quarter" / "last 90 days" → `90d`
+
+For windows that don't match a preset (e.g. "last 45 days"), use `date_range: {start: "<ISO>", end: "<ISO>"}` on the data calls and omit `date_range_preset` on `get-performance-summary`.
 
 ## How to present it
 

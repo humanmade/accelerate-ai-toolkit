@@ -18,15 +18,15 @@ You are helping a marketer figure out why something isn't working so they can de
 2. For the top 5 results, call `accelerate/get-post-performance` with each `post_id` in parallel to get detailed metrics.
 3. Call `accelerate/get-engagement-metrics` with `entity_type: "site"` to get site-wide bounce rate, time on page, scroll depth, recirculation rate.
 4. Look for pages where **high views + high bounce rate** coincide. That's the biggest opportunity.
-5. Call `accelerate/get-content-diff` on the top 3 suspects, comparing the current period to the previous one, to see whether any of them recently got worse.
+5. Call `accelerate/get-content-diff` on the top 3 suspects to see whether any of them recently got worse. Pass `post_ids` (array of the three post IDs) and `current_period` as a `{start, end}` ISO 8601 object covering the last 30 days — for example `{ "post_ids": [42, 17, 8], "current_period": { "start": "2025-05-12T00:00:00Z", "end": "2025-06-11T23:59:59Z" } }`. Omit `comparison_period` to let the server auto-derive the prior period.
 
 ### Case 2 — specific page / post
 
 1. Use `accelerate/search-content` with the user's description if they didn't give you a post_id. Pick the most likely match and confirm with the user.
 2. Call `accelerate/get-post-performance` with the `post_id` for that content.
-3. Call `accelerate/get-engagement-metrics` with `entity_type: "post"` and the same `post_id` to get detailed engagement signals for that specific page.
+3. Call `accelerate/get-engagement-metrics` with `entity_type: "post"` and `entity_id: <post_id>` to get detailed engagement signals for that specific page.
 4. Call `accelerate/get-traffic-breakdown` with `dimension: "referrer"` to understand who's landing on this page.
-5. If the page is a landing page, also call `accelerate/get-landing-pages` — the specific page may show up with useful context. **If this call errors** (known upstream bug on some sites — see `humanmade/accelerate#609`), skip cleanly and proceed with the diagnosis from the four calls above. Do not retry; the diagnostic is still useful without entry-page ranking.
+5. If the page is a landing page, also call `accelerate/get-landing-pages` — the specific page may show up with useful context. **If `accelerate/get-landing-pages` errors**, do not retry and do not show the error to the user. Proceed with the diagnosis from the four calls above; the diagnostic is still useful without entry-page ranking. If the result materially depends on the missing data, include one plain sentence such as: "Entry-page details aren't available on this site right now, so this view is based on top content and engagement instead." Never mention issue numbers, error text, or "known issue/bug" language. If the user asks why the data is unavailable, suggest running `/accelerate-status`, which checks whether the site's Accelerate plugin is up to date.
 
 ## What to look for
 

@@ -58,7 +58,7 @@ If they say yes, hand off mentally to `accelerate-diagnose` with that specific p
 If the user is already asking *why* something is spiking, do this flow:
 
 1. `accelerate/get-post-performance` with the `post_id` — current vs recent baseline.
-2. `accelerate/get-traffic-breakdown` scoped to the site for the last hour (`1h` preset) via `get-performance-summary` with a matching window — see which source is sending the spike. Actually: traffic breakdown doesn't accept a post filter easily, so use `accelerate/get-source-breakdown` with a short date range if available, or settle for site-level source breakdown and reason about it.
+2. Use `accelerate/get-source-breakdown` with `date_range: {preset: "1h"}` to see which source is sending the spike. Note that source breakdown doesn't accept a post filter, so this is site-level; reason about which source is most likely driving traffic to that specific post based on context.
 3. Report the likely cause: a burst from a single referrer, a scheduled post going live, an old post getting shared, etc.
 
 ## Rules

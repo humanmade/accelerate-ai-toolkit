@@ -35,7 +35,7 @@ Do not proceed to hypothesis or variant design for inline content.
 0. **Consult the learning journal first.** Derive the site slug from `get-site-context` using the site slug derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json` if it exists. If the file is missing, unreadable, or has an unknown `schema_version`, skip silently and use generic reasoning. If it's valid: bias toward patterns with `status: "won"` when proposing hypotheses. Demote patterns with `status: "lost"` -- still surface them if the user specifically asks or they're the only viable option, but flag the history: *"This pattern has lost [N] of [M] tests on your site, so I'm not leading with it -- but it might work in this specific context."* Ignore `inconclusive` and `mixed` patterns -- not enough signal to bias on.
 1. Call `accelerate/list-active-experiments` — don't propose a new test on a block that already has one running.
 2. If the user hasn't named a target, use the findings from `accelerate-review`, `accelerate-diagnose`, or `accelerate-opportunities` to suggest the block with the best impact potential. If the user has named a page, find the block using `accelerate/search-content`. **Verify the block is a synced pattern before continuing** — if it isn't, stop and explain the reusable block requirement (see above).
-3. Check site traffic volume via `accelerate/get-performance-summary` (`7d` or `30d` depending on how fast the user wants results) so you can gauge whether the test can reach significance.
+3. Check site traffic volume via `accelerate/get-performance-summary` with `date_range_preset: "7d"` (or `"30d"` if the user wants a slower-burn test) so you can gauge whether the test can reach significance.
 4. Propose 1–2 clear hypotheses in plain English. Each hypothesis names: the block, the change, the expected outcome, and the success metric. **Classify each hypothesis against the pattern taxonomy** in `accelerate-learn` to determine its `pattern_id` -- you'll need this when creating the test.
 5. Before presenting the hypothesis, apply the design standards from `docs/design-standards.md`. Score the proposed variant against the differentiation rubric (message change + visual change + hypothesis clarity, each 0–2). If the total is below 3/6 or any dimension scores 0, strengthen the variant — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics. Do not present a variant that fails the rubric. For low-traffic sites (under ~1,000 weekly visitors), only propose Score 2 variants.
 
@@ -56,7 +56,7 @@ Example output:
 
 Confirm the variant text and the success metric with the user. **Never call `create-ab-test` without explicit confirmation.**
 
-Before showing the confirmation prompt, verify the variant content against the site's brand context file (`~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`). If the file does not exist, generate it from `accelerate/get-site-context` with `include_blocks: true`. Check that all colors, font sizes, spacing, and font families use preset slugs (not hardcoded values), that all block types are registered on the site, and that no anti-pattern bans from `docs/design-standards.md` are violated. Silently correct any violations — swap a hardcoded hex to the nearest palette slug, swap a raw font size to the nearest scale step. The user should only see brand-consistent variant content in the confirmation prompt.
+Before showing the confirmation prompt, verify the variant content against the site's brand context file (`~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`). If the file does not exist, generate it from `accelerate/get-site-context` with `blocks: "styled"` (falls back to `include_blocks: true` on older plugin versions). Check that all colors, font sizes, spacing, and font families use preset slugs (not hardcoded values), that all block types are registered on the site, and that no anti-pattern bans from `docs/design-standards.md` are violated. Silently correct any violations — swap a hardcoded hex to the nearest palette slug, swap a raw font size to the nearest scale step. The user should only see brand-consistent variant content in the confirmation prompt.
 
 ### Reusable block requirement
 
@@ -69,12 +69,12 @@ Do not attempt to create a test on inline content. Do not proceed past this step
 
 ### Safety: backup before mutation
 
-**Before calling `create-ab-test`, always save a backup of the current block content.** The `create-ab-test` call replaces the block's content with variant wrappers. If anything goes wrong (empty variants, malformed markup, API error), the original content is gone unless you saved it.
+**Before calling `create-ab-test`, always save a backup of the current block content.** The `create-ab-test` call replaces the block's content with variant wrappers. If anything goes wrong (empty variants, malformed markup, or an error response), the original content is gone unless you saved it.
 
-Steps:
-1. Fetch the current block content using `accelerate/get-post-content` or equivalent (e.g., WP-CLI via SSH: `wp post get <block_id> --field=content`).
+Steps (model instructions — do not surface these steps to the user):
+1. Fetch the current block content using `accelerate/get-variants` with the `block_id` to retrieve the existing content, or via WP-CLI if available.
 2. Hold the original content in working memory — you will need it for rollback.
-3. Note the block ID and tell the user: *"I've saved a backup of the current content before making changes."*
+3. Tell the user: *"I've saved a backup of the current content before making changes."*
 
 ### Creating the test
 
@@ -93,7 +93,7 @@ Once confirmed and backed up:
    - The control variant still matches the original content
    - The new variant contains the proposed changes
    
-   If any variant is empty or the content looks wrong, **immediately roll back**: restore the original content you saved in the backup step (via WP-CLI: `wp post update <block_id> --post_content="<original_content>"`), tell the user the test creation failed and the original content has been restored, and do not tell the user the test is live.
+   If any variant is empty or the content looks wrong, **immediately roll back**: restore the original content you saved in the backup step (via whatever write mechanism is available — `accelerate/update-variant` on index 0, or WP-CLI if accessible), then tell the user: *"The test setup didn't go as expected, so I've restored the original content. Nothing changed on your site."* Do not tell the user the test is live.
 
 3. Only after verification passes, confirm to the user: *"Done. The test is live -- I've verified both versions are showing correctly."*
 4. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1-2 weeks. For lower traffic, 2-4 weeks.

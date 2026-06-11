@@ -262,6 +262,43 @@ If it is not available but all previous layers passed:
 
 Stop here.
 
+## Layer 8b -- Accelerate version
+
+This is a **non-blocking** check. Unlike every layer above, it never stops the flow -- if it finds a problem it records a single warning line and continues to Layer 9. If it finds nothing, it stays completely silent.
+
+Sites running a version of Accelerate older than the minimum below have a server-side bug that breaks entry-page ranking data. The deployed version is detectable from the homepage without touching the site's settings.
+
+The minimum supported version is **4.2.0**. (Maintenance: bump `MIN_VERSION` below when the floor changes.)
+
+Use the Bash tool:
+
+```bash
+MIN_VERSION="4.2.0"
+DETECTED=$(curl -s "$SITE_ROOT/" 2>/dev/null | grep -oE 'accelerate\.[0-9][0-9a-z.]*\.js' | head -1 | sed -E 's/^accelerate\.(.*)\.js$/\1/')
+if [ -z "$DETECTED" ]; then
+  echo "version=none"
+else
+  OLDER=$(printf '%s\n%s\n' "$MIN_VERSION" "$DETECTED" | sort -V | head -1)
+  if [ "$DETECTED" != "$MIN_VERSION" ] && [ "$OLDER" = "$DETECTED" ]; then
+    echo "version=$DETECTED status=older"
+  else
+    echo "version=$DETECTED status=ok"
+  fi
+fi
+```
+
+- **`version=none`** — the version couldn't be determined (homepage doesn't embed the marker, a custom build, or a development version string). Skip silently: no warning, no mention. Proceed to Layer 9.
+- **`status=ok`** — the site is on a supported version. Proceed to Layer 9 silently.
+- **`status=older`** — record this warning line and carry it into the final summary, then proceed to Layer 9:
+
+  ```
+  ⚠️ Your site is running an older version of Accelerate ([DETECTED version]). Some analytics
+     views (like entry-page rankings) won't work until it's updated.
+     Fix: ask whoever maintains your site to update the Accelerate plugin.
+  ```
+
+When the remaining layers all pass, render the healthy status from Layer 9 as normal, then append this warning line beneath it.
+
 ## Layer 9 -- Live data check
 
 If all layers pass, do all three of these in order:

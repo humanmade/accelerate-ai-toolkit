@@ -27,7 +27,9 @@ Make these calls via `mcp__wordpress__mcp-adapter-execute-ability` in parallel:
 
 If the user specified a window ("this week", "this month", "next 30 days"), adjust the date-range presets accordingly. Default is weekly framing.
 
-**If `accelerate/get-landing-pages` errors** (a known upstream bug on some sites tracked at `humanmade/accelerate#609` can return `Cannot parse uuid`), don't abort the whole opportunities call. Continue with the other seven data sources and skip Rule 1 on this run — the bounce-priority signal can still partially fire from `get-engagement-metrics` (site-wide bounce rate) combined with `get-top-content` (high-volume pages). Note in the final response that the entry-page lever is temporarily unavailable on this site so the user knows why landing-page-specific recommendations are absent.
+**If `accelerate/get-landing-pages` errors**, do not retry and do not show the error to the user. Continue with the other seven data sources and skip Rule 1 on this run — the bounce-priority signal can still partially fire from `get-engagement-metrics` (site-wide bounce rate) combined with `get-top-content` (high-volume pages). If the result materially depends on the missing data, include one plain sentence such as: "Entry-page details aren't available on this site right now, so this view is based on top content and engagement instead." Never mention issue numbers, error text, or "known issue/bug" language. If the user asks why the data is unavailable, suggest running `/accelerate-status`, which checks whether the site's Accelerate plugin is up to date.
+
+**If `get-source-breakdown` returns an empty `sources` array**, fall back to `accelerate/get-traffic-breakdown` with `dimension: "referrer"` for the same window and use that for Rule 3. If the result materially depends on source data, add one plain sentence: "This view is based on referrer data since source attribution isn't available for this window."
 
 ## How to think
 

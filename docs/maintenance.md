@@ -65,15 +65,39 @@ done
 
 ## 6. Workflow resilience for known-failing abilities
 
-Any skill that depends on a single ability known to fail on some sites must declare a fallback path. The current case is `accelerate/get-landing-pages` (upstream bug `humanmade/accelerate#609`). Affected skills must mention the issue number in their fallback prose:
+Any skill that depends on a single ability known to fail on some sites must declare a fallback path. The current case is `accelerate/get-landing-pages`. Verify two things before release:
+
+**a) Each affected skill still contains a fallback block** (grep for the marker):
 
 ```bash
 for f in skills/accelerate-optimize-landing-page/SKILL.md \
          skills/accelerate-opportunities/SKILL.md \
          skills/accelerate-campaigns/SKILL.md \
          skills/accelerate-diagnose/SKILL.md; do
-  grep -q "humanmade/accelerate#609" "$f" || echo "MISSING fallback in: $f"
+  grep -q "If \`accelerate/get-landing-pages\` errors" "$f" || echo "MISSING fallback in: $f"
 done
 ```
 
-When the upstream bug is fixed, sweep these fallbacks (search for `humanmade/accelerate#609`) and remove or simplify them as appropriate.
+**b) No issue references leak into skills/** (must output nothing):
+
+```bash
+grep -rn "accelerate#[0-9]" skills/ && echo "ISSUE-NUMBER LEAK"
+```
+
+If either check fails, fix before releasing.
+
+**c) Minimum Accelerate version** — `accelerate-status` currently warns when the site runs < 4.2.0. Re-verify this threshold against upstream release notes at release time to confirm it still reflects the minimum version with the capabilities this toolkit depends on.
+
+## 7. Ability-reference input shapes match upstream
+
+The `date_range` object shape, `current_period`/`comparison_period` for `get-content-diff`, and any per-ability schema quirks in `docs/ability-reference.md` must match the upstream server. Verify the canonical date schema against:
+
+```bash
+grep -A 20 "function get_date_range_with_preset_schema" \
+  ../altis-accelerate/inc/abilities/helpers.php
+
+grep -A 20 "function get_date_range_schema" \
+  ../altis-accelerate/inc/abilities/namespace.php
+```
+
+And verify per-ability required inputs (e.g. `get-content-diff`, `get-experiment-results`) against their registrations in `../altis-accelerate/inc/abilities/*.php`. If any schema changes, update the "Common input shapes" section in `docs/ability-reference.md` and the literal examples in any skill that calls the changed ability.

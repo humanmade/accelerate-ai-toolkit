@@ -6,6 +6,34 @@ All capabilities are invoked by the toolkit via a single MCP tool (`mcp__wordpre
 
 ---
 
+## Common input shapes
+
+### Date window (`date_range`)
+
+Nearly all windowed abilities accept a `date_range` object in one of two forms:
+
+```json
+{ "preset": "30d" }
+```
+
+Preset values: `1h`, `4h`, `12h`, `24h`, `7d`, `30d`, `90d`.
+
+```json
+{ "start": "2025-05-10T00:00:00Z", "end": "2025-06-11T23:59:59Z" }
+```
+
+ISO 8601 start/end is the universal form — it is accepted by every windowed ability and covers any window the user names. Presets are a convenience shorthand for common cases. (Sites running an outdated Accelerate plugin may still fail on some windowed queries — that is a plugin-version problem, not a shape problem; `/accelerate-status` detects it.)
+
+**Use ISO start/end whenever the user specifies a custom window** (e.g. "last 32 days", "May 10 to June 11"). Derive the exact dates and pass them. Never reject a non-preset window, never silently substitute a preset. Briefly confirm the window in the answer ("covering 10 May – 11 June").
+
+**Exception:** `accelerate/get-performance-summary` additionally accepts a separate top-level `date_range_preset` string (alongside the `date_range` object). All other abilities use only the object form above.
+
+**Exception:** `accelerate/get-content-diff` uses `current_period` and `comparison_period` (not `date_range`). Each is a plain `{start, end}` object — no presets. See the ability entry below.
+
+Bare strings — for example passing `"30d"` directly as the value of `date_range` — are not valid and are rejected by the server.
+
+---
+
 ## Permission tiers
 
 Accelerate uses three WordPress capabilities as permission gates. The authoritative source is `../altis-accelerate/inc/abilities/namespace.php:90–115`.
@@ -24,7 +52,7 @@ Tier 1 is the only one that accepts the dedicated `view_accelerate_analytics` ca
 
 ### `accelerate/get-performance-summary`
 Retrieve aggregated performance metrics for blocks, posts, experiments, or the entire site.
-- **Inputs:** `entity_type` (site \| block \| post \| experiment, default site), `entity_id`, `date_range_preset` (1h \| 4h \| 12h \| 24h \| 7d \| 30d \| 90d), `date_range`, `granularity`, `segment`
+- **Inputs:** `entity_type` (site \| block \| post \| experiment, default site), `entity_id`, `date_range_preset` (1h \| 4h \| 12h \| 24h \| 7d \| 30d \| 90d — top-level string, unique to this ability), `date_range` (object — see Common input shapes above), `granularity`, `segment`
 - **Returns:** views, visitors, conversions, conversion_rate, confidence_interval, time_series
 
 ### `accelerate/get-post-performance`
@@ -40,9 +68,10 @@ Best-performing content ranked by views.
 
 ### `accelerate/get-content-diff`
 Compare content performance between two time periods.
-- **Inputs (required):** `post_ids`, `current_period`
-- **Inputs (optional):** `comparison_period`
+- **Inputs (required):** `post_ids` (array of integers), `current_period` (`{start, end}` ISO 8601 object — no presets)
+- **Inputs (optional):** `comparison_period` (`{start, end}` ISO 8601 object — defaults to the period immediately before `current_period`)
 - **Returns:** object keyed by post_id with { current, previous, change_percent }
+- **Example:** `{ "post_ids": [42, 17], "current_period": { "start": "2025-05-11T00:00:00Z", "end": "2025-06-11T23:59:59Z" } }`
 
 ### `accelerate/get-traffic-breakdown`
 Traffic breakdown by country, browser, OS, or referrer.
@@ -55,9 +84,10 @@ Performance metrics grouped by WordPress taxonomy (category, tag, or custom).
 - **Returns:** terms array with term_id, name, slug, post_count, views, conversions, conversion_rate, underserved_score
 
 ### `accelerate/get-site-context`
-The site's design system: colour palette, typography, spacing, available block types with style variations.
-- **Inputs:** `include_blocks` (default false)
-- **Returns:** site, colors, typography, spacing, blocks
+The site's design system: colour palette, typography, spacing, synced patterns, and (optionally) block types with style variations.
+- **Inputs:** `blocks` (`"none"` default | `"styled"` — only blocks with registered style variations | `"all"` — full registry). `include_blocks: true` is a deprecated alias for `"all"`.
+- **Returns:** site (including `accelerate_version`), colors, typography, spacing, patterns (synced patterns as `{id, title}` — what A/B-test eligibility checks need), blocks
+- **Note:** Omit `blocks` for analytics workflows. When creating or editing content, prefer `blocks: "styled"` — it returns just the blocks whose style variations matter for variant design; `"all"` is the large full-registry dump. On older plugin versions the `blocks` input may be unavailable — `include_blocks: true` works everywhere.
 
 ### `accelerate/list-active-experiments`
 All currently running A/B tests and personalisation rules.
@@ -68,6 +98,7 @@ All currently running A/B tests and personalisation rules.
 Discover historical and active experiments with filtering by status, type, date range, post, and annotations. Supports pagination — use this when you want every experiment ever run, not just the live ones.
 - **Inputs:** `status` (all \| active \| running \| completed \| paused \| draft, default all), `type` (all \| abtest \| personalization, default all), `date_range`, `subject_post_id`, `annotation_key`, `annotation_value`, `page` (default 1), `per_page` (1–100, default 50)
 - **Returns:** experiments array with { experiment_id, block_id, test_id, type, status, title, goal, started_at, ended_at, has_winner, winner_variant_index, annotations }, plus `total` and `pages` for pagination
+- **Date range semantics:** `date_range` filters on when experiments **started**, not when they were active. An experiment started in January but still running will only appear if `date_range` covers January.
 
 ### `accelerate/get-audience-segments`
 Defined audiences with their targeting rules.
@@ -75,9 +106,11 @@ Defined audiences with their targeting rules.
 - **Returns:** array of audiences with id, title, description, rules, optional estimate
 
 ### `accelerate/get-audience-fields`
-Available targeting fields and their values. Used to translate natural language into audience rules.
-- **Inputs:** `refresh` (default false)
+Available targeting fields and their values. Used to translate natural language into audience rules. Reflects roughly the last 7 days of data and does not return zero-count values.
+- **Inputs:** `refresh` (default false), `fields` (array of field name strings — fetch only the fields you need, e.g. `["attributes.referer", "endpoint.Attributes.utm_source"]`)
 - **Returns:** array of { name, label, type, operators, values }
+- **Note:** Do not pass `fields` when you need a full discovery of all available fields. Pass it when you already know which signals you want (referrer, UTM, country, etc.) to keep the payload small.
+- **Referrer fields:** current referrer is `attributes.referer`; first-touch referrer is `endpoint.Attributes.initialReferer`. The name `endpoint.Attributes.referer` does not exist.
 
 ---
 
@@ -91,7 +124,7 @@ Metrics for a specific author or comparison across all authors.
 ### `accelerate/get-author-content`
 All content by a specific author with performance metrics.
 - **Inputs (required):** `author_id`
-- **Inputs (optional):** `date_range`, `order_by` (views \| conversions \| publish_date), `limit` (1–100, default 50)
+- **Inputs (optional):** `date_range`, `order_by` (views \| conversions \| publish_date), `limit` (1–100, default 50; prefer 10–20 for routine use — default 50 fetches a heavy payload)
 - **Returns:** author object, posts array, period
 
 ---
@@ -100,7 +133,7 @@ All content by a specific author with performance metrics.
 
 ### `accelerate/get-engagement-metrics`
 Quality engagement: bounce rate, time on page, scroll depth, recirculation, return visitor rate.
-- **Inputs:** `entity_type` (post \| site, default site), `entity_id`, `date_range`
+- **Inputs:** `entity_type` (post \| site, default site), `entity_id` (use this key — `post_id` is a server-side alias but `entity_id` is the canonical name), `date_range`
 - **Returns:** avg_time_on_page_seconds, bounce_rate, pages_per_session, recirculation_rate, return_visitor_rate, scroll_depth { p25, p50, p75, p100 }, exit_pages, period
 
 ---
@@ -195,7 +228,7 @@ Adjust how much traffic is included in a block's experiment.
 
 ### `accelerate/get-experiment-results`
 Detailed statistical results for a running or completed experiment.
-- **Inputs (required):** `block_id`
+- **Inputs (required):** `block_id` OR `experiment_id` (at least one must be provided)
 - **Inputs (optional):** `refresh` (default false)
 - **Returns:** block_id, experiment_type, status, started_at, ended_at, traffic_percentage, confidence_threshold, has_winner, winner_variant_index, variants, recommendation, edit_url
 
@@ -235,6 +268,7 @@ Attach personalised content to a block for an audience.
 Create a site-wide broadcast campaign pushing blocks to multiple locations. Destructive. Requires confirmation.
 - **Inputs (required):** `block_ids`, `title`
 - **Returns:** success, broadcast_id, block_count, edit_url
+- **Note:** This ability requires administrator access (Tier 3 — `manage_options`). It is not callable through the assistant when the connected user is not an administrator, even if it appears in capability listings.
 
 ### `accelerate/export-events`
 Export raw analytics events for a specific date.

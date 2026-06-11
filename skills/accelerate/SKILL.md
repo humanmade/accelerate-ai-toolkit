@@ -79,6 +79,17 @@ If the question is still ambiguous after applying the table and the disambiguati
 
 ## Core reasoning principles
 
+### 0. Exact-window rule
+
+When the user specifies a time window — any window — serve it exactly.
+
+- If the window matches a preset (`7d`, `30d`, etc.), use `date_range: {preset: "30d"}` (or `date_range_preset: "30d"` for `get-performance-summary`).
+- If the window does not match a preset (e.g. "last 32 days", "May 10 to June 11"), compute the ISO 8601 start and end dates and pass `date_range: {start: "<ISO>", end: "<ISO>"}`.
+- **Never reject a non-preset window.** Never silently round it to the nearest preset.
+- Always confirm the exact window in your answer with a parenthetical like "(covering 10 May – 11 June)".
+
+See `docs/ability-reference.md` — "Common input shapes" — for the full date window schema.
+
 ### 1. Audience signal priority (for personalisation and targeting)
 
 When recommending who to personalise content for, prioritise signals in this order:

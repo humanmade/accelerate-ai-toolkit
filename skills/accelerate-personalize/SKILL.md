@@ -24,7 +24,7 @@ You are helping a marketer show different content to different visitors. In Acce
 
 Before suggesting any personalisation, call:
 
-1. `accelerate/get-audience-fields` — so you know which targeting signals are actually available on this site.
+1. `accelerate/get-audience-fields` with `fields: ["attributes.referer", "endpoint.Attributes.initialReferer", "endpoint.Attributes.utm_source", "endpoint.Location.Country", "endpoint.Demographic.Platform"]` — the most useful signals for personalisation planning. Omit `fields` only if you need a full discovery of every available field.
 2. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` — to see if there's a meaningful traffic concentration to target.
 3. `accelerate/get-source-breakdown` with `group_by: "source"` — UTM source breakdown for any paid or organic campaigns.
 4. `accelerate/get-audience-segments` — to avoid suggesting something that already exists.
@@ -60,7 +60,7 @@ Once the user has agreed to an audience:
 1. Translate the plain-English description into Accelerate's audience rule format. The rule structure has:
    - `include`: `any`, `all`, or `none` — how the groups combine
    - `groups`: an array of rule groups, each with its own `include` and a list of individual rules
-2. Use the field names from `accelerate/get-audience-fields` — never invent field names. Common ones based on the reference skill in altis-accelerate include `endpoint.Attributes.referer`, `endpoint.Attributes.utm_source`, `endpoint.Location.Country`, `endpoint.Demographic.Platform`, `metrics.hour`, `endpoint.Metrics.sessions`.
+2. Use the field names from `accelerate/get-audience-fields` — never invent field names. Common ones include: `attributes.referer` (current/last referrer), `endpoint.Attributes.initialReferer` (first-touch referrer), `endpoint.Attributes.utm_source`, `endpoint.Location.Country`, `endpoint.Demographic.Platform`, `metrics.hour`, `endpoint.Metrics.sessions`. For referrer targeting, always use `attributes.referer` for the current referrer — there is no `referer` field under `endpoint.Attributes`.
 3. Show the user the exact translated rule structure in plain English before creating anything: "I'll create an audience called 'Google pricing searchers' that matches visitors where the referrer contains 'google.com' AND the initial UTM term contains 'pricing'. Sound right?"
 4. **Wait for explicit confirmation.**
 5. Call `accelerate/create-audience` with `title`, `description`, and `rules`. Keep the title short and recognisable; the description should say what the audience is for in one sentence.
@@ -94,7 +94,7 @@ If the user asks "what audiences do I have", call `accelerate/get-audience-segme
 | Audience | Rules | Estimated size |
 |---|---|---|
 
-Translate the technical rules into plain English in the table ("visitors from Google with 'pricing' in their search", not a raw expression).
+Translate the technical rules into plain English in the table ("visitors from Google with 'pricing' in their search", not a raw expression). If `estimate` is missing or null for any row, omit the "Estimated size" column from the table rather than showing empty cells — audience size estimates may not be available on all sites.
 
 ## Rules
 

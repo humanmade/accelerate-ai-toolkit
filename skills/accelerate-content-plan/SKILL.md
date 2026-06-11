@@ -16,10 +16,10 @@ A good plan from you answers: what to write first, why this topic is the best ne
 
 In parallel:
 
-1. `accelerate/get-top-content` with `limit: 20` and a sensible date range (`30d` default) — what's already working.
-2. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` — where the audience comes from.
-3. `accelerate/get-taxonomy-performance` with `taxonomy: "category"` — which content themes perform. Repeat with `taxonomy: "post_tag"` for tag-level insight if the site uses tags heavily.
-4. `accelerate/get-engagement-metrics` with `entity_type: "site"` — overall bounce / time on page baseline.
+1. `accelerate/get-top-content` with `limit: 20` and `date_range: {preset: "30d"}` — what's already working.
+2. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` and `date_range: {preset: "30d"}` — where the audience comes from.
+3. `accelerate/get-taxonomy-performance` with `taxonomy: "category"` and `date_range: {preset: "30d"}` — which content themes perform. Repeat with `taxonomy: "post_tag"` for tag-level insight if the site uses tags heavily.
+4. `accelerate/get-engagement-metrics` with `entity_type: "site"` and `date_range: {preset: "30d"}` — overall bounce / time on page baseline.
 
 Optionally, if the user has asked for a brief on a specific topic or author:
 - `accelerate/search-content` to check if similar posts already exist (avoid cannibalising).
