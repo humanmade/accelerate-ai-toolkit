@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.2
+
+**Stale shell environments no longer cause unexplainable connection failures.** Agents inherit env vars from the terminal they're launched in, so a terminal opened before credentials were saved (or updated) keeps feeding every new session the old values — "restart your session" advice loops forever. Found live: three Claude Code restarts in the same terminal kept re-inheriting a pre-1.3.0 bare-root `WP_API_URL` even though the env file on disk was correct.
+
+- **`/accelerate-status` Layer 1 now detects stale environments.** When env vars are set, it compares the live value against the on-disk sources (`settings.local.json`, then the env file) and tells the user to open a new terminal / `exec zsh` instead of fruitlessly restarting — stopping before the lower layers test the wrong address.
+- **`/accelerate-connect` step 8 splits the restart advice by agent.** Claude Code users restart the session (settings re-read at startup); shell-profile users (Codex) are told a new terminal window or `exec zsh` is required — restarting the agent in the same terminal re-inherits the old values.
+- **`/accelerate-connect` re-links existing setups across folders.** `settings.local.json` is folder-scoped, so a connection made in one project silently didn't exist in another. The "already has credentials" path now checks the on-disk env file (not just the live shell), and offers a no-password re-link into the current folder's settings. Step 6a tells the user about the folder scoping upfront.
+- **`/accelerate-status` Layer 8 fix line** mentions the new-terminal escape hatch for users who already restarted without effect.
+
 ## 1.4.1
 
 **Healthy modern connectors no longer fail the connection probes.** The MCP Adapter's route is POST-only, so the `GET` used by the connect and status probes returns `405` when the connector is alive and well. The probe tables only recognised `200`/`401`, so a perfectly healthy adapter site fell through to the "unexpected response" error in `/accelerate-connect` and left `/accelerate-status` Layer 7 undefined — verified live against a production site running MCP Adapter 0.5.0.

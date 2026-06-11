@@ -173,6 +173,8 @@ with open(path, 'w') as f:
 
 Replace the three placeholders with the values from steps 4 and 5b. `<full_connector_url>` is the full URL chosen in step 5b — never the bare site root.
 
+**This file is folder-scoped.** The connection works when Claude Code is started from this folder. Mention it briefly: *"One thing to know — this connection is tied to the folder we're in now. If you want to use the toolkit from a different folder later, run `/accelerate-connect` there and I'll re-link it in seconds, no password needed."* (The re-link path is in "If the user already has credentials" below.)
+
 **6b — Backup env file (for Codex CLI and other agents)**
 
 Also write a standard env file for non-Claude-Code contexts:
@@ -217,11 +219,19 @@ end
 
 **If the user is using Claude Code, skip this step entirely** — Claude Code reads credentials from `settings.local.json` and doesn't need shell profile changes.
 
-### Step 8 — Remind them to restart their agent session
+### Step 8 — Restart the agent session (advice differs by agent)
 
-Tell them:
+Getting this wrong sends the user into a restart loop that never picks up the new values, so match the advice to how their credentials load.
 
-> "One last step — close your current agent session (Claude Code or Codex, whichever you're using) and start a new one. The agent reads the WordPress connection settings at startup, so the new credentials will only kick in next session. When you're back in, run `/accelerate-status` to confirm everything works."
+**Claude Code** (credentials come from `settings.local.json`, re-read every session start):
+
+> "One last step — close this Claude Code session and start a new one. The connection settings load at startup, so they'll kick in next session. When you're back in, run `/accelerate-status` to confirm everything works."
+
+**Codex CLI, or any agent using the shell-profile method from step 7:** restarting the agent is **not** enough. The agent inherits its environment from the terminal, and the terminal keeps whatever values were exported when it was opened — restarting the agent in the same terminal re-inherits the old values every time. Tell them:
+
+> "One last step — open a **new terminal window** (or run `exec zsh` in this one) so the new connection settings load, then start a fresh Codex session there. Restarting Codex in this terminal won't pick them up. When you're back in, run `/accelerate-status` to confirm everything works."
+
+This matters most when **updating** existing credentials (new password, new site, or the old bare-root address being upgraded to the full connector URL): every already-open terminal keeps exporting the stale values until it reloads its profile.
 
 ## Things to watch for
 
@@ -233,4 +243,19 @@ Tell them:
 
 ## If the user already has credentials
 
-If the user already has `WP_API_URL` etc. set in their shell (check via `env | grep WP_API_` in a Bash call), tell them the connection is already configured and suggest running `/accelerate-status` to verify it's working. Offer to overwrite the existing config if they want to connect to a different site.
+Check the **on-disk sources**, not just the live shell environment — the shell can hold stale values exported by a terminal that was opened before the last update:
+
+```bash
+echo "live=${WP_API_URL:-NOT_SET}"
+sed -n 's/^WP_API_URL=//p' ~/.config/accelerate-ai-toolkit/env 2>/dev/null | tr -d '"' | sed 's/^/file=/' || true
+python3 -c "
+import json
+print('settings=' + json.load(open('.claude/settings.local.json')).get('env', {}).get('WP_API_URL', 'NOT_SET'))
+" 2>/dev/null || echo "settings=NOT_SET"
+```
+
+Route on what you find:
+
+- **All present and agreeing** — already configured. Suggest `/accelerate-status` to verify it works. Offer to overwrite if they want to connect a different site.
+- **Env file has credentials but this folder's `settings.local.json` doesn't** — they set up the toolkit in a different folder. Offer to re-link: *"You've already connected [site] from another folder — want me to link it here too? Takes a second, no password needed."* If yes, read all three values from `~/.config/accelerate-ai-toolkit/env` and write them into `.claude/settings.local.json` using the step 6a snippet, then send them through step 8. Do not ask for the password again.
+- **Live value differs from an on-disk value** — the shell environment is stale. Don't re-collect anything; give them the step 8 advice for their agent (for shell-profile users: new terminal window or `exec zsh`, then a fresh session).

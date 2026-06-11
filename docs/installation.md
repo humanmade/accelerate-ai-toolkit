@@ -137,10 +137,11 @@ Without this flag, the abilities are not exposed through the MCP adapter and `/a
 
 The credentials didn't load, or the server couldn't start. Check these in order:
 
-1. **Did you source the env file in your shell profile?** The line from `/accelerate-connect` should be in `~/.zshrc`, `~/.bash_profile`, or equivalent.
-2. **Did you restart your agent session** after adding the line?
-3. **Try running `env | grep WP_API_`** in a terminal. You should see three variables.
-4. **Is `npx` working correctly?** Open a terminal and run `npx --version`. If this fails or returns unexpected output, another tool in your shell is intercepting `npx`. Common causes include shell proxy tools, custom aliases, or non-standard Node.js shim configurations. To work around this, find the real `npx` binary path (e.g. `which -a npx` or check your Node.js install directory) and create a project-level `.mcp.json` override in any directory where you run Claude Code:
+1. **Did you source the env file in your shell profile?** The line from `/accelerate-connect` should be in `~/.zshrc`, `~/.bash_profile`, or equivalent. (Claude Code users don't need this — credentials load from `.claude/settings.local.json` in the folder where you ran `/accelerate-connect`.)
+2. **Did you start the session from a fresh terminal?** Agents inherit environment variables from the terminal they're launched in. A terminal opened *before* the credentials were saved (or updated) keeps the old values — and restarting the agent inside that terminal re-inherits them every time. Open a new terminal window (or run `exec zsh`), then start the session there.
+3. **Try running `env | grep WP_API_`** in a fresh terminal. You should see three variables, and `WP_API_URL` should match the value in `~/.config/accelerate-ai-toolkit/env` — if it doesn't, that terminal's environment is stale (see step 2).
+4. **Are you in the right folder?** (Claude Code only) `.claude/settings.local.json` is folder-scoped. If you connected from a different folder, run `/accelerate-connect` in this one — it re-links the saved credentials without asking for the password again.
+5. **Is `npx` working correctly?** Open a terminal and run `npx --version`. If this fails or returns unexpected output, another tool in your shell is intercepting `npx`. Common causes include shell proxy tools, custom aliases, or non-standard Node.js shim configurations. To work around this, find the real `npx` binary path (e.g. `which -a npx` or check your Node.js install directory) and create a project-level `.mcp.json` override in any directory where you run Claude Code:
 
    ```json
    {
@@ -169,7 +170,7 @@ The Application Password is wrong or has been revoked. Re-run `/accelerate-conne
 
 If you set up the toolkit before v1.3, your saved `WP_API_URL` may still be a bare site root from the older "site-root only" contract. Recent versions of the WordPress MCP Adapter no longer respond at the legacy `wp/v2/wpmcp` route that bare-root values fall back to.
 
-**Fix:** re-run `/accelerate-connect`. It will probe the connector routes, save the full working URL, and the 404s should clear after restarting your agent session. This is a one-time migration — new installs go through this path automatically.
+**Fix:** re-run `/accelerate-connect`. It will probe the connector routes and save the full working URL. Then start the new agent session **from a fresh terminal** (new window, or `exec zsh` first) — terminals opened before the migration keep exporting the old bare-root value, and restarting the agent in one of them re-inherits it. This is a one-time migration — new installs go through this path automatically.
 
 If `/accelerate-status` reports that the connector address check passed, the 404 is caused by something else:
 - Accelerate isn't installed on the site you pointed at.

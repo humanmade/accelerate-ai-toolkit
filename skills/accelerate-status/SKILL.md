@@ -55,6 +55,33 @@ If neither env vars nor `settings.local.json` have credentials:
 
 Stop here. Do not proceed to further layers.
 
+**If all env vars ARE set**, confirm they aren't stale before trusting them. A terminal opened before the last `/accelerate-connect` run keeps exporting the old values, and an agent restarted inside that terminal re-inherits them — every layer below would then test the wrong address. Compare the live value against the on-disk sources:
+
+```bash
+LIVE="${WP_API_URL:-}"
+FILE=$(sed -n 's/^WP_API_URL=//p' ~/.config/accelerate-ai-toolkit/env 2>/dev/null | tr -d '"')
+LOCAL=$(python3 -c "
+import json
+print(json.load(open('.claude/settings.local.json')).get('env', {}).get('WP_API_URL', ''))
+" 2>/dev/null)
+echo "live=$LIVE file=${FILE:-none} settings=${LOCAL:-none}"
+```
+
+- **`settings` has a value and `live` differs from it** — the session started before the settings were written. Surface the "Credentials saved but not loaded yet" block above and stop.
+- **`settings` is empty, `file` has a value, and `live` differs from it** — the shell environment is stale; restarting the agent in this terminal will never fix it:
+
+  ```
+  ❌ This session is using out-of-date connection settings
+     Your saved settings were updated, but this session inherited older ones from a
+     terminal that was opened before the update.
+     Fix: open a new terminal window (or run `exec zsh`), then start a new agent session
+     from there. Restarting in this terminal will keep loading the old settings.
+  ```
+
+  Stop here. Do not proceed to further layers.
+
+- **`live` matches whichever on-disk source exists (or no on-disk source is found)** — proceed to Layer 2.
+
 ## Layer 2 -- Node.js connector
 
 Use the Bash tool:
@@ -228,7 +255,9 @@ If it is not available but all previous layers passed:
 ❌ Site is reachable but the connector isn't running in this session
    Your credentials and site are fine, but the background connector process hasn't started.
    Fix: restart your agent session (close and reopen Claude Code or Codex). The connector
-   starts automatically when the session begins.
+   starts automatically when the session begins. If you've already restarted and it still
+   fails, open a new terminal window first — an old terminal can feed every new session
+   out-of-date connection settings.
 ```
 
 Stop here.
