@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1
+
+**Healthy modern connectors no longer fail the connection probes.** The MCP Adapter's route is POST-only, so the `GET` used by the connect and status probes returns `405` when the connector is alive and well. The probe tables only recognised `200`/`401`, so a perfectly healthy adapter site fell through to the "unexpected response" error in `/accelerate-connect` and left `/accelerate-status` Layer 7 undefined — verified live against a production site running MCP Adapter 0.5.0.
+
+- `/accelerate-connect` step 5b now treats `405`, `200`, or `401` as "route exists" for both the adapter and legacy routes, with a note explaining why `405` is the expected healthy signal.
+- `/accelerate-status` Layer 7 accepts the same codes for full-URL and bare-root shapes, and the stale-config branch now requires legacy to be `404` before flagging the saved address as out of date.
+
 ## 1.4.0
 
 **Commands are now skills.** Claude Code merged slash commands into the skills system and marks the `commands/` directory as legacy; this release completes the migration and removes the duplication it was causing — `/accelerate` previously appeared twice in the model's skill list (once from the command, once from the skill), wasting context and making routing ambiguous.

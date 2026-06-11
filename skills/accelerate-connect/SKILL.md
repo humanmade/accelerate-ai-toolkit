@@ -131,10 +131,12 @@ Stop here. Do not save credentials.
 
 Pick the connector URL using this priority — adapter wins when both respond, since `mcp-adapter` is the actively maintained route:
 
+The adapter route is POST-only, so a `GET` against a working adapter returns `405` (route exists) — that's the expected healthy signal here, not `200`. Treat `405`, `200`, or `401` as "route exists".
+
 | adapter | legacy | Action |
 |---------|--------|--------|
-| 200/401 | any | Set `WP_API_URL="$SITE/wp-json/mcp/mcp-adapter-default-server"`. Proceed to step 6. |
-| 404 | 200/401 | Set `WP_API_URL="$SITE/wp-json/wp/v2/wpmcp"`. Proceed to step 6. |
+| 405/200/401 | any | Set `WP_API_URL="$SITE/wp-json/mcp/mcp-adapter-default-server"`. Proceed to step 6. |
+| 404 | 405/200/401 | Set `WP_API_URL="$SITE/wp-json/wp/v2/wpmcp"`. Proceed to step 6. |
 | 404 | 404 | Stop. Accelerate is running but no MCP connector responded. Tell the user: *"Accelerate is running on your site, but the WordPress connector isn't responding. This usually means the MCP Adapter plugin needs to be installed or activated. Check with your site administrator or see the installation guide."* |
 | Other | Other | Stop. Tell the user the site returned an unexpected response and suggest they check the URL is correct and the site is reachable in a browser. |
 

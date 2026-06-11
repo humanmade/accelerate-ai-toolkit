@@ -190,7 +190,7 @@ echo "adapter=$ADAPTER legacy=$LEGACY shape=$shape"
 
 Decide the outcome from `shape`, `adapter`, and `legacy`:
 
-- **Full URL saved (`shape=full_adapter` or `shape=full_legacy`) and the matching route responds (`200` or `401`)** — healthy, proceed to Layer 8.
+- **Full URL saved (`shape=full_adapter` or `shape=full_legacy`) and the matching route responds (`405`, `200`, or `401`)** — healthy, proceed to Layer 8. (The adapter route is POST-only, so a `GET` returns `405` when it exists — that's the expected healthy signal, not `200`.)
 - **Full URL saved but the matching route returns `404`** — the connector that was working at setup time has gone away. Surface:
 
   ```
@@ -199,8 +199,8 @@ Decide the outcome from `shape`, `adapter`, and `legacy`:
      Fix: run /accelerate-connect to re-detect the connector address.
   ```
 
-- **Bare-root saved (`shape=bare_root`) and `legacy` responds** — legacy `wordpress-mcp` site, still healthy. Proceed to Layer 8 silently.
-- **Bare-root saved (`shape=bare_root`) and only `adapter` responds** — saved config is stale. The bundled client falls back to the legacy route for bare-root values, so traffic is hitting a `404`. Surface:
+- **Bare-root saved (`shape=bare_root`) and `legacy` responds (`405`/`200`/`401`)** — legacy `wordpress-mcp` site, still healthy. Proceed to Layer 8 silently.
+- **Bare-root saved (`shape=bare_root`), `legacy` is `404`, but `adapter` responds (`405`/`200`/`401`)** — saved config is stale. The bundled client falls back to the legacy route for bare-root values, so traffic is hitting a `404`. Surface:
 
   ```
   ❌ Saved connection is out of date
