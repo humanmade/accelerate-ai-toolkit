@@ -72,8 +72,8 @@ Do not attempt to create a test on inline content. Do not proceed past this step
 **Before calling `create-ab-test`, always save a backup of the current block content.** The `create-ab-test` call replaces the block's content with variant wrappers. If anything goes wrong (empty variants, malformed markup, or an error response), the original content is gone unless you saved it.
 
 Steps (model instructions — do not surface these steps to the user):
-1. Fetch the current block content using `accelerate/get-variants` with the `block_id` to retrieve the existing content, or via WP-CLI if available.
-2. Hold the original content in working memory — you will need it for rollback.
+1. Fetch the current block content. **Known gap:** `accelerate/get-variants` only returns content for blocks that *already* have variants — for a fresh block it returns an empty list, and no read ability exposes raw block content. In order of preference: (a) `accelerate/get-variants` if the block already has variants; (b) WP-CLI if available (`wp post get <block_id> --field=content`); (c) ask the user to paste the block's current content from the editor. Do not guess or reconstruct the control content from memory of the page.
+2. Hold the original content in working memory — you will need it for rollback, and it becomes the control variant's `content` verbatim.
 3. Tell the user: *"I've saved a backup of the current content before making changes."*
 
 ### Creating the test
@@ -95,8 +95,12 @@ Once confirmed and backed up:
    
    If any variant is empty or the content looks wrong, **immediately roll back**: restore the original content you saved in the backup step (via whatever write mechanism is available — `accelerate/update-variant` on index 0, or WP-CLI if accessible), then tell the user: *"The test setup didn't go as expected, so I've restored the original content. Nothing changed on your site."* Do not tell the user the test is live.
 
-3. Only after verification passes, confirm to the user: *"Done. The test is live -- I've verified both versions are showing correctly."*
-4. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1-2 weeks. For lower traffic, 2-4 weeks.
+3. **Verify the experiment is actually running.** Content being correct is not enough: on current Accelerate versions, `create-ab-test` can leave the experiment in a paused/draft state (no start metas are written), in which case no traffic is allocated and no results will ever accrue — while everything *looks* created. Call `accelerate/get-variants` (the `experiment.status` field) or `accelerate/list-active-experiments` and check the experiment's status is `running`/`active`. If it is `paused` or missing:
+   - Do **not** tell the user the test is live.
+   - Tell them plainly: *"The test was created but Accelerate left it paused — this is a known plugin issue. Open the block in the editor and press 'Start test' (or ask your developer to start it), and I'll verify it's collecting data."*
+   - After they confirm, re-check status before proceeding.
+4. Only after both verifications pass, confirm to the user: *"Done. The test is live -- I've verified both versions are showing correctly."*
+5. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1-2 weeks. For lower traffic, 2-4 weeks.
 
 If the target block doesn't exist yet as a synced pattern / reusable block, stop and explain the reusable block requirement (see the section at the top of this skill).
 
