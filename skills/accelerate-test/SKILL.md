@@ -39,6 +39,17 @@ Do not proceed to hypothesis or variant design for inline content.
 4. Propose 1–2 clear hypotheses in plain English. Each hypothesis names: the block, the change, the expected outcome, and the success metric. **Classify each hypothesis against the pattern taxonomy** in `accelerate-learn` to determine its `pattern_id` -- you'll need this when creating the test.
 5. Before presenting the hypothesis, apply the design standards from `docs/design-standards.md`. Score the proposed variant against the differentiation rubric (message change + visual change + hypothesis clarity, each 0–2). If the total is below 3/6 or any dimension scores 0, strengthen the variant — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics. Do not present a variant that fails the rubric. For low-traffic sites (under ~1,000 weekly visitors), only propose Score 2 variants.
 
+   **Visual variance requirement:** When planning variants, explore both copy and structural/visual dimensions. You cannot know in advance which axis drives conversions on a given site, so always propose at least one variant with a visible structural difference — not copy alone. Structural levers to draw from, roughly strongest-signal first:
+   - Add a `core/button` block with a clear CTA where the control has none
+   - Add or swap a `core/image` block
+   - Apply a theme `backgroundColor` preset slug on a wrapping group (changes the visual weight of the section)
+   - Reorder blocks so the CTA appears above the fold
+   - Convert a paragraph to a list
+   - Change the heading level or structure
+   - Pair typography deliberately: a theme `fontFamily` preset for the heading and a readable body preset, set via preset slugs (never inline `font-family` styles, never more than two families in one section)
+
+   A single variant may move both copy and structure simultaneously — that is fine, and sometimes the best test. When it does, the hypothesis must name which axis you expect to drive the result. All structural changes must still satisfy the slug-first and anti-pattern rules from `docs/design-standards.md`.
+
 Example output:
 
 > **Here's what I'd test on the homepage hero:**
@@ -86,7 +97,9 @@ Once confirmed and backed up:
    - `goal`: `engagement`, `click_any_link`, or `submit_form` based on what the user cares about
    - `variants`: an array of `{ title, content }` pairs. The first variant should be the control (current content). Content can be full WordPress block markup (including `<!-- wp:... -->` comment delimiters) or plain text/HTML -- Accelerate parses both correctly
    - `traffic_percentage`: default to `100` unless the user asks for a gradual rollout
-   - `annotations`: `{ "toolkit:pattern": "<pattern_id>" }` -- the pattern_id you classified in Planning step 4. This is what lets the learning loop (`/accelerate-learn`) classify the experiment reliably later. Use the taxonomy in `accelerate-learn`'s SKILL.md.
+   - `annotations`: merge two keys — `{ "toolkit:pattern": "<pattern_id>", "source": "ai" }`. The `toolkit:pattern` value is the pattern_id you classified in Planning step 4; the `source` value marks the experiment as AI-authored. Use `"source": "autopilot"` instead of `"ai"` only when this skill is invoked as part of an unattended continuous-optimization loop where no human is reviewing each step before the test goes live. In all normal (human-in-the-loop) sessions, use `"source": "ai"`.
+
+   **Naming convention for AI-created tests:** Every experiment title and every variant title you write MUST be prefixed with `"AI: "`. Names must describe the hypothesis — what is being changed and what outcome is expected — not the mechanic. Good: `"AI: Hero — problem-first headline + donate button"`. Bad: `"AI: urgency rewrite"`, `"AI: test 2"`, `"AI: variant A"`. The name should let a developer or editor understand the test at a glance without reading the hypothesis field.
 
 2. **Verify the test was created correctly.** Immediately after the call succeeds, fetch the block content again and check that:
    - Both variants contain non-empty content (not self-closing `<!-- wp:altis/variant ... /-->` tags)

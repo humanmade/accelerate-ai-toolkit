@@ -145,6 +145,8 @@ Score the proposed variant against the control on three dimensions (0–2 each):
 - **No zeros on any single dimension.** A variant that scores 0 on any dimension must be reworked regardless of total score.
 - If the variant does not pass, strengthen it before presenting to the user — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics.
 
+> **CRO note:** Strong tests aim for Score 2 on **both** Message and Visual/structural. Either axis can be the conversion driver on a given page — it is rarely possible to know in advance whether visitors respond to what a section says or how it is laid out. A test that moves only copy leaves the structural axis untested, and vice versa. When time or traffic constrains you to one variant, prefer the combination that scores highest across both dimensions, even if neither dimension is a perfect 2.
+
 ### Traffic-aware override
 
 This connects to the router's existing traffic-level awareness (principle §2):
