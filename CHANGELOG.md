@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+**Two install-doc corrections for source/headless setups, and `accelerate-test` create-flow hardening against two confirmed plugin gaps.**
+
+- **Source checkouts need the MCP adapter installed manually.** Release builds of Accelerate bundle the WordPress MCP Adapter, but development checkouts do not — so the MCP route 404s even with the Abilities API feature flag on. `docs/installation.md` now documents the manual install (download `mcp-adapter.zip` from the WordPress/mcp-adapter releases, extract into `wp-content/plugins/`, `wp plugin activate mcp-adapter`) and the diagnostic tell: `/wp-json/wp-abilities/v1/abilities` lists the `accelerate/*` abilities while the MCP route 404s.
+- **Headless / server-side callers must set a current user.** Every execution capability's permission callback evaluates the current WordPress user; over MCP that comes from the Application Password's user, but outside an authenticated request (WP-CLI `wp eval`, cron, custom automation) the current user is `0` and every call fails with a permission error. `docs/authentication.md` now tells those callers to set a user first (`wp_set_current_user()`, or `wp --user=admin`). Normal toolkit usage is unaffected.
+- **`accelerate-test` backup step has a real fallback ladder.** `accelerate/get-variants` only returns content for blocks that *already* have variants — for a fresh block it returns an empty list, and no read ability exposes raw block content. The backup step now orders fallbacks explicitly: (a) `get-variants` if the block already has variants, (b) WP-CLI `wp post get <block_id> --field=content`, (c) ask the user to paste the current content from the editor — never guess or reconstruct it from memory.
+- **`accelerate-test` now mandates an experiment-status verification after creation.** On current Accelerate versions `create-ab-test` can leave the experiment paused/draft (no start metas written), so no traffic is allocated and no results accrue — while everything *looks* created. The Creating flow now checks `experiment.status` via `get-variants` or `list-active-experiments`, refuses to tell the user the test is live unless status is `running`/`active`, and surfaces a plain-English instruction to start the test from the editor when it is paused. This is a skill-level guardrail (the `PostToolUse` hook still only checks for empty variants).
+
 ## 1.4.3
 
 **Fallback prose is now generic and jargon-free; `/accelerate-status` warns when Accelerate is out of date. All ability call shapes corrected against the upstream server registry.**
