@@ -141,7 +141,7 @@ Then generate and write the markdown summary from the JSON (same atomic pattern)
     "name": "<from get-site-context>",
     "url": "<from get-site-context>"
   },
-  "last_updated": "<ISO 8601 timestamp>",
+  "last_updated": "<ISO 8601 timestamp — wall-clock UTC at the moment of the run>",
   "stats": {
     "total_experiments_considered": 0,
     "concluded_with_winner": 0,
@@ -166,6 +166,8 @@ Then generate and write the markdown summary from the JSON (same atomic pattern)
   ]
 }
 ```
+
+Field notes: `patterns_with_signal` counts distinct patterns with at least one decisive test recorded (`tests_won + tests_lost >= 1`) — regardless of the >=3 classification floor. `total_experiments_considered` counts every completed experiment fetched, including ones classified `other`.
 
 ### Markdown format
 

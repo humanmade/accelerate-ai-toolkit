@@ -121,6 +121,8 @@ Tier 1 is satisfied by either capability. Sites that want a true read-only marke
 
 If a capability call fails with a permission error, the toolkit will surface this and tell you which tier the failing capability belongs to so you can ask your site administrator for the right role.
 
+> **Headless / server-side contexts:** every execution capability's permission callback evaluates the *current WordPress user*, and over MCP that comes from the Application Password's user. But if you invoke abilities outside an authenticated request — WP-CLI (`wp eval`), cron jobs, or custom server-side automation — the current user is `0` and every call fails with a permission error. Set a user first (`wp_set_current_user( $admin_id )`, or `wp --user=admin` on the CLI). This never affects normal toolkit usage; it bites scripts that drive the same abilities directly.
+
 ---
 
 ## Rotating credentials
