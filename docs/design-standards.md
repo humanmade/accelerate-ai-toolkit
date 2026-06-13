@@ -17,7 +17,7 @@ This is the single most important guardrail. WordPress block markup supports two
 
 **Rule: always use preset slug references. Never hardcode raw values.**
 
-When the model constructs variant block markup, every design token must reference a slug from the site's brand context file (`~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`). If that file does not exist yet, call `accelerate/get-site-context` with `include_blocks: true` and generate it before proposing a variant.
+When the model constructs variant block markup, every design token must reference a slug from the site's brand context file (`~/.config/accelerate-ai-toolkit/sites/<key>/brand.md`). If that file does not exist yet, call `accelerate/get-site-context` with `include_blocks: true` and generate it before proposing a variant.
 
 ### Correct vs incorrect patterns
 
@@ -113,25 +113,31 @@ These are block-level patterns the model must never produce in variant content. 
 
 **A variant that is not different enough to notice is not different enough to win.** If a visitor would need to read both versions side-by-side to spot the change, the change is too small to produce statistical significance in reasonable time.
 
-Score the proposed variant against the control on three dimensions (0–2 each):
+These two dimensions describe one coherent system: **the concept is what we argue; the composition is how we stage it.** Message measures whether the variant makes a genuinely different *case* for why the visitor should act; Visual/structural measures whether the page is *staged* to make that case land. A winner usually needs both — a new argument, told through a new experience. Score the proposed variant against the control on all three dimensions (0–2 each):
 
-### Message change
+### Message change (concept distance)
+
+This measures the *strategic distance* between the variant's argument and the control's. The question is not "are the words different?" but "is the variant appealing to a different motivation?" — outcome / pain relief vs social proof vs scarcity vs trust/safety are different concepts; the same concept reworded is not.
 
 | Score | Description | Example |
 |---|---|---|
 | **0 — fail** | Synonym swap. Same promise, different words. | "Build better websites" → "Create superior websites" |
-| **1 — weak** | Emphasis shift. Same message, different framing. | "Build better websites" → "Better websites, faster" |
-| **2 — strong** | New promise or new angle. Different value proposition entirely. | "Build better websites" → "Fix your slow site in one afternoon" |
+| **1 — weak** | Same strategic frame, reworded. Same motivation appealed to, different phrasing or emphasis. | "Build better websites" → "Better websites, faster" (still a generic capability claim) |
+| **2 — strong** | A genuinely different strategic frame — a different motivation appealed to. A new value proposition, not a new wording of the old one. | "Build better websites" (feature framing) → "Fix your slow site in one afternoon" (outcome / pain-relief framing). Or → "Join 12,000 teams who ship faster" (social-proof framing). |
 
-### Visual / structural change
+The highest-leverage Score-2 move is reframing a *feature* into an *outcome*: not what the thing is, but what the visitor gets and the problem it ends.
+
+### Visual / structural change (concept staging)
+
+This measures whether the page is *staged* to make the concept land. A concept argued in plain text on an unchanged layout is under-staged; a concept whose imagery, color, type, and CTA all serve the argument is fully staged.
 
 | Score | Description | Example |
 |---|---|---|
 | **0 — fail** | Identical block structure, only text content changed. | Heading text swapped, everything else the same |
 | **1 — weak** | A single structural lever pulled. | A list added, a CTA moved, a background color applied — one isolated change |
-| **2 — strong** | A composed visual redesign: three or more structural levers working together as one coherent change. | An image (with descriptive alt text) + a background color preset paired with an explicit text color + a deliberate heading/body font-family preset pairing + CTA treatment. One lever is a tweak; a composition is a different experience. |
+| **2 — strong** | A composed redesign that stages the concept: three or more structural levers working together as one coherent experience, all serving the argument. | For an outcome concept: a before/after image (with descriptive alt text) + a background color preset paired with an explicit text color + a deliberate heading/body font-family preset pairing + a single high-contrast CTA. One lever is a tweak; a composition is a different experience that *embodies* the frame. |
 
-> **Why composition matters:** a single-lever variant produces an effect too small to detect on typical traffic volumes. Composed variants create a meaningfully different experience — which is what a clear winner requires. Compositions must still comply with the slug-first principle (§1) and the anti-pattern bans (§3).
+> **Why composition matters:** a single-lever variant produces an effect too small to detect on typical traffic volumes, and it leaves the concept under-staged — the argument is made but not felt. Composed variants create a meaningfully different experience, which is what a clear winner requires. Compositions must still comply with the slug-first principle (§1) and the anti-pattern bans (§3).
 
 ### Hypothesis clarity
 
@@ -147,7 +153,7 @@ Score the proposed variant against the control on three dimensions (0–2 each):
 - **No zeros on any single dimension.** A variant that scores 0 on any dimension must be reworked regardless of total score.
 - If the variant does not pass, strengthen it before presenting to the user — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics.
 
-> **CRO note:** Strong tests aim for Score 2 on **both** Message and Visual/structural. Either axis can be the conversion driver on a given page — it is rarely possible to know in advance whether visitors respond to what a section says or how it is laid out. A test that moves only copy leaves the structural axis untested, and vice versa. When time or traffic constrains you to one variant, prefer the combination that scores highest across both dimensions, even if neither dimension is a perfect 2.
+> **CRO note:** Strong tests aim for Score 2 on **both** Message and Visual/structural — a distinct concept (Message 2), fully staged (Visual 2). The two are one move: a new argument told through a new experience. Either can be the conversion driver, and you rarely know in advance which — a concept argued but not staged, or a redesign with no new argument behind it, each leaves half the lever untested. When time or traffic constrains you to one variant, prefer the combination that scores highest across both dimensions, and never let a Score-2 composition stand on a Score-1 (reworded) message — that is a redesign with nothing new to say.
 
 ### Traffic-aware override
 
@@ -187,12 +193,11 @@ After drafting variant copy, apply this test:
 
 ## 6. Brand context file format
 
-The brand context file lives at `~/.config/accelerate-ai-toolkit/brand-<site-slug>.md`. It is generated from `accelerate/get-site-context` (with `include_blocks: true`) and maps the site's design tokens to the block attribute slugs the model should use.
+The brand context file lives at `~/.config/accelerate-ai-toolkit/sites/<key>/brand.md`. It is generated from `accelerate/get-site-context` (with `include_blocks: true`) and maps the site's design tokens to the block attribute slugs the model should use.
 
-### Site slug derivation
+### Site key derivation
 
-Lowercase the hostname, replace dots with hyphens, strip `www.`, strip port numbers.
-Example: `https://www.example.com:8080` → `example-com`
+The site key is derived by the canonical rule in `accelerate-learn` (`<site-name-slug>-<theme-slug>-<url-hash>`, gracefully omitting the theme segment when the plugin doesn't expose it). Do not implement a separate derivation here — use that rule so all per-site files share one key.
 
 ### File template
 

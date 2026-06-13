@@ -64,7 +64,7 @@ Route the user's question to the right specialised skill:
 
 ### Learning journal consultation
 
-Before recommending a test, a personalisation idea, or prioritised actions, check whether a learning journal exists for this site. Derive the site slug using the rule in `accelerate-learn` and attempt to read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json`.
+Before recommending a test, a personalisation idea, or prioritised actions, check whether a learning journal exists for this site. Derive the site key using the rule in `accelerate-learn` and attempt to read `~/.config/accelerate-ai-toolkit/sites/<key>/journal.json`.
 
 - **File missing or unreadable:** Fall back to generic reasoning silently. No error, no mention to user.
 - **Valid journal:** Only patterns with `status: "won"` should influence ranking -- weight them up and say so: *"I'm leaning on [pattern name] because it's won [N] of [M] tests on your site."* Patterns with `status: "lost"` should be demoted (pushed below won and neutral patterns) with advisory context, not silently excluded. Patterns with `status: "inconclusive"` or `"mixed"` are invisible to ranking.

@@ -56,7 +56,7 @@ Each pattern gets one of four statuses:
 - **Mixed** -- enough tests, but no clear trend. Treated as neutral.
 - **Not enough data** -- fewer than 3 decisive tests. Ignored until more evidence arrives.
 
-You can read the journal any time by opening `~/.config/accelerate-ai-toolkit/journal-<your-site>.md` in any text editor.
+You can read the journal any time by opening `~/.config/accelerate-ai-toolkit/sites/<your-site-key>/journal.md` in any text editor.
 
 ---
 
@@ -117,7 +117,7 @@ Run `/accelerate-learn`. If your site has no completed A/B tests, the journal wi
 
 ### The journal seems wrong
 
-You can delete `~/.config/accelerate-ai-toolkit/journal-<your-site>.json` and run `/accelerate-learn` again to rebuild from scratch. The skill reads all completed experiments from your site, so nothing is lost.
+You can delete `~/.config/accelerate-ai-toolkit/sites/<your-site-key>/journal.json` and run `/accelerate-learn` again to rebuild from scratch. The skill reads all completed experiments from your site, so nothing is lost.
 
 ### The scheduled workflow fails
 

@@ -64,7 +64,7 @@ List currently active A/B tests and personalisation rules, one sentence each. If
 
 **Only show this section if a learning journal exists with at least one pattern that has `status: "won"` or `status: "lost"`.** If the journal is missing, unreadable, or all patterns are `inconclusive`/`mixed`, skip this section entirely.
 
-Derive the site slug from `get-site-context` using the site slug derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json`.
+Derive the site key from `get-site-context` using the site key derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/sites/<key>/journal.json`.
 
 Show the top 2 `won` patterns (highest hit rate) and the top 1 `lost` pattern as one-line bullets:
 
