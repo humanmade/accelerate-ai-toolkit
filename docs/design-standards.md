@@ -128,8 +128,10 @@ Score the proposed variant against the control on three dimensions (0–2 each):
 | Score | Description | Example |
 |---|---|---|
 | **0 — fail** | Identical block structure, only text content changed. | Heading text swapped, everything else the same |
-| **1 — weak** | Minor structural addition. | A subheading block added, a word bolded, a list item added |
-| **2 — strong** | Visible layout change a visitor would notice at a glance. | CTA moved above the fold, image added/removed, section reordered, new block type introduced |
+| **1 — weak** | A single structural lever pulled. | A list added, a CTA moved, a background color applied — one isolated change |
+| **2 — strong** | A composed visual redesign: three or more structural levers working together as one coherent change. | An image (with descriptive alt text) + a background color preset paired with an explicit text color + a deliberate heading/body font-family preset pairing + CTA treatment. One lever is a tweak; a composition is a different experience. |
+
+> **Why composition matters:** a single-lever variant produces an effect too small to detect on typical traffic volumes. Composed variants create a meaningfully different experience — which is what a clear winner requires. Compositions must still comply with the slug-first principle (§1) and the anti-pattern bans (§3).
 
 ### Hypothesis clarity
 

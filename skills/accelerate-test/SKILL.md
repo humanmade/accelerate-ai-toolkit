@@ -41,12 +41,20 @@ Do not proceed to hypothesis or variant design for inline content.
 
    **Visual variance requirement:** When planning variants, explore both copy and structural/visual dimensions. You cannot know in advance which axis drives conversions on a given site, so always propose at least one variant with a visible structural difference — not copy alone. Structural levers to draw from, roughly strongest-signal first:
    - Add a `core/button` block with a clear CTA where the control has none
-   - Add or swap a `core/image` block
-   - Apply a theme `backgroundColor` preset slug on a wrapping group (changes the visual weight of the section)
+   - Add or swap a `core/image` block (with descriptive alt text — not empty or generic)
+   - Apply a theme `backgroundColor` preset slug on a wrapping group paired with an explicit `textColor` preset (changes the visual weight of the section; never apply a background without setting a contrasting text color)
    - Reorder blocks so the CTA appears above the fold
    - Convert a paragraph to a list
    - Change the heading level or structure
    - Pair typography deliberately: a theme `fontFamily` preset for the heading and a readable body preset, set via preset slugs (never inline `font-family` styles, never more than two families in one section)
+
+   **Commonly underused levers** — these are high-signal and frequently skipped: imagery with descriptive alt text, heading/body font-family preset pairing, and background color preset explicitly paired with a contrasting text color preset. If none of these appear in a proposed variant, reconsider before presenting it.
+
+   **The bold-challenger rule:** every test must field at least one composed challenger — a Visual Score 2 variant per the differentiation rubric in `docs/design-standards.md` (three or more structural levers working together as one coherent redesign). Single-lever variants are permitted only alongside a composed one, never as the sole challenger. If you are proposing only one variant, it must be composed.
+
+   **Effect-size discipline:** a variant should be different enough that you would expect a clearly visible lift if the hypothesis is right. If the expected lift is marginal, the test will require enormous traffic to resolve. Make the variant bolder, or test a different element.
+
+   **Two strong arms beat three similar ones:** under-differentiated arms split traffic and starve each other of statistical power. Prefer control + one bold composed variant (optionally plus one targeted single-lever variant) over three near-identical variations. When traffic is limited, fewer, bolder arms are almost always the right call.
 
    A single variant may move both copy and structure simultaneously — that is fine, and sometimes the best test. When it does, the hypothesis must name which axis you expect to drive the result. All structural changes must still satisfy the slug-first and anti-pattern rules from `docs/design-standards.md`.
 
@@ -147,6 +155,12 @@ If there's already a winner (`has_winner` is true), say so and offer to declare 
 5. If the user wants to resume a paused test, `action: "resume"`.
 
 After any state change, confirm in a single sentence.
+
+### Recording learnings and the anti-false-negative rule
+
+When a test concludes, record what you learned in plain language for the user (and in the learning journal if `accelerate-learn` is available).
+
+**Anti-false-negative rule:** when the control defends against a challenger, the scope of the learning must match the scope of the challenger. A single-lever variant (Visual Score 1) that loses tells you only that *that specific change did not move the metric*. It does not tell you whether the visual/structural axis works on this block. Never record the conclusion as "visual changes don't work here" or "layout doesn't matter for this section." Axis-level conclusions — "copy is what moves this block" or "structural changes don't help here" — require a composed, clearly-differentiated challenger (Visual Score 2) to have lost cleanly. If the losing variant was incremental, flag this explicitly: *"The variant we tested was a single-lever change — we haven't yet learned whether a bolder structural redesign would move this metric."*
 
 ## Monitoring multiple experiments
 
