@@ -79,7 +79,7 @@ Read `~/.config/accelerate-ai-toolkit/sites/<key>/journal.json` if it exists.
 
 - **File missing:** Start with an empty journal structure. (This is expected on a site's first run under the new key — old flat `journal-<hostname>.*` files are not read or migrated.)
 - **Invalid JSON / parse error:** Do not overwrite. Stop and tell the user: *"Your learning journal appears to be corrupted. You can delete it and I'll rebuild from scratch, or restore it from a backup."* Do not proceed.
-- **`schema_version` is newer than `2`:** Stop and tell the user: *"Your learning journal was created by a newer version of the toolkit. Please update the toolkit to read it."* Do not proceed. (A `schema_version` of `1` is a pre-subdirectory flat journal and will not appear at this path; start fresh.)
+- **`schema_version` is newer than `3`:** Stop and tell the user: *"Your learning journal was created by a newer version of the toolkit. Please update the toolkit to read it."* Do not proceed. (A `schema_version` of `1` is a pre-subdirectory flat journal and will not appear at this path; start fresh. A `schema_version` of `2` is a valid older journal — read it, and add the `iteration_counter` field when you next write, see Step 6.)
 - **Valid:** Parse and continue.
 
 ## Step 5 -- Classify each experiment
@@ -109,6 +109,8 @@ No keyword fallback. No hypothesis text parsing. Classification is a pure dictio
 For wins: lift = `((winner_conversion_rate - control_conversion_rate) / control_conversion_rate) * 100`. The control is always variant index 0. Store as a percentage.
 
 ## Step 6 -- Merge into journal state
+
+**Update the iteration counter first.** The journal tracks `iteration_counter` — the number of experiments recorded in this site's auto-research sequence, used by `accelerate-test` to name the next experiment `"I<n> <Block>"`. Set `iteration_counter` to the count of completed experiments fetched in Step 2 (`total_experiments_considered`). This keeps the count stable across runs and global across rounds and blocks, so the next experiment's code is `iteration_counter + 1`. If the existing journal had a higher counter than the fetched count (e.g. experiments created since the last `list-experiments` that haven't completed), keep the higher value — the counter only ever moves forward.
 
 For each pattern that has at least one experiment:
 
@@ -155,7 +157,7 @@ Then generate and write the markdown summary from the JSON (same atomic pattern)
 
 ```json
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "site": {
     "key": "<site key — see derivation rule>",
     "name": "<from get-site-context>",
@@ -163,6 +165,7 @@ Then generate and write the markdown summary from the JSON (same atomic pattern)
     "url": "<from get-site-context>"
   },
   "last_updated": "<ISO 8601 timestamp — wall-clock UTC at the moment of the run>",
+  "iteration_counter": 0,
   "stats": {
     "total_experiments_considered": 0,
     "concluded_with_winner": 0,
@@ -198,6 +201,7 @@ Then generate and write the markdown summary from the JSON (same atomic pattern)
 ```
 
 Field notes:
+- `iteration_counter` is the site's running experiment count, used by `accelerate-test` to name the next experiment `"I<n> <Block>"` (where `n = iteration_counter + 1`). It is global across rounds and blocks and only moves forward. See Step 6.
 - `patterns_with_signal` counts distinct patterns with at least one decisive test recorded (`tests_won + tests_lost >= 1`) — regardless of the >=3 classification floor. `total_experiments_considered` counts every completed experiment fetched, including ones classified `other`.
 - `compositions_tried` is an append-only log of the **structural recombinations** that have been tested for this pattern — which sections were composed together and how that variant did. It lets run N see what run N-1 already tried so later passes build on prior structure instead of re-testing settled compositions. Append one entry per experiment as you classify it (step 5); never rewrite history. Keep each `summary` short and human-readable.
 - `notes` is free-text carry-forward context for the next run: what has been learned about this pattern on this site that the stats alone don't capture (e.g. "outcome framing wins; social-proof framing has lost twice"). Update it, don't blank it.
