@@ -110,7 +110,7 @@ For wins: lift = `((winner_conversion_rate - control_conversion_rate) / control_
 
 ## Step 6 -- Merge into journal state
 
-**Update the iteration counter first.** The journal tracks `iteration_counter` — the number of experiments recorded in this site's auto-research sequence, used by `accelerate-test` to name the next experiment `"I<n> <Block>"`. Set `iteration_counter` to the count of completed experiments fetched in Step 2 (`total_experiments_considered`). This keeps the count stable across runs and global across rounds and blocks, so the next experiment's code is `iteration_counter + 1`. If the existing journal had a higher counter than the fetched count (e.g. experiments created since the last `list-experiments` that haven't completed), keep the higher value — the counter only ever moves forward.
+**Update the iteration counter first.** The journal tracks `iteration_counter` — the number of experiments recorded in this site's auto-research sequence. It does double duty: it is the test number `accelerate-test` puts at the front of each experiment title (`"#<n> <Block>"`, where `n = iteration_counter + 1`), and it indexes the x-axis of the auto-research progress chart — so a card's `#<n>` and its point on the chart are the same number. Set `iteration_counter` to the count of completed experiments fetched in Step 2 (`total_experiments_considered`). This keeps the count stable across runs and global across rounds and blocks. If the existing journal had a higher counter than the fetched count (e.g. experiments created since the last `list-experiments` that haven't completed), keep the higher value — the counter only ever moves forward.
 
 For each pattern that has at least one experiment:
 
@@ -201,7 +201,7 @@ Then generate and write the markdown summary from the JSON (same atomic pattern)
 ```
 
 Field notes:
-- `iteration_counter` is the site's running experiment count, used by `accelerate-test` to name the next experiment `"I<n> <Block>"` (where `n = iteration_counter + 1`). It is global across rounds and blocks and only moves forward. See Step 6.
+- `iteration_counter` is the site's running experiment count, used by `accelerate-test` as the test number at the front of each experiment title (`"#<n> <Block>"`, where `n = iteration_counter + 1`) and as the x-axis index of the auto-research progress chart. It is global across rounds and blocks and only moves forward. See Step 6.
 - `patterns_with_signal` counts distinct patterns with at least one decisive test recorded (`tests_won + tests_lost >= 1`) — regardless of the >=3 classification floor. `total_experiments_considered` counts every completed experiment fetched, including ones classified `other`.
 - `compositions_tried` is an append-only log of the **structural recombinations** that have been tested for this pattern — which sections were composed together and how that variant did. It lets run N see what run N-1 already tried so later passes build on prior structure instead of re-testing settled compositions. Append one entry per experiment as you classify it (step 5); never rewrite history. Keep each `summary` short and human-readable.
 - `notes` is free-text carry-forward context for the next run: what has been learned about this pattern on this site that the stats alone don't capture (e.g. "outcome framing wins; social-proof framing has lost twice"). Update it, don't blank it.

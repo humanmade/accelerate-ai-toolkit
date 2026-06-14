@@ -39,7 +39,7 @@ When the model constructs variant block markup, every design token must referenc
 
 ## 2. Block markup validity
 
-**Invalid markup causes "Block contains unexpected or invalid content" errors in the editor.** WordPress validates saved HTML against the expected output of each block's `save()` function. A single missing class or wrong attribute order triggers a validation failure. This is not cosmetic — it breaks the editing experience for enterprise users.
+**Invalid markup causes "Block contains unexpected or invalid content" errors in the editor.** WordPress validates each saved block's HTML against the expected output of *that block type's* `save()` function — block by block, against the block's own type, **never against the control or any other variant**. A *missing* generated class or a mismatched tag/attribute triggers a failure. This is not cosmetic — it breaks the editing experience for enterprise users. The way to stay valid is for each block to be well-formed for its own type; it is **not** to keep the variant's structure close to the control. A wholly different composition of individually-valid blocks is wholly valid.
 
 ### Required CSS classes from block attributes
 
@@ -57,25 +57,12 @@ WordPress auto-generates CSS classes from block JSON attributes. The HTML elemen
 
 > Source: WordPress style engine (`wp_style_engine_get_styles` with `convert_vars_to_classnames`). See [Gutenberg style engine docs](https://github.com/wordpress/gutenberg/blob/trunk/packages/style-engine/docs/using-the-style-engine-with-block-supports.md).
 
-### Class ordering rules
+### Class presence, not class order
 
-WordPress emits classes in a deterministic order. The HTML must match.
+**What matters is that every generated class is present — not the order they appear in.** WordPress's validator compares the class list as a *set* (whitespace-split, order-agnostic), so `"wp-block-button__link has-background"` and `"has-background wp-block-button__link"` validate identically. Do **not** spend effort matching a specific class order; spend it on including every class the block's attributes generate (see the table above). Omitting a generated class fails; reordering does not. (The conventional order below is fine to follow for readability, but it is not a validation requirement.)
 
-**For `core/button` `<a>` elements:**
-
-```
-wp-block-button__link [color classes] [font classes] has-custom-font-size? wp-element-button
-```
-
-- `wp-block-button__link` is always first.
-- `wp-element-button` is always last. This is the global element selector WordPress uses for button styling — see [element styles mapping](https://github.com/wordpress/gutenberg/blob/trunk/docs/how-to-guides/themes/global-settings-and-styles.md).
-- Color classes (`has-<slug>-color`, `has-<slug>-background-color`, `has-text-color`, `has-background`) come before font/typography classes.
-
-**For `core/group`, `core/heading`, `core/paragraph` elements:**
-
-```
-wp-block-<type> [alignment classes] [color classes] [font classes]
-```
+- `core/button` `<a>`: `wp-block-button__link`, color classes, font classes, `wp-element-button`.
+- `core/group` / `core/heading` / `core/paragraph`: `wp-block-<type>`, alignment, color, font classes.
 
 ### Inline style attribute rules
 
@@ -85,11 +72,15 @@ When a block uses custom (non-preset) values via the `style` attribute:
 - The `href` attribute must come before `style` on link elements.
 - Never mix preset slugs and inline styles for the same token type. If you use `"fontSize":"medium"` (preset), do not also set `style.typography.fontSize`.
 
-### Strict enforcement
+### Composing safely (so boldness stays valid)
 
-- **Never approximate.** If you are unsure what classes or order a block type expects, do not guess. Instead, reference an existing variant on the same site (via `get-variants`) and mirror its class structure.
-- **Never fabricate factual content.** Do not invent numbers, costs, statistics, donation amounts, or operational claims. Use clearly generic placeholder text that the site owner can replace. Fabricating figures for a charity or enterprise site is a trust-destroying error.
-- **Validate against the control.** Before uploading a new variant, compare its HTML structure against the control variant's markup. The wrapper, class list, and style attribute format should follow the same pattern — only the content and text should differ.
+The whole point of these rules is to make ambition *safe*: a Score-3 recomposition (§4) is only worth proposing if it renders cleanly. These are constraints on *how* you build, never on *how boldly*.
+
+- **Compose from the full registered palette.** Every block type in the site's registered `blocks` list (from `get-site-context`) is fair game — `core/columns`, `core/group`, `core/cover`, `core/media-text`, `core/buttons`, etc. — and you may replace the section's structure wholesale. You are not limited to the control's block types.
+- **Learn conventions to enable ambition, not to copy the safe thing.** When unsure what classes or markup a block type expects, read a real example on this site (`get-variants` → `raw_markup`, or the site's synced patterns) to learn its exact class/attribute shape — then use that knowledge to compose your *new* structure validly. The goal of reading existing markup is fluency in the site's block grammar, not mirroring one block.
+- **Ground every attribute; never invent values.** Fill only attributes you can ground in something real: registered preset slugs (§1), copy you are writing, and media that actually exists on the site (existing markup and synced patterns reveal real attachment URLs/IDs you can reuse). If you cannot ground an attribute — an image you don't have, an ID you'd be guessing, a coordinate — **omit it and let the block use its registered default.** An empty-but-valid block beats a block with an invented value. (Slug-first, §1, is the same principle for tokens.)
+- **Never fabricate factual content.** Do not invent numbers, costs, statistics, donation amounts, or operational claims. Use clearly generic placeholder text the site owner can replace. Fabricating figures for a charity or enterprise site is a trust-destroying error.
+- **Round-trip check before you ship it.** A reliable validity test for any composition: it must parse and re-serialize cleanly (the block delimiters, attribute JSON, and nesting are well-formed). If you've composed something rich, sanity-check the markup structure rather than assume it.
 
 ---
 
@@ -136,8 +127,13 @@ This measures whether the page is *staged* to make the concept land. A concept a
 | **0 — fail** | Identical block structure, only text content changed. | Heading text swapped, everything else the same |
 | **1 — weak** | A single structural lever pulled. | A list added, a CTA moved, a background color applied — one isolated change |
 | **2 — strong** | A composed redesign that stages the concept: three or more structural levers working together as one coherent experience, all serving the argument. | For an outcome concept: a before/after image (with descriptive alt text) + a background color preset paired with an explicit text color + a deliberate heading/body font-family preset pairing + a single high-contrast CTA. One lever is a tweak; a composition is a different experience that *embodies* the frame. |
+| **3 — reimagined** | A **ground-up recomposition**: the section is rebuilt as a distinctly different *kind* of section — composed from the site's full registered block palette and its own pattern vocabulary — not the control restructured. Judged by **coherence and fit, not lever count**: it must read unmistakably as this site (its tokens, its voice, its patterns) and argue one clear concept, while being a section the control simply does not contain. | An outcome concept restaged as a `core/cover` with a full-bleed media-library image, then a `core/columns` pairing a benefit-led heading with a single proof stat, closing on one high-contrast CTA — a section the control never had. *(Illustrative, not a template — the right recomposition is whatever stages this concept on this site.)* |
 
-> **Why composition matters:** a single-lever variant produces an effect too small to detect on typical traffic volumes, and it leaves the concept under-staged — the argument is made but not felt. Composed variants create a meaningfully different experience, which is what a clear winner requires. Compositions must still comply with the slug-first principle (§1) and the anti-pattern bans (§3).
+> **Why composition matters:** a single-lever variant produces an effect too small to detect on typical traffic volumes, and it leaves the concept under-staged — the argument is made but not felt. Composed variants create a meaningfully different experience, which is what a clear winner requires.
+>
+> **When to reach for Score 3 (reimagined).** Score 2 is the floor for a real challenger; Score 3 is the gear for a **big swing**, and you should take it when the situation rewards drastic change: a block that has **plateaued** across rounds (copy/composition haven't moved it — see the escalation ladder in `accelerate-test`), a block with lots of **headroom**, **low traffic** (where only a bold difference can ever resolve), or the **architecture rung** of an escalation. Don't force it when *refining* an already-won concept — that's when you tighten, not reinvent. The point is that "drastic, ground-up, but still unmistakably this site" is a **rewarded** outcome, not a risky deviation: the rubric explicitly has a top gear for it.
+>
+> A Score-3 recomposition is still bound by the slug-first principle (§1) and the anti-pattern bans (§3). Those constrain *how* you compose (on-brand tokens, no generic-AI markers) — never *how boldly*. Validity and brand-fidelity are the floor; ambition is free above it.
 
 ### Hypothesis clarity
 
@@ -149,7 +145,7 @@ This measures whether the page is *staged* to make the concept land. A concept a
 
 ### Passing threshold
 
-- **Total score must be 3 or higher** (out of 6).
+- **Total score must be 3 or higher** (out of 7 — Message 0–2, Visual/structural 0–3, Hypothesis 0–2).
 - **No zeros on any single dimension.** A variant that scores 0 on any dimension must be reworked regardless of total score.
 - If the variant does not pass, strengthen it before presenting to the user — change the value proposition, add structural variation, or sharpen the hypothesis with data from the fetched analytics.
 

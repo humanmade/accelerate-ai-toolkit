@@ -44,3 +44,6 @@ logs/
 # Project
 /prd
 .firecrawl/
+
+# local meta/findings — never shipped in the plugin
+knowledge/
