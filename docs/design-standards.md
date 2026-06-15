@@ -185,6 +185,19 @@ After drafting variant copy, apply this test:
 - **One CTA per section.** If the variant introduces a new call-to-action, don't scatter three more around it.
 - **Plain language over jargon.** The site's visitors are real people. Write like you're talking to them, not writing ad copy for an awards submission.
 
+### Display-text line breaks (headlines, heroes, posters)
+
+A display headline is not a sentence — it's a **stack of visual phrases**. How it breaks across lines is part of the design, and a bad break reads as amateur even when the words are right. When you write a headline that will wrap (hero, banner, pull quote, any large type), make the break carry meaning. For prominent display copy these are close to hard rules:
+
+- **Break by meaning, keep phrases together.** "Grow your / business faster", never "Grow your business / faster". Write the phrasing so the natural break falls between phrases.
+- **No widows / runts.** Never strand a single short word alone on the last line. If the phrasing produces one, **rewrite the line** — that's usually the cleanest fix, not resizing.
+- **Never end a prominent line on a weak word** — `the, and, of, for, to, with`, etc. — and **never split a compound** (`AI-powered`, `New York`, `higher education`). These dangle or misread.
+- **Balance the lines.** Avoid one long line over one tiny line; aim for an even rag. (In CSS-controlled contexts, `text-wrap: balance` does this automatically — but the phrasing still has to support it.)
+- **Fewer sizes and weights.** Display hierarchy gets worse with more of them; keep it clean. All-caps usually wants slight extra tracking; lowercase does not.
+- **The read-it-out-loud test.** If you'd naturally pause at the line break when speaking the headline, it works. If the break makes you trip, it'll look wrong too — rewrite it.
+
+Good break patterns: *modifier / main idea* ("Smarter content / for modern teams"), *setup / payoff* ("Build less / launch more"), *noun phrase / qualifier* ("Enterprise WordPress / without the bottlenecks").
+
 ---
 
 ## 6. Brand context file format
