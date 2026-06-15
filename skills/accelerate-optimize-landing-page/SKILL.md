@@ -1,6 +1,6 @@
 ---
 name: accelerate-optimize-landing-page
-description: Improve a landing page. Make it convert better. What should I change on my homepage? Optimise a specific page with data-grounded recommendations and A/B test hand-off.
+description: Improve a landing page. Make it convert better. What should I change on my homepage? Optimise a specific page with data-grounded recommendations and A/B test hand-off. Recommends WHAT to change across a page; NOT for composing a specific new version of one block — use accelerate-design for that.
 license: MIT
 category: optimization
 parent: accelerate

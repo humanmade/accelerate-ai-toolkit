@@ -69,7 +69,7 @@ For Codex CLI: run `codex`, open `/plugins`, choose "Install from local path".
 
 ## How it works
 
-The toolkit is not a wrapper around your analytics API. It's 14 purpose-built skills that compose raw data into decisions:
+The toolkit is not a wrapper around your analytics API. It's 16 purpose-built skills that compose raw data into decisions:
 
 | Workflow | What it does |
 |----------|-------------|
@@ -78,6 +78,8 @@ The toolkit is not a wrapper around your analytics API. It's 14 purpose-built sk
 | **Opportunities** | The front door: synthesises everything into 3 ranked next actions |
 | **Optimize landing page** | Deep-dive on one page: engagement metrics, 2-3 testable improvements, A/B test hand-off |
 | **Test** | Full A/B test lifecycle: plan, create, monitor, review, declare a winner |
+| **Design** | Make a new on-brand version of a block or a fresh section on demand — offers to A/B test it, never forces |
+| **Evolve** | Multi-round optimization loop: generate bold versions, test, keep the winner, repeat — attended or autopilot |
 | **Personalize** | Audience creation and content personalization: by referrer, geography, behaviour, device |
 | **Content plan** | Proposes upcoming posts grounded in what's actually working on your site |
 | **Realtime** | What's happening right now: concurrent visitors, trending content, spike investigation |

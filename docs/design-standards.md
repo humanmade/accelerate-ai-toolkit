@@ -1,6 +1,6 @@
 # Design standards for variant proposals
 
-This document teaches the model to propose better A/B test variants. It is never shown to the user. Skills that propose variant content — `accelerate-test`, `accelerate-optimize-landing-page`, `accelerate-diagnose` — reference it internally before presenting a variant for confirmation.
+This document teaches the model to propose better A/B test variants. It is never shown to the user. Skills that propose variant content — `accelerate-design`, `accelerate-test`, `accelerate-evolve`, `accelerate-optimize-landing-page`, `accelerate-diagnose` — reference it internally before presenting a variant for confirmation.
 
 Inspired by [Impeccable](https://github.com/pbakaus/impeccable), adapted for WordPress block-level reality.
 
@@ -285,3 +285,19 @@ These design standards are the **generic quality floor**. When the v1.2 learning
 - If the journal shows a pattern has consistently won on this site → prefer it over generic recommendations.
 - If the journal shows a pattern has consistently lost on this site → do not propose it, even if the generic standards would allow it.
 - The journal overrides these standards for that specific site. These standards apply when the journal has no opinion.
+
+---
+
+## 9. Bold-by-default round composition
+
+The rubric above governs a *single* variant. This governs how a **round** is composed — what set of arms you field at once. It applies whenever you field more than a control + one arm, and it is the spine of `accelerate-evolve`.
+
+**One incumbent, the rest are swings.** A round carries exactly one incumbent — the current control (on a multi-round block, the harvested champion) — as the benchmark to beat. Every *other* arm is a bold challenger: a genuinely different **structure** drawn from the site's own vocabulary (the brand pack, `docs/brand-pack.md`), not a re-skin of the control. Do not spend arms re-testing the winner with timid tweaks; the winner rides as control while the challengers explore.
+
+**Novelty-first.** Pull each challenger's structure from a kind of section the site has that you *haven't tried yet* on this block — recombine and extend it (Visual Score 2–3). Only once the site's vocabulary is genuinely spent do you author a new section from what's winning (`accelerate-design`). Never re-field the same structure with reworded copy.
+
+**The arm budget is the grid.** How many challengers you field is set by traffic/conversion volume, not ambition — see the arm-count rule in `accelerate-test` (Planning step 5) and the router's traffic-level awareness. Low volume → control + **one** bold challenger. Ample volume (≥500 conv/month) → 3–5 distinct challengers in one test. The bold-by-default shape scales to whatever budget the site supports; it never collapses to a lone timid arm (the bold-challenger rule still binds every round).
+
+**Cull on a clean loss, then escalate.** A composed (Visual Score 2+) concept that loses cleanly under the stopping gate is retired — don't re-field it; climb the escalation ladder (`accelerate-test`). A *timid* loss teaches nothing (anti-false-negative rule) and is not grounds to retire a concept.
+
+**Integrity.** Never declare a winner, harvest, or cull on thin data — the binding stopping gate in `accelerate-test` is the only authority on "what won." Bold on composition; honest on results.
