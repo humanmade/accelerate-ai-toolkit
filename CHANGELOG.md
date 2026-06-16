@@ -51,6 +51,16 @@ Where the concept-driven rewrite made variant *design* stronger, this makes the 
 - **The bold-challenger rule binds on every round, not just the opener.** Refinement rounds (round 2+) must still field a composed (Visual Score 2) challenger: refining a winning concept means a fuller composition of that concept, never degrading to a single-lever tweak (e.g. changing only CTA button text on an otherwise identical block). A lone single-lever challenger is not permitted as the sole challenger in any round. This is tied to the existing anti-false-negative rule — a timid challenger cannot teach whether the concept works, so it may never stand alone.
 - **Winner's-curse guard strengthened.** Any observed lift above ~10% is now treated as probably-an-error until confirmed; for durable or irreversible harvests, a confirmatory re-test of the apparent winner against control is recommended before applying.
 
+### Cross-vendor support — Cursor, Gemini, GitHub Copilot, and Hermes
+
+The toolkit now ships standards-correct manifests for the full Shopify-AI-Toolkit vendor list. Claude Code remains the supported, actively-used path; the others are in testing — their manifests follow each agent's current standard but aren't yet verified end-to-end. The shared `skills/` directory is unchanged; this is additive packaging plus per-harness connection wiring.
+
+- **New manifests.** `.cursor-plugin/{plugin.json,marketplace.json}` (replaces the stub README), a repo-root `plugin.json` for GitHub Copilot, `.hermes-plugin/` (`plugin.yaml` + an `__init__.py` that auto-registers `../skills/` + `install.sh` + README), and `gemini-extension.json` upgraded from stub to a real extension that declares the `wordpress` MCP server inline. All manifests version-synced to `1.5.0`.
+- **`accelerate-connect` is now harness-aware.** After saving credentials it wires the WordPress MCP server per agent: Claude reads the bundled `.mcp.json` (unchanged); Codex is registered via `codex mcp add` (with a `~/.codex/config.toml` write as fallback, since Codex does not read `.mcp.json`); Cursor gets a merged `.cursor/mcp.json` pointing at the credential env file; Gemini and Copilot are declarative (extension manifest / auto-loaded `.mcp.json`); Hermes is documented. Credentials stay in a single `~/.config/accelerate-ai-toolkit/env` source of truth — secrets are never written to a tracked repo file.
+- **New `docs/harness-support.md`.** Per-harness install + connection reference, the per-vendor validator landscape, and an explicit verified-vs-theoretical note.
+- **New `scripts/validate.sh`.** A standards / vendor-compliance gate for the hard files — parses every manifest, enforces one shared version, checks the Hermes `provides_skills` against `skills/`, sanity-checks the MCP server shape, verifies final newlines and skill count, and runs the official `claude plugin validate --strict`. It checks the files agents load, not skill content.
+- **Deliberately not shipped.** No telemetry hooks (the toolkit phones home to nobody) and no per-agent safety-hook ports — the A/B-test backup/verify guardrails already live vendor-agnostically in `accelerate-test` skill prose.
+
 ## 1.4.3
 
 **Fallback prose is now generic and jargon-free; `/accelerate-status` warns when Accelerate is out of date. All ability call shapes corrected against the upstream server registry.**
