@@ -1,0 +1,10 @@
+{
+  "name": "accelerate-ai-toolkit",
+  "description": "Accelerate AI Toolkit for GitHub Copilot — ask your Accelerate WordPress site what to fix and get a diagnosis, a recommended A/B test, and a verdict on whether it worked. Skills are auto-discovered from skills/; the WordPress connection is auto-loaded from .mcp.json.",
+  "version": "1.5.0",
+  "author": { "name": "Human Made" },
+  "license": "MIT",
+  "homepage": "https://www.accelerateplugin.com/",
+  "repository": "https://github.com/humanmade/accelerate-ai-toolkit",
+  "keywords": ["accelerate", "wordpress", "analytics", "ab-testing", "personalization", "mcp", "marketer"]
+}

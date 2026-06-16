@@ -1,0 +1,30 @@
+name: accelerate-ai-toolkit
+version: 1.5.0
+description: >
+  Accelerate AI Toolkit for Hermes — conversational access to your Accelerate
+  WordPress site. Ask analytics questions in plain English and get answers
+  backed by real data: diagnose underperformance, plan and run A/B tests,
+  design on-brand variants, and report on whether they worked.
+author: Human Made
+license: MIT
+homepage: https://github.com/humanmade/accelerate-ai-toolkit
+
+# Skills are auto-discovered from ../skills/ at register() time.
+# Hermes loads them on demand via skill_view("accelerate-ai-toolkit:<skill-name>").
+provides_skills:
+  - accelerate
+  - accelerate-abilities-reference
+  - accelerate-campaigns
+  - accelerate-connect
+  - accelerate-content-plan
+  - accelerate-design
+  - accelerate-diagnose
+  - accelerate-evolve
+  - accelerate-learn
+  - accelerate-opportunities
+  - accelerate-optimize-landing-page
+  - accelerate-personalize
+  - accelerate-realtime
+  - accelerate-review
+  - accelerate-status
+  - accelerate-test

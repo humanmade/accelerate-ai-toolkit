@@ -1,7 +1,7 @@
 {
   "name": "accelerate-ai-toolkit",
-  "version": "1.4.3",
-  "description": "Conversational access to your Accelerate WordPress site from Claude Code and Codex CLI. Ask analytics questions in plain English, get answers backed by real data.",
+  "version": "1.5.0",
+  "description": "Conversational access to your Accelerate WordPress site from Claude Code, Codex CLI, Cursor, Gemini CLI, GitHub Copilot, and Hermes. Ask analytics questions in plain English, get answers backed by real data.",
   "author": {
     "name": "Human Made",
     "url": "https://humanmade.com"
