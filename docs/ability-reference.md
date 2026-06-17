@@ -66,6 +66,16 @@ Best-performing content ranked by views.
 - **Inputs:** `type` (post type filter), `limit` (1–50, default 10), `date_range`
 - **Returns:** array of { id, title, type, views, conversions, url }
 
+### `accelerate/get-content`
+Retrieve a single post or page by ID or URL — including its **raw block markup**. The brand-pack ingest uses this to harvest real section fragments from published pages (`docs/brand-pack.md` §2a); works on any post type, not just synced blocks.
+- **Inputs (one required):** `id` (integer — takes precedence) or `url` (string)
+- **Returns:** { id, type, status, slug, title, content (raw `post_content` markup), template }
+
+### `accelerate/get-media`
+List media-library attachments — the real on-brand assets compositions reuse.
+- **Inputs (optional):** `search` (title/filename), `mime_type` (e.g. `image/jpeg`), `limit`
+- **Returns:** array of attachments { id, url, alt, mime_type, … }
+
 ### `accelerate/get-content-diff`
 Compare content performance between two time periods.
 - **Inputs (required):** `post_ids` (array of integers), `current_period` (`{start, end}` ISO 8601 object — no presets)
