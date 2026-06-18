@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.5.0 — 2026-06-18
 
 **Two install-doc corrections for source/headless setups, and `accelerate-test` create-flow hardening against two confirmed plugin gaps.**
 
