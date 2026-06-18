@@ -24,11 +24,11 @@ You run a multi-round optimization on one block: each round generates bold chall
 3. **Create the test (`accelerate-test` → Creating).** Back up the block first, field control + challengers, name `"#<n> <Block>"`, set the goal, annotate the source. Verify it's actually running.
 4. **Monitor to the gate (`accelerate-test` → Monitoring).** The binding stopping gate decides what won — per-arm minimums on **every** arm and ≥95% probability sustained across checks. Below it, the only verdict is "inconclusive"; never read a thin-data delta as a result.
 5. **Harvest before the next round (mandatory).** A gate-valid winner you intend to carry forward **must** be harvested — `accelerate-test` → `declare_winner` — *before* round N+1, or the next round builds on un-harvested baseline content and the climb never materialises. Record the round's concept-level learning (`accelerate-learn` pattern) so later rounds don't re-field settled structures.
-6. **Cull, escalate, or author.** A composed concept that lost cleanly is retired — climb the escalation ladder (`accelerate-test`), don't re-field it. When the site's existing vocabulary is spent, author a *new* section from what's winning (`accelerate-design`) and field that next.
+6. **Cull, escalate, or author.** A composed concept that lost cleanly is retired — don't re-field it. When new *structures* stop beating the incumbent, escalate the **lever, not just the layout** — climb the axis ladder (structure → message frame → conversion mechanism → imagery); recomposition explores one basin, an axis-change jumps basins. When the site's structural vocabulary is spent, author a *new* section (`accelerate-design`) by **crossing the winning traits of the round's top ≥2 performers** (not unrelated novelty), and **promote a winner back into the brand pack** so the vocabulary grows. Full mechanism: `docs/design-standards.md` §14.
 
 ## Stopping
 
-Stop and report when any of these hold: the user stops it; a round comes back inconclusive after escalating through the ladder with no class left to climb; or several rounds produce no gate-valid improvement over the incumbent (convergence). Don't churn rounds that can't teach anything — say plainly that the block has plateaued and what the current best is.
+Stop and report when any of these hold: the user stops it; a round comes back inconclusive after escalating through the ladder with no class left to climb; or **K consecutive rounds produce no gate-valid improvement** over the incumbent (convergence). Evolution plateaus fast — typically by round 3–6 on a fixed offer/fact set — so stop on the convergence signal, **not** a fixed round count, and don't churn rounds that only re-stage settled arguments. Say plainly that the block has plateaued, what the current best is, and that the remaining headroom is in the **offer/substrate** (new facts, proof, imagery), not recomposition (`docs/design-standards.md` §14).
 
 ## Reporting
 
@@ -40,6 +40,7 @@ Each round, in marketer language: what's being tested and why, what the current 
 - **The stopping gate is binding.** Never declare, harvest, cull, or report a winner on thin data. A directional delta below the gate is noise — see `accelerate-test` Monitoring.
 - **Harvest every carried winner before the next round.** A declared-but-unharvested winner captures zero real improvement and breaks the climb.
 - **A loss only teaches if the challenger was bold.** Retire a concept only on a clean composed loss, never a timid one (anti-false-negative rule).
-- **Author new only when the vocabulary is spent** — exhaust the site's real sections (recombined and extended) first.
+- **Escalate the axis when structure plateaus** — once new structures stop winning, climb the lever (message frame → conversion mechanism → imagery), not another layout. The only reliable plateau-breaker is an axis-change. `docs/design-standards.md` §14.
+- **Author new only when the vocabulary is spent** — exhaust the site's real sections first; then author by **crossing the top ≥2 performers' winning traits** (elite crossover, adaptive parent count, boldness annealed up), never unrelated novelty. **Promote a clean winner into the brand pack** (extinction → speciation). §14.
 - **Autopilot annotates `source: "autopilot"`** and keeps every gate and harvest rule; it removes the per-step click, not the discipline.
 - **Confirm before mutating in attended mode**, and never leak developer jargon in anything the user reads.

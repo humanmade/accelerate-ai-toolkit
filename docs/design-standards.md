@@ -472,3 +472,33 @@ When the target site is the aphelion stack (the internal dark-theme brand), thes
 - **Registered styles**: check-list `is-style-checkmark-list`; eyebrow `( parenthetical )`; plate `[ bracketed ]` — use the site's real style slugs, not invented classNames.
 - **Light-on-dark**: this is a dark surface — apply the §12 light-on-dark rule (line-height bump, weight step).
 - **Mirror the control's grammar to compose, not to copy.** Fetch the real block first (it's the control); learn its class/attribute shape, then compose your *new* archetype (§10) from the site's full registered palette — a wholly different composition of individually-valid blocks is wholly valid (§2).
+
+---
+
+## 14. Cross-round escalation — the axis ladder and elite crossover (the evolve climb)
+
+§9 composes a *single* round; this governs how the **sequence** escalates when a round stops improving. It is the spine of `accelerate-evolve`. Validated on a 12-category, 8-round simulation: structural recomposition climbs for ~3–5 rounds then **plateaus**, and the only moves that broke a settled plateau were changes of **argument axis**, not new layouts.
+
+### The axis ladder
+A challenger can differ from the incumbent on more than structure. When new *structures* stop beating the incumbent, escalate the **lever**, in order — each is a fresh search basin, not a restyle of the last:
+
+1. **Structure** — the §10 archetype. Exhaust the site's real structural vocabulary first.
+2. **Message frame** — reframe the *argument*: magnitude→scarcity, feature→outcome, risk→risk-reversal, loss-aversion, identity, comparison-to-alternative.
+3. **Conversion mechanism** — change the action itself: passive CTA → focused CTA → email-capture form (§10 CTA, TI-6).
+4. **Imagery** — a different hero image / full-bleed treatment can move outcome on visual draw alone.
+
+Recomposition explores one basin; an axis-change jumps basins. Report the escalation plainly: *"structure hasn't moved this in two rounds — next round changes the message frame, not the layout."*
+
+### Elite crossover when the vocabulary is spent
+§9 authors a new section once the site's vocabulary is exhausted. Author it by **crossing the winning traits of the round's top performers**, not by inventing unrelated novelty:
+
+- **Select ≥2 parents** — the top cluster of arms (those within the gate's resolution of the leader). **Widen** the parent pool when scores bunch (no clear winner); **narrow** to the top 2 when one arm clearly leads.
+- **Cross their winning traits** into the new section (the winning structure × a winning message frame × the winning image), never a re-skin of a single parent.
+- **Anneal boldness up** each round the incumbent holds — modest recombination first, then bolder trait-fusions and structural leaps.
+- *Validated:* breeding new sections from ≥2 elite parents beat injecting unrelated novelty — it broke a plateau the random approach could not.
+
+### Promote winners into the brand pack
+When a crossed-from-scratch section wins cleanly under the gate, fold it back into the site's vocabulary (the brand pack / pattern library) so future rounds compose from a richer set — extinction of the loser, speciation of the winner. **The vocabulary grows with every climb.**
+
+### Convergence — when to stop
+Evolution plateaus fast (typically by round 3–6 on a fixed offer/fact set). Stop after **K consecutive rounds with no gate-valid improvement** over the incumbent — not a fixed round count — and don't grind rounds that only re-stage settled arguments. When the axis ladder is exhausted and crossover has stopped clearing the gate, say plainly the block has plateaued, name the current best, and note that the remaining headroom is in the **offer/substrate** (new facts, proof, imagery), not in recomposition.
