@@ -98,6 +98,30 @@ These are block-level patterns the model must never produce in variant content. 
 | **Identical column content** | Every column in a `wp:columns` block using the exact same block structure (icon + heading + paragraph, repeated identically) | Vary the content structure and length across columns. Not every column needs the same template |
 | **Decorative-only blocks** | Adding `wp:separator`, `wp:spacer`, or empty `wp:group` blocks purely for visual padding | Use the spacing scale (`var:preset\|spacing\|<slug>`) on the surrounding blocks instead |
 
+### The detector tells — generation must pre-clear these
+
+Generation must pre-clear the list below: **these are exactly what `impeccable detect` flags** (~44 deterministic detector rules). A variant that trips one is generic-AI design by definition — rework it before presenting. Each tell, and the block-level shape it takes in WordPress:
+
+| Tell (`impeccable detect` rule) | What it looks like in block markup | Pre-clear by |
+|---|---|---|
+| `gradient-text` | `{"gradient":"…"}` on a heading/paragraph | Solid `{"textColor":"<slug>"}` |
+| `side-stripe` | one-sided thick colored `border` on group/column/callout | Background slug, full border preset, or no indicator |
+| `identical-card-grids` | same-size icon+heading+text columns repeated, no variation | Varied spans/sizes, mixed non-card content (see archetype library §10) |
+| `repeated-section-kickers` | a tiny uppercase tracked eyebrow above **every** section | **One** named kicker is voice; an eyebrow on every section is AI grammar — drop the repetition |
+| `numbered-section-markers` | `01· / 02· / 03·` on every section | Numbers earn their place only inside a real ordered sequence; never as default scaffold |
+| `icon-tile-stack` | a large rounded-corner icon tile above every heading | Lead with type/space hierarchy, not a decorative tile per section |
+| `gray-on-color` | gray text on a colored background (washed out) | A darker shade of the same hue, or an alpha of the text color — never neutral gray on color |
+| `monotonous-spacing` | padding = gap = margin everywhere, no rhythm | Tight grouping for related, generous gaps between sections (see §12) |
+| `glassmorphism` | decorative blur/glass card surfaces | Solid background slugs; reserve depth for real elevation |
+| `hero-metric` | big number + small label + gradient accent (SaaS cliché) | Earn a stat only where proof *is* the argument (stat-band archetype, §10) — never as hero decoration |
+| `stat-rail` | a repeated 3–4 cell big-number / tiny-mono-label rail bolted under a hero headline (often with a dead empty cell, gray-on-color labels) | A stat belongs in a hero only *integrated* — inline, one hero figure, or a real asymmetric layout — never a repeated N-up cell grid (§10 stat-anchored) |
+| `unstyled-form-control` | a `wp:html` raw native `<input>`/`<button>` — white box, default border, system-font button, no theme tokens | Emit themed form controls: aphelion field styling (token bg/border/radius, `body` font, themed submit via the CTA primitive) — never a bare native control (§10 final-banner) |
+| `accent-ground` | a full-bleed section on an accent-color background (accent used as a page ground, not a reserved highlight) | Accent stays ≤10% per 60-30-10 (§12); ground sections in neutral/contrast surfaces, reserve accent for the CTA / primary |
+| `ghost-text` | same-hue low-opacity text laid over its own ground as decoration (e.g. orange-on-orange at low alpha) | Decorative text must clear 4.5:1 — a real contrasting slug, never a low-opacity same-hue ghost layer |
+| `generic-fonts` | Inter/Roboto/Arial/Open Sans/system fonts | Use the site's registered display/body families (§13) |
+
+**Voice vs grammar (the load-bearing distinction).** One deliberately-named kicker, or one genuine numbered sequence where order is the point, is **voice** — keep it. The *same* device mechanically repeated on every section is **AI grammar** — ban it. The test is whether the device is load-bearing for *this* section's argument, or just scaffolding pasted everywhere.
+
 ---
 
 ## 4. The differentiation rubric
@@ -170,6 +194,16 @@ Never use these words in variant copy. They are the top markers of AI-generated 
 > unlock, supercharge, leverage, empower, elevate, streamline, revolutionize, game-changing, cutting-edge, seamless, next-level, harness, transform, reimagine
 
 Replace with specific, concrete language grounded in the page's data. "Start your free trial" beats "Unlock your potential." "See pricing for teams" beats "Elevate your workflow."
+
+### AI-slop microcopy tells (every interface string, not just headlines)
+
+The slop test extends past marketing copy to every functional string a variant introduces. Each below is a named tell `impeccable` looks for in UX copy — name the action, state the fix, welcome the visitor:
+
+- **Buttons / CTAs**: "OK / Submit / Yes / No / Click here" → name the action — "Create account", "Download PDF", "See pricing".
+- **Errors**: "Invalid input" / "Something went wrong" → state the problem **and** the fix — "Enter a valid email, e.g. name@site.com".
+- **Empty states**: "No items" / "Nothing here" → the next action plus a welcome — "No tests yet — start your first A/B test".
+- **Loaders**: never the cliché whimsy loaders (`ai-loading-copy`): "Herding pixels", "Teaching robots to dance", "Consulting the magic 8-ball", "Counting backwards from infinity". A plain "Loading…" beats forced personality.
+- **Redundancy**: a header that restates the intro, the same concept re-explained two ways. Say it once, well — redundant restating is a slop tell in itself.
 
 ### The AI slop test
 
@@ -281,11 +315,13 @@ The design check is an internal reasoning step:
 1. Read this document (`docs/design-standards.md`).
 2. Read the brand context file (or generate it via `get-site-context` if it does not exist).
 3. Validate block markup correctness — required classes, class order, style attribute order (§2).
-4. Score the variant against the differentiation rubric (§4).
-5. Check brand consistency — slug-first principle (§1).
-6. Check anti-pattern bans (§3).
-7. Scan copy for AI-slop markers (§5).
-8. **Revise silently** if anything fails — the user only ever sees the passing version.
+4. Pick the archetype that fits the argument (§10), then score the variant against the differentiation rubric (§4).
+5. Check brand consistency — slug-first principle (§1); on the aphelion stack apply the aphelion binding (§13).
+6. Check anti-pattern bans **and pre-clear the detector tells** (§3).
+7. Check the polish thresholds — type scale, measure, spacing rhythm, color weight, contrast, motion (§12).
+8. Scan copy for AI-slop markers, including microcopy tells (§5).
+9. **For a round of >1 arm, run the per-round diversity gate** (§11) over the whole set before presenting any of them.
+10. **Revise silently** if anything fails — the user only ever sees the passing version.
 
 The marketer never sees a "quality check failed" message. They just see better variants with bolder hypotheses that match their site's visual language.
 
@@ -314,3 +350,125 @@ The rubric above governs a *single* variant. This governs how a **round** is com
 **Cull on a clean loss, then escalate.** A composed (Visual Score 2+) concept that loses cleanly under the stopping gate is retired — don't re-field it; climb the escalation ladder (`accelerate-test`). A *timid* loss teaches nothing (anti-false-negative rule) and is not grounds to retire a concept.
 
 **Integrity.** Never declare a winner, harvest, or cull on thin data — the binding stopping gate in `accelerate-test` is the only authority on "what won." Bold on composition; honest on results.
+
+---
+
+## 10. The archetype library — structurally distinct section kinds
+
+§9 fields one incumbent + bold challengers; this is **what makes a challenger structurally bold** rather than a micro-variation. The single most common generation failure is fielding five arms that share a block skeleton and differ only in words — copy-only swaps that the differentiation rubric (§4) scores 0 on Visual/structural. The cure is to draw each arm from a **different archetype**: a different *kind* of section, not a restyle of the same one.
+
+**Structure must FIT the argument.** Pick the archetype the *message* needs, never the most decorative one: a **process** → ordered sequence/timeline; **proof** → stat-band; **objections** → FAQ; **capabilities** → grid; **story** → editorial; **a single bold claim** → centered statement. The archetype encodes the argument's shape, so two archetypes that argue differently *read* differently even before the copy lands. The site's own brand pack (`docs/brand-pack.md`) is always the first source — prefer a real harvested fragment of the chosen archetype; author a fresh one only once the site's vocabulary of that kind is spent.
+
+Per category, here are 5–6 **structurally distinct** archetypes (different block skeletons, not restyles). A round picks ≥4 distinct ones (§11):
+
+### Hero
+- **full-bleed-image-overlay** — `core/cover` with media + headline + CTA overlaid; image carries the mood. Copy over a photographic/gradient plate **requires a scrim/overlay or placement on a dark region** — never the theme's default gray body on a variable-luminance image (`gray-on-color`, §3/§12).
+- **split-asymmetric-70-30** — `core/columns` 70/30 (or 30/70); copy stack on one side, single supporting visual on the other.
+- **centered-statement-minimal** — one large `core/heading`, one line of body, one CTA; space does the work, no imagery.
+- **stat-anchored** — headline paired with a **single integrated** proof stat (`core/group` headline + one hero figure inline), arguing from evidence. **Not** a serif statement bolted to a repeated 3–4 cell big-number rail (`stat-rail`, §3) — that's the SaaS cliché, scores template-grade on craft. If a hero must carry more than one readout, it is a *deliberate compositional element* (a framed panel, a 2-up, or an inline spec strip — **cap ~2–3 rows**), never an open-ended vertical label→value dump (reads as inventory, scores `monotonous-spacing`). Stat labels must clear 4.5:1 contrast; never a grid with a dead empty cell.
+- **typographic-display-scale** — oversized display headline (extreme scale jump) as the whole composition; type *is* the hero.
+- **product-in-context** — `core/media-text` showing the product/screenshot beside a benefit-led claim.
+
+### Pricing
+- **tiered-cards-comparison** — `core/columns` of 2–3 plan cards, one marked recommended (the *only* place identical-ish cards are earned — vary the highlighted tier).
+- **single-plan-focus** — one plan, big price, benefit list, one CTA; no comparison clutter.
+- **value-anchored-feature-table** — `core/table`/columns mapping features to tiers; argues on inclusion, not price.
+- **toggle-framed** (monthly/annual) — pricing staged around a choice, savings made explicit.
+- **outcome-led-no-table** — lead with what the visitor gets at each level; price stated plainly, table de-emphasized.
+- **enterprise-contact-split** — self-serve tier(s) beside a "talk to us" panel for the high-touch path.
+
+### Trust / social-proof
+- **logo-wall** — `core/columns`/gallery of customer/partner marks; breadth as proof.
+- **stat-band** — a row of 2–4 headline metrics (`core/columns`), each one number + short label; magnitude as proof.
+- **named-quote-strip** — a single strong `core/quote` with attribution; depth over breadth.
+- **rating-badges-row** — review scores / awards / certifications as a horizontal band.
+- **case-study-teaser** — one customer result staged as a mini before/after with a link out.
+- **press-mentions** — "as seen in" publication marks; third-party authority.
+
+### Experience / capability
+- **media-text-alternating** — `core/media-text` rows that alternate sides down the page; each pairs one capability with one visual.
+- **horizontal-step-sequence** — `core/columns` of ordered steps (numbered *here* legitimately — order is the point).
+- **vertical-timeline** — stacked sequence with progression cues; for a journey/process over time.
+- **two-column-deep-dive** — one capability explained richly in a 50/50 split (copy + supporting visual), not a grid of many.
+- **tabbed-or-sectioned-showcase** — distinct capability areas as separate full-width sections, each self-contained.
+- **interactive-demo-callout** — a single capability framed around a live example/screenshot + CTA to try it.
+
+### Testimonial
+- **single-hero-quote** — one large `core/quote`, oversized, full attention; the strongest line.
+- **three-up-quote-grid** — `core/columns` of three short quotes (vary length/emphasis — not identical cards).
+- **quote-with-portrait** — `core/media-text`: portrait beside the quote and named attribution.
+- **carousel-strip** (if registered) — a row of quotes the visitor scans.
+- **video-testimonial-feature** — a single embedded testimonial as the centerpiece.
+- **result-led-quote** — quote framed by the concrete outcome it produced (number + words together).
+
+### FAQ
+- **accordion-list** — collapsible Q&A (`core/details`); compact, scannable.
+- **two-column-qa** — questions laid out as a 2-column grid for breadth at a glance.
+- **objection-grouped** — questions clustered by objection theme (price / trust / fit), each cluster a section.
+- **inline-prose-faq** — Q&A as flowing headed prose, not an accordion; editorial register.
+- **search-or-categorized** — categorized FAQ with a lead-in for larger question sets.
+
+### Final-banner / CTA
+- **full-bleed-color-band** — `core/group` full-width on a **contrast** background (never a full-bleed *accent* ground — `accent-ground`, §3), one headline + one CTA.
+- **split-image-cta** — `core/media-text`: closing visual beside the final ask.
+- **centered-minimal-cta** — one line + one button on a quiet background; maximum focus.
+- **email-capture-form** — a direct capture field + submit (highest conversion-affordance, TI-6). **The form is the conversion mechanism — it must be the best-crafted element, not the worst.** Style it with the site's tokens (field bg/border/radius slugs, `body` font, submit via the CTA button primitive); **never** a bare `wp:html` native `<input>`/`<button>` (`unstyled-form-control`, §3).
+- **stacked-reassurance-cta** — CTA plus a short trust line (guarantee / "no card required") beneath.
+- **two-path-cta** — primary action + a secondary path (`is-style-outline`) for the not-ready visitor.
+- **stat-reinforced-cta** — the closing ask anchored by one last proof number.
+
+### Features / capability-grid
+- **icon-feature-grid** — `core/columns` of feature cards (vary spans/lengths — never identical-card-grid §3).
+- **alternating-feature-rows** — `core/media-text` rows, one feature per row, sides alternating.
+- **bento-mixed-spans** — a grid of deliberately *unequal* tiles (one large + several small) — breaks card monotony.
+- **comparison-vs-grid** — features framed as us-vs-alternative columns.
+- **categorized-feature-sections** — features grouped under themed sub-headings, each its own block.
+- **single-flagship-feature** — one capability given a full section instead of a grid; depth over enumeration.
+
+### Stats / metrics-band
+- **horizontal-number-row** — `core/columns` of 3–4 big numbers + short labels.
+- **single-hero-metric-in-context** — one dominant number framed with the sentence that gives it meaning (earns the number — not the SaaS `hero-metric` cliché).
+- **comparison-stat-pair** — before/after or us/them as two contrasted figures.
+- **annotated-stat-with-source** — a metric paired with its source/attribution for credibility.
+- **progress-or-milestone-band** — cumulative figures ("X served to date") as a milestone strip.
+- **stat-plus-supporting-quote** — one number reinforced by a one-line quote that humanizes it.
+
+---
+
+## 11. Per-round diversity gate (pre-flight)
+
+Before a round ships — **after** drafting all arms, **before** presenting them or calling `create-ab-test` — assert structural diversity. This promotes the thunderdome `_run_validate.py` structural-diversity check *into* generation, so a copy-only round never gets fielded in the first place.
+
+**The gate (a round of N≥3 arms, control excluded):**
+
+1. Tag each arm with its archetype (§10) and its block skeleton — the ordered list of its top-level block types (e.g. `cover → columns → buttons`).
+2. **Assert ≥4 distinct archetypes / skeletons across the arms** (for a 5-arm round). For smaller rounds, *every* challenger must use a different skeleton from the incumbent and from each other — no two arms may share a skeleton.
+3. If two arms collapse to the same skeleton (same block types in the same order, differing only in copy/tokens), **the round fails the gate** — regenerate the duplicate from an unused archetype before shipping.
+
+A round that passes the gate is structurally diverse by construction; a round that can't pass it is the copy-only failure §10 exists to prevent. Treat this gate as binding, the same way §2 (validity) and §4 (per-variant differentiation) are binding — it operates on the *set*, where they operate on each arm.
+
+---
+
+## 12. Polish thresholds (craft floor)
+
+Differentiation (§4) makes a variant *bold*; these thresholds make it *crafted*. They are the committed numbers a composed variant must hit — reference values, applied via the site's preset slugs (§1), never hardcoded. (Where the site lacks a matching preset, this is direction for *which* registered slug to reach for, not a license to hardcode.)
+
+- **Type scale**: one committed modular ratio — **1.25** (major third), **1.333** (fourth), or **1.5** (fifth). Don't mix ratios within a variant. **Body ≥16px.** Display copy gets a letter-spacing floor (≈ −0.04em on large headings).
+- **Headline measure**: cap line length at **65–75ch**; body over 75ch is a slop tell. Lean on `text-wrap: balance` on h1–h3 where the site exposes it (and the display-break rules in §5).
+- **Spacing — rhythm, not uniformity**: 4pt base (4/8/12/16/24/32/48/64/96). **Tight grouping (8–12px) for related elements, generous (48–96px) between sections.** Equal spacing everywhere is the `monotonous-spacing` tell. Prefer `gap`/spacing presets over ad-hoc margins.
+- **Color — 60-30-10 weight**: ~60% neutral surface, 30% secondary, **10% accent reserved for the CTA / primary / current state**. Don't spread the accent across decoration, and **never use the accent as a full-bleed section ground** (`accent-ground`, §3) — it blows the 10% budget and reads off-brand. Body contrast **≥4.5:1**, large/UI text **≥3:1** — never gray-on-color (use a darker shade of the hue or an alpha), and **never same-hue low-opacity "ghost" text** as decoration (`ghost-text`, §3). Copy over a photographic/gradient plate needs a scrim/overlay or a dark region — not the default gray on variable luminance.
+- **Motion**: 100–150ms feedback, 200–300ms state, 300–500ms layout; easing **ease-out** (quart/quint/expo). **Never bounce/elastic** (the `bounce-easing` tell). Every animation needs a `prefers-reduced-motion` path; cap a stagger at ~500ms total.
+- **Light-on-dark surfaces** (e.g. dark-themed sites): bump line-height **+0.05–0.1** and optionally step the weight up one notch — light type on dark reads thinner.
+
+---
+
+## 13. Aphelion binding (when composing on the aphelion / dark-brand stack)
+
+When the target site is the aphelion stack (the internal dark-theme brand), these constraints are **hard** and override any generic default above. They are the same slug-first / ground-every-attribute discipline (§1, §2), pinned to this brand's real tokens:
+
+- **Palette — preset slugs only.** `base · base-2 · panel · contrast · contrast-2 · contrast-3 · contrast-4 · accent · blue · champagne · status`. **There is no `accent-3`** — it renders invisible; remap any such reference to `base-2`. Never hardcode hex/px — always the slug.
+- **Fonts — three only**: `display` (Instrument Serif), `body` (Geist), `mono`. `{"fontFamily":"heading"}` is **invalid** on this site — use `display`.
+- **Images — approved IDs only**: 724 (interior) · 725–730 (nebula) · 731–745 (obscure) · 746–747 (viewport). **Never NASA placeholder images** (IDs 371-class, all 404) and never invent attachment IDs — omit the image and let the block default rather than guess (§2).
+- **Registered styles**: check-list `is-style-checkmark-list`; eyebrow `( parenthetical )`; plate `[ bracketed ]` — use the site's real style slugs, not invented classNames.
+- **Light-on-dark**: this is a dark surface — apply the §12 light-on-dark rule (line-height bump, weight step).
+- **Mirror the control's grammar to compose, not to copy.** Fetch the real block first (it's the control); learn its class/attribute shape, then compose your *new* archetype (§10) from the site's full registered palette — a wholly different composition of individually-valid blocks is wholly valid (§2).
