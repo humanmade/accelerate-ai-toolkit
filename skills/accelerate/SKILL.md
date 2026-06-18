@@ -55,6 +55,8 @@ Route the user's question to the right specialised skill:
 | Find what's underperforming and why | `accelerate-diagnose` |
 | Optimise a specific landing page | `accelerate-optimize-landing-page` |
 | Plan, create, monitor, or end an A/B test | `accelerate-test` |
+| Make a new on-brand version of a block / design a fresh section (no test required) | `accelerate-design` |
+| Continuously improve a block over several rounds / run an optimization loop / autopilot a block | `accelerate-evolve` |
 | Set up audiences or personalisation | `accelerate-personalize` |
 | Plan the next batch of posts / get content ideas / write a brief | `accelerate-content-plan` |
 | See who's on the site right now or what's trending | `accelerate-realtime` |
@@ -62,9 +64,13 @@ Route the user's question to the right specialised skill:
 | Update what the toolkit has learned about the site / see the learning journal / refresh tailored suggestions | `accelerate-learn` |
 | Understand every capability available | `accelerate-abilities-reference` |
 
+### Design vs test vs evolve (disambiguation)
+
+Three related skills, increasing scope: `accelerate-design` makes **one** on-brand version of a block and offers (doesn't force) a test. `accelerate-test` runs **one** A/B test end to end. `accelerate-evolve` runs a **multi-round** loop — generate, test, harvest, repeat — and is the one to use for "keep improving" or "autopilot". When the user just wants a fresh version, design; when they want to test a specific idea, test; when they want sustained improvement over time, evolve.
+
 ### Learning journal consultation
 
-Before recommending a test, a personalisation idea, or prioritised actions, check whether a learning journal exists for this site. Derive the site slug using the rule in `accelerate-learn` and attempt to read `~/.config/accelerate-ai-toolkit/journal-<site-slug>.json`.
+Before recommending a test, a personalisation idea, or prioritised actions, check whether a learning journal exists for this site. Derive the site key using the rule in `accelerate-learn` and attempt to read `~/.config/accelerate-ai-toolkit/sites/<key>/journal.json`.
 
 - **File missing or unreadable:** Fall back to generic reasoning silently. No error, no mention to user.
 - **Valid journal:** Only patterns with `status: "won"` should influence ranking -- weight them up and say so: *"I'm leaning on [pattern name] because it's won [N] of [M] tests on your site."* Patterns with `status: "lost"` should be demoted (pushed below won and neutral patterns) with advisory context, not silently excluded. Patterns with `status: "inconclusive"` or `"mixed"` are invisible to ranking.

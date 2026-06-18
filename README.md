@@ -69,7 +69,7 @@ For Codex CLI: run `codex`, open `/plugins`, choose "Install from local path".
 
 ## How it works
 
-The toolkit is not a wrapper around your analytics API. It's 14 purpose-built skills that compose raw data into decisions:
+The toolkit is not a wrapper around your analytics API. It's 16 purpose-built skills that compose raw data into decisions:
 
 | Workflow | What it does |
 |----------|-------------|
@@ -78,6 +78,8 @@ The toolkit is not a wrapper around your analytics API. It's 14 purpose-built sk
 | **Opportunities** | The front door: synthesises everything into 3 ranked next actions |
 | **Optimize landing page** | Deep-dive on one page: engagement metrics, 2-3 testable improvements, A/B test hand-off |
 | **Test** | Full A/B test lifecycle: plan, create, monitor, review, declare a winner |
+| **Design** | Make a new on-brand version of a block or a fresh section on demand — offers to A/B test it, never forces |
+| **Evolve** | Multi-round optimization loop: generate bold versions, test, keep the winner, repeat — attended or autopilot |
 | **Personalize** | Audience creation and content personalization: by referrer, geography, behaviour, device |
 | **Content plan** | Proposes upcoming posts grounded in what's actually working on your site |
 | **Realtime** | What's happening right now: concurrent visitors, trending content, spike investigation |
@@ -92,20 +94,25 @@ Every workflow that creates or changes something (A/B tests, personalization rul
 
 ## Supported agents
 
+The skills are vendor-agnostic — they live in a shared `/skills/` directory and load in any agent that reads markdown skill files. **Claude Code is the path we support and actively use.** The others ship standards-correct manifests and are **in testing** — they should work, but we haven't verified every one end-to-end. If a connection doesn't come up on one of them, that's exactly the feedback we'd love: [open an issue](https://github.com/humanmade/accelerate-ai-toolkit/issues).
+
 | Agent | Status |
 |---|---|
-| Claude Code | ✅ v1 |
-| Codex CLI | ✅ v1 |
-| Cursor | 🚧 Roadmap |
-| Gemini | 🚧 Roadmap |
+| **Claude Code** | ✅ Supported — primary, actively used |
+| Codex CLI | 🧪 In testing |
+| Cursor | 🧪 In testing |
+| Gemini CLI | 🧪 In testing |
+| GitHub Copilot | 🧪 In testing |
+| Hermes | 🧪 In testing |
 
-All skills are vendor-agnostic and live in a shared `/skills/` directory. See [ROADMAP.md](./internal/ROADMAP.md) for what's coming next.
+Two things have to work on any agent: the **skills** must load, and the toolkit must reach your site through the **WordPress connection** (an MCP server). Skills auto-load everywhere; the connection is wired differently per agent — `/accelerate-connect` handles it, and [`docs/harness-support.md`](./docs/harness-support.md) is the full per-agent reference. See [ROADMAP.md](./internal/ROADMAP.md) for what's next.
 
 ---
 
 ## Documentation
 
 - [Installation guide](./docs/installation.md)
+- [Harness support (Codex, Cursor, Gemini, Copilot, Hermes)](./docs/harness-support.md)
 - [Authentication & security](./docs/authentication.md)
 - [All 39 Accelerate capabilities](./docs/ability-reference.md)
 - [Adding your own skills](./docs/skill-development.md)

@@ -1,8 +1,17 @@
 {
-  "_comment": "Stub — Gemini CLI support not yet shipped; intentionally not version-synced with the Claude Code plugin. See ROADMAP.md and .cursor-plugin/README.md for context. All skills live in ./skills/ and are vendor-agnostic.",
   "name": "accelerate-ai-toolkit",
-  "version": "1.0.0",
-  "description": "Conversational access to your Accelerate WordPress site. Gemini support not yet shipped.",
-  "author": "Human Made",
-  "license": "MIT"
+  "version": "1.5.0",
+  "description": "Conversational access to your Accelerate WordPress site. Ask analytics questions in plain English, get answers backed by real data.",
+  "mcpServers": {
+    "wordpress": {
+      "command": "npx",
+      "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+      "env": {
+        "WP_API_URL": "$WP_API_URL",
+        "WP_API_USERNAME": "$WP_API_USERNAME",
+        "WP_API_PASSWORD": "$WP_API_PASSWORD",
+        "OAUTH_ENABLED": "false"
+      }
+    }
+  }
 }

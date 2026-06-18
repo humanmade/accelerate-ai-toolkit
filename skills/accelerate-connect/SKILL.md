@@ -19,7 +19,7 @@ Three pieces of information need to land in `~/.config/accelerate-ai-toolkit/env
 2. **Username** — the WordPress username to authenticate as
 3. **Application password** — a WordPress Application Password (not their login password)
 
-Once those are set, the `.mcp.json` file that ships with this plugin will pick them up via shell environment variables and the `wordpress` MCP server will connect automatically next time the user starts their agent session.
+Once those are set, the toolkit's WordPress connection (the `wordpress` MCP server) picks them up. **How** it picks them up depends on the agent: Claude Code reads the bundled `.mcp.json`, while Codex, Cursor, Gemini, GitHub Copilot, and Hermes each wire it a little differently. Step 7 handles that per agent. (Claude Code is the supported path; the others are in testing — if a connection doesn't come up, that's useful feedback.)
 
 ## The conversation
 
@@ -185,6 +185,7 @@ cat > ~/.config/accelerate-ai-toolkit/env <<'EOF'
 WP_API_URL="<full_connector_url>"
 WP_API_USERNAME="<username>"
 WP_API_PASSWORD="<app_password>"
+OAUTH_ENABLED="false"
 EOF
 chmod 600 ~/.config/accelerate-ai-toolkit/env
 ```
@@ -195,20 +196,90 @@ chmod 600 ~/.config/accelerate-ai-toolkit/env
 - Do NOT echo the full password back to the user in chat after writing. Confirm by saying "Saved. ✓" instead.
 - The `.claude/settings.local.json` file is automatically gitignored by Claude Code. Do not commit it.
 
-### Step 7 — Shell profile (Codex CLI users only)
+### Step 7 — Wire the connection for your agent
 
-If the user is using **Codex CLI** (not Claude Code), they also need to source the env file from their shell profile so Codex picks up the values. Tell them:
+The credentials are saved, but each agent reads them differently. If you don't already know which agent the user is in, ask. Then follow the matching branch. **Claude Code is the supported path; Codex, Cursor, Gemini, GitHub Copilot, and Hermes are in testing — if a connection doesn't come up for one of those, that's useful feedback to report.**
 
-> "Since you're using Codex, you'll also need to add a line to your shell profile so the credentials load automatically."
+**Claude Code** — nothing more to do. The `.mcp.json` that ships with the plugin already reads the credentials you saved in `settings.local.json` (step 6a). Skip to step 8.
 
-Show the appropriate line based on their shell:
+**Cursor** — Cursor configures MCP servers in `.cursor/mcp.json`. Write the WordPress server there (merged, non-destructive); it reads the credentials from the env file you wrote in step 6b:
 
-For zsh / bash:
+```bash
+python3 - <<'PY'
+import json, os
+path = os.path.join(os.getcwd(), '.cursor', 'mcp.json')
+data = json.load(open(path)) if os.path.exists(path) else {}
+data.setdefault('mcpServers', {})
+data['mcpServers']['wordpress'] = {
+    'command': 'npx',
+    'args': ['-y', '@automattic/mcp-wordpress-remote@latest'],
+    'envFile': os.path.expanduser('~/.config/accelerate-ai-toolkit/env'),
+}
+os.makedirs(os.path.dirname(path), exist_ok=True)
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2); f.write('\n')
+print('Wrote', path)
+PY
+```
+
+Like Claude's `settings.local.json`, this is folder-scoped — run `/accelerate-connect` again from another project to wire it there too.
+
+**Codex CLI** — Codex configures MCP servers in `~/.codex/config.toml` (it does **not** read `.mcp.json`). Use Codex's own command — it owns the TOML merge, escaping, and idempotency:
+
+```bash
+codex mcp remove wordpress >/dev/null 2>&1 || true   # clear any old entry so re-runs update cleanly
+codex mcp add wordpress \
+  --env WP_API_URL="$WP_API_URL" \
+  --env WP_API_USERNAME="$WP_API_USERNAME" \
+  --env WP_API_PASSWORD="$WP_API_PASSWORD" \
+  --env OAUTH_ENABLED=false \
+  -- npx -y @automattic/mcp-wordpress-remote@latest
+```
+
+Pass the real values from steps 4 and 5b; do not echo the password back. Confirm it landed with `codex mcp list` (and `codex doctor` for a fuller config/auth/runtime health check).
+
+If `codex mcp add` isn't available (older Codex without the subcommand), fall back to writing `~/.codex/config.toml` directly — merged, values inline so it works regardless of how Codex passes environment to the server, file locked to `600`:
+
+```bash
+python3 - "$WP_API_URL" "$WP_API_USERNAME" "$WP_API_PASSWORD" <<'PY'
+import os, re, sys
+url, user, pw = sys.argv[1:4]
+path = os.path.expanduser('~/.codex/config.toml')
+os.makedirs(os.path.dirname(path), exist_ok=True)
+text = open(path).read() if os.path.exists(path) else ''
+# Drop any existing wordpress block so re-runs update cleanly.
+text = re.sub(r'(?ms)^\[mcp_servers\.wordpress\].*?(?=^\[|\Z)', '', text)
+text = (text.rstrip() + '\n\n') if text.strip() else ''
+esc = lambda s: s.replace('\\', '\\\\').replace('"', '\\"')
+block = (
+    '[mcp_servers.wordpress]\n'
+    'command = "npx"\n'
+    'args = ["-y", "@automattic/mcp-wordpress-remote@latest"]\n'
+    'env = { WP_API_URL = "%s", WP_API_USERNAME = "%s", WP_API_PASSWORD = "%s", OAUTH_ENABLED = "false" }\n'
+    % (esc(url), esc(user), esc(pw))
+)
+open(path, 'w').write(text + block)
+os.chmod(path, 0o600)
+print('Wrote', path)
+PY
+```
+
+Either way, also add the shell-profile line below (some Codex setups read the env from the shell too).
+
+**Gemini CLI** and **GitHub Copilot** — the WordPress server is already declared in the manifest that ships with the toolkit (`gemini-extension.json` `mcpServers` for Gemini; the bundled `.mcp.json` for Copilot). There's no per-project file to write — they just need the credentials available as shell environment variables, so add the shell-profile line below.
+
+**Hermes** — Hermes configures MCP servers separately from the plugin manifest. Point the user at `.hermes-plugin/README.md`, which has the exact `wordpress` server block to paste into their Hermes MCP config, then add the shell-profile line below.
+
+**Shell-profile line (everyone except Claude Code — Codex, Cursor, Gemini, Copilot, Hermes):**
+
+These agents read the credentials from the shell environment, so the env file must be sourced when the terminal starts. Add this line to the user's shell profile:
+
+For zsh / bash (`~/.zshrc` or `~/.bashrc`):
 ```bash
 [ -f ~/.config/accelerate-ai-toolkit/env ] && set -a && . ~/.config/accelerate-ai-toolkit/env && set +a
 ```
 
-For fish:
+For fish (`~/.config/fish/config.fish`):
 ```fish
 if test -f ~/.config/accelerate-ai-toolkit/env
     for line in (cat ~/.config/accelerate-ai-toolkit/env)
@@ -217,7 +288,7 @@ if test -f ~/.config/accelerate-ai-toolkit/env
 end
 ```
 
-**If the user is using Claude Code, skip this step entirely** — Claude Code reads credentials from `settings.local.json` and doesn't need shell profile changes.
+(Cursor reads the env file directly via `envFile`, but the shell-profile line is still the simplest way to make the same credentials available everywhere.)
 
 ### Step 8 — Restart the agent session (advice differs by agent)
 
@@ -227,9 +298,9 @@ Getting this wrong sends the user into a restart loop that never picks up the ne
 
 > "One last step — close this Claude Code session and start a new one. The connection settings load at startup, so they'll kick in next session. When you're back in, run `/accelerate-status` to confirm everything works."
 
-**Codex CLI, or any agent using the shell-profile method from step 7:** restarting the agent is **not** enough. The agent inherits its environment from the terminal, and the terminal keeps whatever values were exported when it was opened — restarting the agent in the same terminal re-inherits the old values every time. Tell them:
+**Codex, Gemini, Copilot, Hermes, or any agent using the shell-profile method from step 7:** restarting the agent is **not** enough. The agent inherits its environment from the terminal, and the terminal keeps whatever values were exported when it was opened — restarting the agent in the same terminal re-inherits the old values every time. Tell them:
 
-> "One last step — open a **new terminal window** (or run `exec zsh` in this one) so the new connection settings load, then start a fresh Codex session there. Restarting Codex in this terminal won't pick them up. When you're back in, run `/accelerate-status` to confirm everything works."
+> "One last step — open a **new terminal window** (or run `exec zsh` in this one) so the new connection settings load, then start a fresh session there. Restarting in the same terminal won't pick them up. When you're back in, run `/accelerate-status` to confirm everything works."
 
 This matters most when **updating** existing credentials (new password, new site, or the old bare-root address being upgraded to the full connector URL): every already-open terminal keeps exporting the stale values until it reloads its profile.
 
