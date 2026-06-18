@@ -81,6 +81,7 @@ The whole point of these rules is to make ambition *safe*: a Score-3 recompositi
 - **Ground every attribute; never invent values.** Fill only attributes you can ground in something real: registered preset slugs (§1), copy you are writing, and media that actually exists on the site (existing markup and synced patterns reveal real attachment URLs/IDs you can reuse). If you cannot ground an attribute — an image you don't have, an ID you'd be guessing, a coordinate — **omit it and let the block use its registered default.** An empty-but-valid block beats a block with an invented value. (Slug-first, §1, is the same principle for tokens.)
 - **Never fabricate factual content.** Do not invent numbers, costs, statistics, donation amounts, or operational claims. Use clearly generic placeholder text the site owner can replace. Fabricating figures for a charity or enterprise site is a trust-destroying error.
 - **Round-trip check before you ship it.** A reliable validity test for any composition: it must parse and re-serialize cleanly (the block delimiters, attribute JSON, and nesting are well-formed). If you've composed something rich, sanity-check the markup structure rather than assume it.
+- **Prefer forgiving primitives for full-bleed / visual sections.** Hand-authored `wp:cover` is the most mismatch-prone block — build the same look from `wp:group` + `wp:image` + `wp:heading` + `wp:paragraph` + `wp:buttons` styled in CSS. This and the editor/alignment/width gotchas that govern whole sections are in **§15**.
 
 ---
 
@@ -502,3 +503,37 @@ When a crossed-from-scratch section wins cleanly under the gate, fold it back in
 
 ### Convergence — when to stop
 Evolution plateaus fast (typically by round 3–6 on a fixed offer/fact set). Stop after **K consecutive rounds with no gate-valid improvement** over the incumbent — not a fixed round count — and don't grind rounds that only re-stage settled arguments. When the axis ladder is exhausted and crossover has stopped clearing the gate, say plainly the block has plateaued, name the current best, and note that the remaining headroom is in the **offer/substrate** (new facts, proof, imagery), not in recomposition.
+
+---
+
+## 15. Rendering & editability — beyond per-block validity
+
+§2 keeps each block valid *in isolation*. This keeps a whole **section or page** rendering correctly on **both** surfaces — the editor canvas *and* the front end — which are different and can disagree. A composition can pass §2 and still render wrong; verify both, at a wide viewport. Two of these rules are variant-markup choices; the rest are **theme-side** requirements — if you don't own the theme, author to them and **flag them** to whoever does. (Validated building a full aphelion landing page, 2026-06.)
+
+### Prefer forgiving primitives (variant-side)
+- Hand-authoring `wp:cover` reliably trips "invalid content / Attempt recovery": its `is-position-*` (content position), `has-background-dim-N`, and gradient-`<span>` markup are easy to mismatch. **Build the same look from forgiving primitives** — `wp:group` + `wp:image` + `wp:heading` + `wp:paragraph` + `wp:buttons` — and do the background image / scrim / overlay in **CSS keyed to classes**. (Cover is still a valid block per §2; it's just mismatch-prone to author by hand.)
+- Fewer attributes = smaller mismatch surface: prefer a CSS class over per-block `textColor` / `fontFamily` / `fontSize` / `style` whenever a class can carry it.
+
+### The editor must be able to see the CSS (theme-side)
+When the design lives in CSS rather than block attributes, the editor canvas shows **bare structure** unless the theme loads that CSS into the editor with `add_editor_style()`. Front-end `wp_enqueue_style` (on `wp_enqueue_scripts`) does **not** reach the editor iframe. Without this, CSS-driven sections are un-WYSIWYG and effectively uneditable — flag it when handing a CSS-driven section to a theme you don't control.
+
+### Full / wide alignment — all three, or it silently collapses (mixed)
+A full-bleed band needs **every** one of these; miss one and the section quietly renders at `contentSize`:
+1. **Inline real blocks, not `wp:pattern` references** — the editor strips child `align` when it expands a pattern ref. *(variant-side)*
+2. **Mark the band `align:"full"`.** *(variant-side)*
+3. **The content root must be a *constrained* layout** — *flow* layouts don't support child alignment, so Gutenberg drops it. In a page template: `wp:post-content {"layout":{"type":"constrained"}}` inside a **flow** `<main>`. Do **not** nest two constrained layers — `align:full` breaks out of post-content but stays trapped at the main's `contentSize` on the front end. *(theme-side)*
+
+### Content width (theme-side)
+- Full-bleed bands span the viewport, but their **inner** content is capped by `theme.json` `settings.layout.contentSize`. A 620–720px reading measure is far too narrow for multi-column marketing sections — they huddle in the centre with dead margins. **~1100–1280px is typical;** set it deliberately, not by inheritance.
+- Cap the **title element's** measure, not a wrapper `<div>` — a `max-width` in `ch` on a small-font wrapper computes tiny (~the base font, not the heading). To make a child align to the content column exactly, use `max-width: var(--wp--style--global--content-size)`, never a hardcoded narrower value.
+
+### Full-bleed images (variant-side)
+- A `wp:image` `<figure>` inherits the content-width cap **even when absolutely positioned** — force `width:100% !important; max-width:none !important` to fill a full-bleed container.
+- Images may be `loading="lazy"` (won't paint until scrolled into view) and carry an auto-generated `srcset`; confirm the resized variant URLs actually resolve before treating a blank image as "broken."
+
+### First-column parity — the block-gap leak (mixed)
+The classic symptom: in a multi-column row (stat band, card pair, timeline, feature grid) **column 1 sits at a different height / offset** than cols 2..n. Two causes, both about the first child being special-cased:
+- **WordPress block-gap leak (most common).** WP implements block spacing as `margin-block-start` on every child **except the first** (`> :where(:not(:first-child)) { margin-block-start: var(--wp--style--block-gap) }`). When a container is `is-layout-flow`/constrained but you restyle it as CSS **grid or flex**, those sibling top-margins leak onto the items and push cols 2..n down — leaving col 1 high (a ~19px offset on default gap). **Fix:** declare the container `"layout":{"type":"flex"}` (or `grid`) in the block JSON so WP stops emitting flow margins, **or** zero it in CSS on the children — `.row > * { margin-block-start: 0 }` — and use a real `gap`.
+- **Asymmetric dividers / padding.** `border-left` + `padding-left` per cell with only `:first-child{ border-left:0 }` leaves col 1 padded-but-divider-less, so its content doesn't line up with the content column. Keep per-cell padding symmetric and **zero the first cell's leading padding** so col 1 sits flush with the column edge (dividers then separate cols 2..n).
+
+Verify by measuring, not eyeballing: every column's content should share one left edge and one top baseline.
