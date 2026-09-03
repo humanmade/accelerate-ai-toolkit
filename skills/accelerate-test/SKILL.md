@@ -79,6 +79,8 @@ When a round concludes inconclusive (no concept cleared the gate), the next iter
 
    **Author the variant as a block tree, then serialize it.** Design the composition first as a structure — which blocks, nested how, with which grounded attributes — then write the markup from that tree. Fill only attributes you can ground (preset slugs, copy you're writing, real media from the site's library/patterns); omit anything you'd be guessing and let the block default. This is how bold composition stays valid; §2 of `design-standards.md` is the safety contract. The recombination engine is the site's own pattern vocabulary surveyed in step 3b — transplant and recombine whole sections, don't invent generic ones.
 
+   **Required Block Runner pre-flight.** Before showing any generated challenger, follow `docs/block-runner.md`: run `validate`; if it exits `1`, run `fix` and then re-`validate` the repaired markup. Present only markup that validates cleanly; if repair does not produce a clean result, recompose or withhold that challenger. Do not substitute hand-checking for an invalid result. If `npx` is unavailable, the call times out, or headless Gutenberg cannot boot, fail open to the §2 manual checks in `docs/design-standards.md` and tell the user automated markup validation was unavailable. Exit `2` is a broken invocation: warn prominently, then use that disclosed manual fallback. If markup changes after this pre-flight, run it again before presenting or writing the challenger.
+
    Structural levers to stage a concept with, roughly strongest-signal first:
    - Add a `core/button` block with a clear CTA where the control has none
    - Add or swap a `core/image` block (with descriptive alt text — not empty or generic). Source images from the site's own media library — existing block markup reveals attachment URLs you can reuse, and on-brand imagery usually already exists; never hotlink external images
@@ -136,7 +138,8 @@ Steps (model instructions — do not surface these steps to the user):
 
 Once confirmed and backed up:
 
-1. Call `accelerate/create-ab-test` with:
+1. **Re-check the write payload.** Use each challenger's pre-flighted (and, where applicable, repaired) markup as its `content`. If any generated or changed challenger was altered after its successful pre-flight, run the required `docs/block-runner.md` loop again before this call. Preserve the current control verbatim; do not silently repair it while creating a test.
+2. Call `accelerate/create-ab-test` with:
    - `block_id`: the synced pattern / reusable block ID that holds the content to test
    - `hypothesis`: the plain-English hypothesis you agreed on
    - `goal`: `engagement`, `click_any_link`, or `submit_form` based on what the user cares about
@@ -153,19 +156,19 @@ Once confirmed and backed up:
    - **Experiment title = a test number + the block name.** Format: `"#<n> <Block>"` — e.g. `"#12 Hero"`, `"#7 Pricing"`, `"#15 Waitlist"`. `#<n>` is the test's number in *this site's* auto-research sequence — the **same number that indexes the x-axis of the progress chart**, so a card ties straight to the chart and tells a non-developer which test they're on. The number leads (it's the at-a-glance code); the block name follows, **spelled out in full**. Derive `n` from the journal's `iteration_counter + 1` (or the count from `list-experiments` + 1 if no journal — see the journal-consult step in Planning). **The code is a number, never an abbreviation:** never abbreviate the block to letters (`"WAIT"`, `"PRIC"`, `"H7"`) — a number needs no key, a letter-cipher does. **Do not write a sentence or the block's H1** as the title (`"Waitlist — join the waitlist"`, `"Trust — safety record"` are wrong — they bury the block name in prose). Just `#<number> <Block>`, nothing else.
    - **Variant title = the concept, spelled out in 1–2 words.** Name each arm by its strategic frame, never `"Variant A/B/C"`, never an H1, and **never an abbreviation** (`"OUT"`, `"SCR"` are wrong — write `"Outcome"`, `"Scarcity"`). Use `"Control"` for the incumbent (variant index 0); name challengers by the motivation they argue — e.g. `"Scarcity"`, `"Outcome"`, `"Social proof"`, `"Safety"`, `"Urgency"`. Short, human, consistent. The test number lives on the experiment, not in every variant — in context a variant reads as `"#12 Hero — Outcome"`. Good: `"Control"`, `"Outcome"`, `"Social proof"`. Bad: `"Variant B"`, `"AI: R2 con…"`, `"OUT"`, a truncated headline.
 
-2. **Verify the test was created correctly.** Immediately after the call succeeds, fetch the block content again and check that:
+3. **Verify the test was created correctly.** Immediately after the call succeeds, fetch the block content again and check that:
    - Both variants contain non-empty content (not self-closing `<!-- wp:altis/variant ... /-->` tags)
    - The control variant still matches the original content
    - The new variant contains the proposed changes
    
    If any variant is empty or the content looks wrong, **immediately roll back**: restore the original content you saved in the backup step (via whatever write mechanism is available — `accelerate/update-variant` on index 0, or WP-CLI if accessible), then tell the user: *"The test setup didn't go as expected, so I've restored the original content. Nothing changed on your site."* Do not tell the user the test is live.
 
-3. **Verify the experiment is actually running.** Content being correct is not enough: on current Accelerate versions, `create-ab-test` can leave the experiment in a paused/draft state (no start metas are written), in which case no traffic is allocated and no results will ever accrue — while everything *looks* created. Call `accelerate/get-variants` (the `experiment.status` field) or `accelerate/list-active-experiments` and check the experiment's status is `running`/`active`. If it is `paused` or missing:
+4. **Verify the experiment is actually running.** Content being correct is not enough: on current Accelerate versions, `create-ab-test` can leave the experiment in a paused/draft state (no start metas are written), in which case no traffic is allocated and no results will ever accrue — while everything *looks* created. Call `accelerate/get-variants` (the `experiment.status` field) or `accelerate/list-active-experiments` and check the experiment's status is `running`/`active`. If it is `paused` or missing:
    - Do **not** tell the user the test is live.
    - Tell them plainly: *"The test was created but Accelerate left it paused — this is a known plugin issue. Open the block in the editor and press 'Start test' (or ask your developer to start it), and I'll verify it's collecting data."*
    - After they confirm, re-check status before proceeding.
-4. Only after both verifications pass, confirm to the user: *"Done. The test is live -- I've verified both versions are showing correctly."*
-5. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1-2 weeks. For lower traffic, 2-4 weeks.
+5. Only after both verifications pass, confirm to the user: *"Done. The test is live -- I've verified both versions are showing correctly."*
+6. Tell them roughly when to check back. For sites with 1000+ weekly visitors, 1-2 weeks. For lower traffic, 2-4 weeks.
 
 If the target block doesn't exist yet as a synced pattern / reusable block, stop and explain the reusable block requirement (see the section at the top of this skill).
 

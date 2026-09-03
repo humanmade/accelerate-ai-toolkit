@@ -117,6 +117,7 @@ Two things have to work on any agent: the **skills** must load, and the toolkit 
 - [All 39 Accelerate capabilities](./docs/ability-reference.md)
 - [Adding your own skills](./docs/skill-development.md)
 - [Design standards for A/B test variants](./docs/design-standards.md)
+- [Gutenberg markup pre-flight](./docs/block-runner.md)
 
 ---
 

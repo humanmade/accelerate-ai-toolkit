@@ -41,6 +41,8 @@ When the model constructs variant block markup, every design token must referenc
 
 **Invalid markup causes "Block contains unexpected or invalid content" errors in the editor.** WordPress validates each saved block's HTML against the expected output of *that block type's* `save()` function — block by block, against the block's own type, **never against the control or any other variant**. A *missing* generated class or a mismatched tag/attribute triggers a failure. This is not cosmetic — it breaks the editing experience for enterprise users. The way to stay valid is for each block to be well-formed for its own type; it is **not** to keep the variant's structure close to the control. A wholly different composition of individually-valid blocks is wholly valid.
 
+**Use Block Runner for the actual editor-validity verdict whenever it is available.** The required `validate` → `fix` → `validate` pre-flight, including its repair, withholding, and fail-open rules, lives in `docs/block-runner.md`. The tables below are still essential authoring guidance and are the manual fallback when that optional tool is unavailable; they are not a substitute for a successful headless-Gutenberg validation.
+
 ### Required CSS classes from block attributes
 
 WordPress auto-generates CSS classes from block JSON attributes. The HTML element **must** include every class that WordPress would produce. Omitting any of these causes a validation mismatch.
@@ -80,7 +82,7 @@ The whole point of these rules is to make ambition *safe*: a Score-3 recompositi
 - **Learn conventions to enable ambition, not to copy the safe thing.** When unsure what classes or markup a block type expects, read a real example on this site (`get-variants` → `raw_markup`, or the site's synced patterns) to learn its exact class/attribute shape — then use that knowledge to compose your *new* structure validly. The goal of reading existing markup is fluency in the site's block grammar, not mirroring one block.
 - **Ground every attribute; never invent values.** Fill only attributes you can ground in something real: registered preset slugs (§1), copy you are writing, and media that actually exists on the site (existing markup and synced patterns reveal real attachment URLs/IDs you can reuse). If you cannot ground an attribute — an image you don't have, an ID you'd be guessing, a coordinate — **omit it and let the block use its registered default.** An empty-but-valid block beats a block with an invented value. (Slug-first, §1, is the same principle for tokens.)
 - **Never fabricate factual content.** Do not invent numbers, costs, statistics, donation amounts, or operational claims. Use clearly generic placeholder text the site owner can replace. Fabricating figures for a charity or enterprise site is a trust-destroying error.
-- **Round-trip check before you ship it.** A reliable validity test for any composition: it must parse and re-serialize cleanly (the block delimiters, attribute JSON, and nesting are well-formed). If you've composed something rich, sanity-check the markup structure rather than assume it.
+- **Round-trip check before you ship it.** When Block Runner is available, its required pre-flight (`validate` → `fix` → `validate`) is the round-trip check — do not replace it by eyeballing this table. If the tool is unavailable, manually check that the block delimiters, attribute JSON, and nesting parse and re-serialize cleanly, then disclose the fallback as `docs/block-runner.md` requires.
 - **Prefer forgiving primitives for full-bleed / visual sections.** Hand-authored `wp:cover` is the most mismatch-prone block — build the same look from `wp:group` + `wp:image` + `wp:heading` + `wp:paragraph` + `wp:buttons` styled in CSS. This and the editor/alignment/width gotchas that govern whole sections are in **§15**.
 
 ---
@@ -315,7 +317,7 @@ The design check is an internal reasoning step:
 
 1. Read this document (`docs/design-standards.md`).
 2. Read the brand context file (or generate it via `get-site-context` if it does not exist).
-3. Validate block markup correctness — required classes, class order, style attribute order (§2).
+3. Run the Block Runner pre-flight (`docs/block-runner.md`) for every generated or changed markup candidate. If it is unavailable, use the §2 required-class, class-order, and style-order checks as the disclosed fallback.
 4. Pick the archetype that fits the argument (§10), then score the variant against the differentiation rubric (§4).
 5. Check brand consistency — slug-first principle (§1); on the aphelion stack apply the aphelion binding (§13).
 6. Check anti-pattern bans **and pre-clear the detector tells** (§3).
@@ -324,7 +326,7 @@ The design check is an internal reasoning step:
 9. **For a round of >1 arm, run the per-round diversity gate** (§11) over the whole set before presenting any of them.
 10. **Revise silently** if anything fails — the user only ever sees the passing version.
 
-The marketer never sees a "quality check failed" message. They just see better variants with bolder hypotheses that match their site's visual language.
+The marketer never sees a routine "quality check failed" message. They just see better variants with bolder hypotheses that match their site's visual language. The exception is the required disclosure when automated markup validation is unavailable or misconfigured; use the wording in `docs/block-runner.md` rather than pretending the headless check ran.
 
 ---
 

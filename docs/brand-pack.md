@@ -33,6 +33,10 @@ The result is a library of real fragments, each tagged with kind + usage + confi
 ### 3. Media (real assets)
 Index the image URLs/IDs that already appear in the harvested fragments and pages (`accelerate/get-media` lists the library; the fragments show what's actually placed). On-brand imagery almost always already exists on the site — compositions reuse these real assets. **Never hotlink external images** and never invent attachment IDs (`design-standards.md` §2).
 
+### 4. Pending upstream: hosted-site Block Runner context
+
+Do not use or document `block-runner context --rest`: it is not implemented in `block-runner@0.8.0`. Its `context` collector is WP-CLI-only; the hosted-site REST collector using Application Passwords is pending upstream in Block Runner/wesper. Continue to load this pack with `accelerate/get-site-context`, `accelerate/get-content`, and the other abilities above. The absent collector is not a reason to stop a composition or skip the separate Block Runner markup pre-flight (`docs/block-runner.md`).
+
 ---
 
 ## Cache
