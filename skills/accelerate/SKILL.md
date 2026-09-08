@@ -56,7 +56,7 @@ Route the user's question to the right specialised skill:
 | Optimise a specific landing page | `accelerate-optimize-landing-page` |
 | Plan, create, monitor, or end an A/B test | `accelerate-test` |
 | Make a new on-brand version of a block / design a fresh section (no test required) | `accelerate-design` |
-| Continuously improve a block over several rounds / run an optimization loop / autopilot a block | `accelerate-evolve` |
+| Continuously improve a block over several supervised rounds / run an optimization loop | `accelerate-evolve` |
 | Set up audiences or personalisation | `accelerate-personalize` |
 | Plan the next batch of posts / get content ideas / write a brief | `accelerate-content-plan` |
 | See who's on the site right now or what's trending | `accelerate-realtime` |
@@ -66,7 +66,7 @@ Route the user's question to the right specialised skill:
 
 ### Design vs test vs evolve (disambiguation)
 
-Three related skills, increasing scope: `accelerate-design` makes **one** on-brand version of a block and offers (doesn't force) a test. `accelerate-test` runs **one** A/B test end to end. `accelerate-evolve` runs a **multi-round** loop — generate, test, harvest, repeat — and is the one to use for "keep improving" or "autopilot". When the user just wants a fresh version, design; when they want to test a specific idea, test; when they want sustained improvement over time, evolve.
+Three related skills, increasing scope: `accelerate-design` makes **one** on-brand version of a block and offers (doesn't force) a test. `accelerate-test` runs **one** A/B test end to end. `accelerate-evolve` runs a **supervised multi-round** loop — generate, test, review the applied result, repeat — and is the one to use for "keep improving." When the user just wants a fresh version, design; when they want to test a specific idea, test; when they want sustained improvement over time, evolve. An unattended loop is not currently supported; never treat an autopilot request as standing permission for future changes.
 
 ### Learning journal consultation
 
@@ -107,7 +107,7 @@ When recommending who to personalise content for, prioritise signals in this ord
 
 ### 2. Traffic-level awareness
 
-Always check total site traffic before recommending tests. A/B tests need enough visitors to reach statistical confidence.
+Always check available traffic and the returned experiment measurements before recommending tests. Treat impressions as recorded measurements, never as a count of unique visitors, and do not turn a toolkit heuristic into a completion rule.
 
 - **Low traffic** (under ~1,000 weekly visitors): only recommend **big** changes — new hero headlines, new page structures, new offers. Small tweaks won't reach significance in reasonable time.
 - **Medium traffic** (1,000–10,000 weekly visitors): medium-size tests are viable. Headlines, CTA placement, social proof blocks.

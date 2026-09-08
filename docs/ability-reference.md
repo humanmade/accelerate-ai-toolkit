@@ -40,11 +40,11 @@ Accelerate uses three WordPress capabilities as permission gates. The authoritat
 
 | Tier | Callback | WordPress capability | Unlocks |
 |---|---|---|---|
-| 1 | `can_view_analytics` | `view_accelerate_analytics` **or** `edit_posts` | The **27** read-only capabilities (discovery, author, engagement, attribution, realtime, query, content search, audience reads, experiment-state reads) |
-| 2 | `can_create_experiments` | `edit_posts` | The **9** experiment-creation capabilities (variant management, A/B tests, audience create/update, personalisation rules, goal & traffic settings) |
+| 1 | `can_view_analytics` | `view_accelerate_analytics` **or** `edit_posts` | The **27** read-only analytics capabilities (discovery, author, engagement, attribution, realtime, query, search, audience reads, experiment-state reads) |
+| 2 | `can_create_experiments` | `edit_posts` | The **10** experiment capabilities (variant management, A/B tests, recovery, audience create/update, personalisation rules, goal & traffic settings) |
 | 3 | `can_manage_experiments` | `manage_options` | The **3** destructive or site-wide capabilities — `stop-experiment`, `broadcast-content`, `export-events` |
 
-Tier 1 is the only one that accepts the dedicated `view_accelerate_analytics` capability — that lets a marketing role read analytics without being granted `edit_posts` (and therefore without the ability to create experiments). Editors and authors satisfy both Tier 1 and Tier 2 by default via `edit_posts`. Tier 3 requires administrator access.
+Tier 1 is the only one that accepts the dedicated `view_accelerate_analytics` capability — that lets a marketing role read analytics without being granted `edit_posts` (and therefore without the ability to create experiments). Editors and authors satisfy both Tier 1 and Tier 2 by default via `edit_posts`. Tier 3 requires administrator access. Content access is separate: `get-content` requires `edit_posts` plus the normal per-post reading permission, while `get-media` requires `upload_files` and only returns private media the account may read.
 
 ---
 
@@ -107,7 +107,7 @@ All currently running A/B tests and personalisation rules.
 ### `accelerate/list-experiments`
 Discover historical and active experiments with filtering by status, type, date range, post, and annotations. Supports pagination — use this when you want every experiment ever run, not just the live ones.
 - **Inputs:** `status` (all \| active \| running \| completed \| paused \| draft, default all), `type` (all \| abtest \| personalization, default all), `date_range`, `subject_post_id`, `annotation_key`, `annotation_value`, `page` (default 1), `per_page` (1–100, default 50)
-- **Returns:** experiments array with { experiment_id, block_id, test_id, type, status, title, goal, started_at, ended_at, has_winner, winner_variant_index, annotations }, plus `total` and `pages` for pagination
+- **Returns:** experiments array with { experiment_id, block_id, test_id, type, status, title, goal, started_at, ended_at, updated_at, result_revision, has_winner, winner_variant_index, annotations }, plus `total` and `pages` for pagination. `result_revision` is an opaque equality value for detecting corrected stored results or variant snapshots.
 - **Date range semantics:** `date_range` filters on when experiments **started**, not when they were active. An experiment started in January but still running will only appear if `date_range` covers January.
 
 ### `accelerate/get-audience-segments`
@@ -223,8 +223,8 @@ Remove a variant. Cannot remove the last one. Destructive.
 ### `accelerate/create-ab-test`
 Create a multi-variant A/B test on a block.
 - **Inputs (required):** `block_id`, `variants` (min 2 of { title, content })
-- **Inputs (optional):** `hypothesis`, `goal` (engagement \| click_any_link \| submit_form, default engagement), `traffic_percentage` (1–100, default 100)
-- **Returns:** success, block_id, variants_count, edit_url
+- **Inputs (optional):** `hypothesis`, `goal` (engagement \| click_any_link \| submit_form, default engagement), `traffic_percentage` (1–100, default 100), `annotations`. For a recoverable create, supply both `expected_content_hash` (SHA-256 of the reviewed raw markup) and a stable `request_id`.
+- **Returns:** success, block_id, variants_count, edit_url; recoverable calls also return request_id, experiment_id, original_content_hash, current_content_hash, recovery_available
 
 ### `accelerate/set-block-goal`
 Define the conversion metric for a block.
@@ -240,13 +240,18 @@ Adjust how much traffic is included in a block's experiment.
 Detailed statistical results for a running or completed experiment.
 - **Inputs (required):** `block_id` OR `experiment_id` (at least one must be provided)
 - **Inputs (optional):** `refresh` (default false)
-- **Returns:** block_id, experiment_type, status, started_at, ended_at, traffic_percentage, confidence_threshold, has_winner, winner_variant_index, variants, recommendation, edit_url
+- **Returns:** block_id, experiment_id, experiment_type, status, started_at, ended_at, traffic_percentage, confidence_threshold, has_winner, winner_variant_index, selection_provenance (`manual` or null), variants, recommendation, annotations, edit_url
 
 ### `accelerate/stop-experiment`
 Pause, resume, stop, or declare a winner. Destructive. Requires confirmation.
 - **Inputs (required):** `block_id`, `action` (pause \| resume \| stop \| declare_winner)
 - **Inputs (optional):** `winner_variant_index` (required for declare_winner)
 - **Returns:** success, block_id, action, new_status, message, edit_url
+
+### `accelerate/restore-ab-test`
+Restore a recoverable A/B-test creation. Destructive. Requires confirmation and refuses to overwrite content that changed after creation.
+- **Inputs (required):** `block_id`, `request_id`, `expected_current_hash` (SHA-256 of the current created state)
+- **Returns:** success, block_id, request_id, original_content_hash, current_content_hash, restored, edit_url
 
 ---
 
@@ -313,14 +318,15 @@ Custom aggregations over analytics data with flexible dimensions and metrics.
 
 ---
 
-## Total: 39 capabilities
+## Total: 42 capabilities
 
-Structural breakdown by section: 11 discovery + 2 author + 1 engagement + 4 attribution + 2 realtime + 1 content search + 9 experiment management + 3 personalisation + 3 broadcasts & integration + 3 raw query = **39**.
+Producer-domain breakdown: 11 discovery + 14 execution + 2 content + 2 author + 1 engagement + 4 attribution + 2 realtime + 4 query + 2 integration = **42**.
 
 Permission-tier breakdown (see the Permission tiers table at the top of this file):
 
 - **27** abilities gated by `can_view_analytics` (`view_accelerate_analytics` or `edit_posts`) — read-only analytics, search, audience/experiment reads
-- **9** abilities gated by `can_create_experiments` (`edit_posts`) — variant + experiment + audience + personalisation creation
+- **10** abilities gated by `can_create_experiments` (`edit_posts`) — variant + experiment + recovery + audience + personalisation creation
 - **3** abilities gated by `can_manage_experiments` (`manage_options`) — `stop-experiment`, `broadcast-content`, `export-events`
+- **2** content abilities with their own WordPress checks — `get-content` (`edit_posts` plus per-post reading) and `get-media` (`upload_files` plus private-content scoping)
 
-Total: 27 + 9 + 3 = **39**, matching the section breakdown above.
+Total: 27 + 10 + 3 + 2 = **42**, matching the producer-domain breakdown above.

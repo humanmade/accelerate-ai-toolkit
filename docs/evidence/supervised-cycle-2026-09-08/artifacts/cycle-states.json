@@ -1,0 +1,21 @@
+{
+  "provenance": "synthetic functional traffic",
+  "states": {
+    "connect": { "connector_version": "0.4.0", "adapter_version": "0.5.0", "status": "complete" },
+    "choose": { "block_id": "redacted-block-1", "original_content_hash": "b792a6c135234afbe9fb2e7964cb8e4aec5a3efde1203d7b3da616a154e97275" },
+    "approve": { "challenger_content_hash": "de3a71e21d93e965c850229a4b5c36fc65849c982a3fbe3b3c8487df72d8a916", "status": "approved" },
+    "create": { "experiment_id": "redacted-experiment-1", "created_once": true, "recovery_available": true },
+    "observe": { "control_exposures": 119, "challenger_exposures": 101, "control_impressions": 106, "challenger_impressions": 93 },
+    "resolve": { "selection": "challenger", "selection_provenance": "manual", "statistical_verdict": false },
+    "apply": { "block_type": "standard", "variants_remaining": 0, "readback_content_hash": "de3a71e21d93e965c850229a4b5c36fc65849c982a3fbe3b3c8487df72d8a916" },
+    "learn": { "experiment_id": "redacted-experiment-1", "evidence": "manual_selection", "unchanged_refresh_detail_reads": 0, "duplicate_entries": 0 }
+  },
+  "recovery_exercise": {
+    "experiment_id": "redacted-experiment-2",
+    "original_content_hash": "80b30b329a46fdc6bc71093b557959b8a00ba78a3ff40d390a42a7725f7064cf",
+    "created_content_hash": "63e789aa074111da5cc34f15a88d90a2601f952cf13a96fadbde9846d3bc1071",
+    "restored_content_hash": "80b30b329a46fdc6bc71093b557959b8a00ba78a3ff40d390a42a7725f7064cf",
+    "created_experiment_removed": true,
+    "repeat_restore_idempotent": true
+  }
+}

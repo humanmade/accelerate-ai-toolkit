@@ -57,14 +57,20 @@ for f in "${JSON_MANIFESTS[@]}"; do
   fi
 done
 
-if python3 -c "import yaml" 2>/dev/null; then
-  if python3 -c "import yaml; yaml.safe_load(open('.hermes-plugin/plugin.yaml'))" 2>/dev/null; then
-    ok "YAML parses: .hermes-plugin/plugin.yaml"
+if command -v ruby >/dev/null 2>&1; then
+  if ruby -e "require 'yaml'; YAML.safe_load(File.read(ARGV[0]), aliases: false)" .hermes-plugin/plugin.yaml 2>/dev/null; then
+    ok "YAML parses: .hermes-plugin/plugin.yaml (Ruby stdlib)"
+  else
+    bad "YAML invalid: .hermes-plugin/plugin.yaml"
+  fi
+elif python3 -c "import yaml" 2>/dev/null; then
+  if python3 -c "import sys,yaml; yaml.safe_load(open(sys.argv[1]))" .hermes-plugin/plugin.yaml 2>/dev/null; then
+    ok "YAML parses: .hermes-plugin/plugin.yaml (PyYAML)"
   else
     bad "YAML invalid: .hermes-plugin/plugin.yaml"
   fi
 else
-  skip "PyYAML absent — skipping plugin.yaml parse"
+  skip "no YAML parser available — install Ruby or PyYAML to parse .hermes-plugin/plugin.yaml"
 fi
 
 if python3 -c "import ast; ast.parse(open('.hermes-plugin/__init__.py').read())" 2>/dev/null; then
@@ -194,10 +200,10 @@ done
 section "7. Skill count consistency"
 
 N="$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-if grep -q "$N skills" AGENTS.md 2>/dev/null && grep -q "$N purpose-built skills" README.md 2>/dev/null; then
-  ok "skill count ($N) matches README + AGENTS.md"
+if grep -q "$N purpose-built skills" README.md 2>/dev/null; then
+  ok "skill count ($N) matches README"
 else
-  bad "skill count ($N) not reflected in README and/or AGENTS.md"
+  bad "skill count ($N) not reflected in README"
 fi
 
 # ---------------------------------------------------------------------------

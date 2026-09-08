@@ -108,13 +108,12 @@ SITE="<the normalised site root from step 2>"
 USER="<the username from step 4>"
 PASS="<the application password from step 4>"
 
-# Is Accelerate active?
-ACCEL=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/accelerate/v1" 2>/dev/null)
-# Which MCP connector route responds?
-ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
-LEGACY=$(curl -s -o /dev/null -w '%{http_code}' -u "$USER:$PASS" "$SITE/wp-json/wp/v2/wpmcp" 2>/dev/null)
-
-echo "accelerate=$ACCEL adapter=$ADAPTER legacy=$LEGACY"
+# The helper gives each request a 5-second connection limit and a 15-second
+# overall limit. It gives curl the password through standard input, never argv.
+WP_API_USERNAME="$USER" WP_API_PASSWORD="$PASS" \
+  python3 scripts/connection.py probe --site "$SITE" --check accelerate
+WP_API_USERNAME="$USER" WP_API_PASSWORD="$PASS" \
+  python3 scripts/connection.py probe --site "$SITE" --check routes
 ```
 
 Interpret the results in order:
@@ -148,51 +147,25 @@ Save credentials in **two places** so they work across all supported agents.
 
 **6a — Claude Code settings (primary)**
 
-This is what Claude Code reads when it starts the WordPress connector. Use the Bash tool to write the credentials into the project's `.claude/settings.local.json` (this file is gitignored and never committed):
+This is what Claude Code reads when it starts the WordPress connector. Use the bundled helper from the toolkit directory to write the credentials into the project's `.claude/settings.local.json` (this file is gitignored and never committed):
 
 ```bash
-# Read existing settings.local.json if it exists, merge env vars in
-python3 -c "
-import json, os, sys
-path = '.claude/settings.local.json'
-data = {}
-if os.path.exists(path):
-    with open(path) as f:
-        data = json.load(f)
-data.setdefault('env', {})
-data['env']['WP_API_URL'] = sys.argv[1]
-data['env']['WP_API_USERNAME'] = sys.argv[2]
-data['env']['WP_API_PASSWORD'] = sys.argv[3]
-data['env']['OAUTH_ENABLED'] = 'false'
-os.makedirs(os.path.dirname(path), exist_ok=True)
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-    f.write('\n')
-" "<full_connector_url>" "<username>" "<app_password>"
+python3 scripts/connection.py write \
+  --settings .claude/settings.local.json \
+  --env-file "$HOME/.config/accelerate-ai-toolkit/env"
 ```
 
-Replace the three placeholders with the values from steps 4 and 5b. `<full_connector_url>` is the full URL chosen in step 5b — never the bare site root.
+Pass exactly three lines to the helper's standard input: the full connector URL chosen in step 5b, the username, and the Application Password. Do not put any of those values after the command. The helper preserves unrelated settings, writes both files atomically with mode `600`, and prints no credential values.
 
 **This file is folder-scoped.** The connection works when Claude Code is started from this folder. Mention it briefly: *"One thing to know — this connection is tied to the folder we're in now. If you want to use the toolkit from a different folder later, run `/accelerate-connect` there and I'll re-link it in seconds, no password needed."* (The re-link path is in "If the user already has credentials" below.)
 
 **6b — Backup env file (for Codex CLI and other agents)**
 
-Also write a standard env file for non-Claude-Code contexts:
-
-```bash
-mkdir -p ~/.config/accelerate-ai-toolkit
-cat > ~/.config/accelerate-ai-toolkit/env <<'EOF'
-WP_API_URL="<full_connector_url>"
-WP_API_USERNAME="<username>"
-WP_API_PASSWORD="<app_password>"
-OAUTH_ENABLED="false"
-EOF
-chmod 600 ~/.config/accelerate-ai-toolkit/env
-```
+The same helper writes the standard env file for non-Claude-Code contexts.
 
 **Important:**
-- **Double-quote every value** in the env file. Application Passwords contain spaces.
-- `chmod 600` is required — the file holds credentials.
+- **Double-quote every value** in the env file. Application Passwords contain spaces. The helper handles this safely.
+- Mode `600` is required — the helper establishes it before credential bytes are written.
 - Do NOT echo the full password back to the user in chat after writing. Confirm by saying "Saved. ✓" instead.
 - The `.claude/settings.local.json` file is automatically gitignored by Claude Code. Do not commit it.
 
@@ -212,7 +185,7 @@ data = json.load(open(path)) if os.path.exists(path) else {}
 data.setdefault('mcpServers', {})
 data['mcpServers']['wordpress'] = {
     'command': 'npx',
-    'args': ['-y', '@automattic/mcp-wordpress-remote@latest'],
+    'args': ['-y', '@automattic/mcp-wordpress-remote@0.4.0'],
     'envFile': os.path.expanduser('~/.config/accelerate-ai-toolkit/env'),
 }
 os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -224,47 +197,15 @@ PY
 
 Like Claude's `settings.local.json`, this is folder-scoped — run `/accelerate-connect` again from another project to wire it there too.
 
-**Codex CLI** — Codex configures MCP servers in `~/.codex/config.toml` (it does **not** read `.mcp.json`). Use Codex's own command — it owns the TOML merge, escaping, and idempotency:
+**Codex CLI** — Codex configures MCP servers in `~/.codex/config.toml` (it does **not** read `.mcp.json`). Use the bundled helper after step 6; it merges only the `wordpress` block, locks the file to `600`, and never passes credentials on the command line:
 
 ```bash
-codex mcp remove wordpress >/dev/null 2>&1 || true   # clear any old entry so re-runs update cleanly
-codex mcp add wordpress \
-  --env WP_API_URL="$WP_API_URL" \
-  --env WP_API_USERNAME="$WP_API_USERNAME" \
-  --env WP_API_PASSWORD="$WP_API_PASSWORD" \
-  --env OAUTH_ENABLED=false \
-  -- npx -y @automattic/mcp-wordpress-remote@latest
+python3 scripts/connection.py configure-codex \
+  --config "$HOME/.codex/config.toml" \
+  --env-file "$HOME/.config/accelerate-ai-toolkit/env"
 ```
 
-Pass the real values from steps 4 and 5b; do not echo the password back. Confirm it landed with `codex mcp list` (and `codex doctor` for a fuller config/auth/runtime health check).
-
-If `codex mcp add` isn't available (older Codex without the subcommand), fall back to writing `~/.codex/config.toml` directly — merged, values inline so it works regardless of how Codex passes environment to the server, file locked to `600`:
-
-```bash
-python3 - "$WP_API_URL" "$WP_API_USERNAME" "$WP_API_PASSWORD" <<'PY'
-import os, re, sys
-url, user, pw = sys.argv[1:4]
-path = os.path.expanduser('~/.codex/config.toml')
-os.makedirs(os.path.dirname(path), exist_ok=True)
-text = open(path).read() if os.path.exists(path) else ''
-# Drop any existing wordpress block so re-runs update cleanly.
-text = re.sub(r'(?ms)^\[mcp_servers\.wordpress\].*?(?=^\[|\Z)', '', text)
-text = (text.rstrip() + '\n\n') if text.strip() else ''
-esc = lambda s: s.replace('\\', '\\\\').replace('"', '\\"')
-block = (
-    '[mcp_servers.wordpress]\n'
-    'command = "npx"\n'
-    'args = ["-y", "@automattic/mcp-wordpress-remote@latest"]\n'
-    'env = { WP_API_URL = "%s", WP_API_USERNAME = "%s", WP_API_PASSWORD = "%s", OAUTH_ENABLED = "false" }\n'
-    % (esc(url), esc(user), esc(pw))
-)
-open(path, 'w').write(text + block)
-os.chmod(path, 0o600)
-print('Wrote', path)
-PY
-```
-
-Either way, also add the shell-profile line below (some Codex setups read the env from the shell too).
+Confirm it landed with `codex mcp list` (and `codex doctor` for a fuller config/auth/runtime health check). Also add the shell-profile line below (some Codex setups read the env from the shell too).
 
 **Gemini CLI** and **GitHub Copilot** — the WordPress server is already declared in the manifest that ships with the toolkit (`gemini-extension.json` `mcpServers` for Gemini; the bundled `.mcp.json` for Copilot). There's no per-project file to write — they just need the credentials available as shell environment variables, so add the shell-profile line below.
 
@@ -282,11 +223,14 @@ For zsh / bash (`~/.zshrc` or `~/.bashrc`):
 For fish (`~/.config/fish/config.fish`):
 ```fish
 if test -f ~/.config/accelerate-ai-toolkit/env
-    for line in (cat ~/.config/accelerate-ai-toolkit/env)
-        set -gx (string split -m 1 '=' $line)
-    end
+    while read -l line
+        set -l pair (string split -m 1 '=' -- $line)
+        set -gx $pair[1] (string unescape --style=script -- $pair[2])
+    end < ~/.config/accelerate-ai-toolkit/env
 end
 ```
+
+This removes the double quotes used by the shared env file and decodes its escaped values before exporting them.
 
 (Cursor reads the env file directly via `envFile`, but the shell-profile line is still the simplest way to make the same credentials available everywhere.)
 

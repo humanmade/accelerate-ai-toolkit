@@ -305,6 +305,10 @@ Use these slugs in block attributes — never hardcode hex values.
 
 ## 7. When to apply these standards
 
+### Bounded brand-pack context
+
+Use `docs/brand-pack.md`'s single `brandpack.json` cache for design context; do not keep a separate palette survey. Reuse it only when its site key, full URL, theme/context identity, and contract version match the current site. Otherwise refresh within its fixed 40-read, 12-page, 24-reference, 768 KiB, and 45-second bounds. When `coverage.complete` is false, treat the pack as representative only: preserve its observed markup and theme tokens, and do not invent unobserved sections, tokens, or full-site coverage.
+
 These standards activate at exactly one point: **between the model drafting a variant and the model presenting it to the user for confirmation.**
 
 ```

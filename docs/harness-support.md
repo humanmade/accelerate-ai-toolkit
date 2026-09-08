@@ -7,7 +7,7 @@ How the toolkit installs and connects on each supported agent. **Claude Code is 
 Every agent needs both halves:
 
 1. **Skills load.** All skills live in the shared `/skills/` directory as `SKILL.md` files. Every supported agent auto-discovers them — there's nothing per-agent to do here.
-2. **The WordPress connection.** Each skill is useless without a live link to your site through the `wordpress` MCP server (`@automattic/mcp-wordpress-remote`). *This* is the part that differs per agent. `/accelerate-connect` wires it; the table below is the reference.
+2. **The WordPress connection.** Each skill is useless without a live link to your site through the `wordpress` MCP server (`@automattic/mcp-wordpress-remote@0.4.0`). *This* is the part that differs per agent. `/accelerate-connect` wires it; the table below is the reference.
 
 Credentials always live in one place — `~/.config/accelerate-ai-toolkit/env` (chmod 600), written by `/accelerate-connect`. Each agent's MCP server definition points back at those values; secrets are never committed to the repo.
 
@@ -36,16 +36,15 @@ The bundled `.mcp.json` reads `WP_API_URL` / `WP_API_USERNAME` / `WP_API_PASSWOR
 
 ## Codex CLI
 
-Install the plugin from the Codex `/plugins` flow (or local path), then run `/accelerate-connect`. Codex configures MCP servers in `~/.codex/config.toml` and **does not read `.mcp.json`**, so `/accelerate-connect` registers the server using Codex's own command (it owns the TOML merge and escaping):
+Install the plugin from the Codex `/plugins` flow (or local path), then run `/accelerate-connect`. Codex configures MCP servers in `~/.codex/config.toml` and **does not read `.mcp.json`**, so `/accelerate-connect` uses the bundled connection helper to merge only the `wordpress` block without putting a password in a command-line argument:
 
 ```bash
-codex mcp add wordpress \
-  --env WP_API_URL="$WP_API_URL" --env WP_API_USERNAME="$WP_API_USERNAME" \
-  --env WP_API_PASSWORD="$WP_API_PASSWORD" --env OAUTH_ENABLED=false \
-  -- npx -y @automattic/mcp-wordpress-remote@latest
+python3 scripts/connection.py configure-codex \
+  --config "$HOME/.codex/config.toml" \
+  --env-file "$HOME/.config/accelerate-ai-toolkit/env"
 ```
 
-That writes a `[mcp_servers.wordpress]` block into `~/.codex/config.toml`. Verify with `codex mcp list` (or `codex doctor` for a full config/auth/runtime check). On older Codex without the `mcp add` subcommand, `/accelerate-connect` falls back to writing the TOML block directly (file locked to `600` because it holds credentials). After connecting, **open a new terminal** (or `exec zsh`) so the shell-profile env line loads, then start a fresh Codex session.
+That writes a `[mcp_servers.wordpress]` block into `~/.codex/config.toml`. Verify with `codex mcp list` (or `codex doctor` for a full config/auth/runtime check). After connecting, **open a new terminal** (or `exec zsh`) so the shell-profile env line loads, then start a fresh Codex session.
 
 ## Cursor
 
@@ -56,7 +55,7 @@ Install via the Cursor plugin marketplace (or `~/.cursor/plugins/local/` for tes
   "mcpServers": {
     "wordpress": {
       "command": "npx",
-      "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+      "args": ["-y", "@automattic/mcp-wordpress-remote@0.4.0"],
       "envFile": "/Users/you/.config/accelerate-ai-toolkit/env"
     }
   }

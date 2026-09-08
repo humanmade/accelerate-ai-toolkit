@@ -50,7 +50,7 @@ WP_API_USERNAME="your_wp_username"
 WP_API_PASSWORD="abcd efgh ijkl mnop"
 ```
 
-`WP_API_URL` is the full URL of the WordPress MCP connector that responded during `/accelerate-connect`. For sites running the modern MCP Adapter that's `…/wp-json/mcp/mcp-adapter-default-server`; legacy `wordpress-mcp` sites store `…/wp-json/wp/v2/wpmcp` instead. The upstream [`@automattic/mcp-wordpress-remote`](https://www.npmjs.com/package/@automattic/mcp-wordpress-remote) client uses this URL as-is when it includes a path; a bare-root value is treated as legacy compatibility and routed to the old `wp/v2/wpmcp` endpoint.
+`WP_API_URL` is the full URL of the WordPress MCP connector that responded during `/accelerate-connect`. For sites running the modern MCP Adapter that's `…/wp-json/mcp/mcp-adapter-default-server`; legacy `wordpress-mcp` sites store `…/wp-json/wp/v2/wpmcp` instead. The upstream [`@automattic/mcp-wordpress-remote`](https://www.npmjs.com/package/@automattic/mcp-wordpress-remote) client uses this URL as-is when it includes a path; a bare-root value is treated as legacy compatibility and routed to the old `wp/v2/wpmcp` endpoint. Toolkit manifests pin the tested `0.4.0` release rather than following an unreviewed update.
 
 Permissions: `600` (read/write for you only).
 
@@ -73,7 +73,7 @@ Inside the repo, `.mcp.json` uses shell variable expansion to wire the env value
   "mcpServers": {
     "wordpress": {
       "command": "npx",
-      "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+      "args": ["-y", "@automattic/mcp-wordpress-remote@0.4.0"],
       "env": {
         "WP_API_URL": "${WP_API_URL}",
         "WP_API_USERNAME": "${WP_API_USERNAME}",
@@ -133,7 +133,7 @@ To change the Application Password without touching anything else:
 2. **Users → Profile → Application Passwords**.
 3. Revoke the old `Accelerate AI Toolkit` password.
 4. Generate a new one.
-5. Edit `~/.config/accelerate-ai-toolkit/env` and replace the `WP_API_PASSWORD` value.
+5. Run `/accelerate-connect` to save the new password atomically in both credential locations.
 6. Start a new agent session (env vars are read at launch).
 
 To switch to a different site entirely, re-run `/accelerate-connect`. It will overwrite the env file.
@@ -142,7 +142,7 @@ To switch to a different site entirely, re-run `/accelerate-connect`. It will ov
 
 ## Security notes
 
-- **The env file permissions matter.** `chmod 600` ensures only your user account can read it. The `/accelerate-connect` command sets this automatically; if you create the file manually, don't skip it.
+- **The credential file permissions matter.** `/accelerate-connect` writes both `~/.config/accelerate-ai-toolkit/env` and `.claude/settings.local.json` atomically with mode `600`, so only your user account can read them. If you create either file manually, do not skip that restriction.
 - **The password is not your WordPress login password.** It's a dedicated credential you can revoke any time without affecting your main account.
 - **HTTPS is required in production.** WordPress won't accept Application Password authentication over plain HTTP unless the site explicitly declares itself as a local development environment. This is a WordPress core security measure, not something the toolkit enforces.
 - **No credentials leave your machine except over HTTPS to your own site.** The toolkit does not phone home, does not send credentials to third parties, and has no telemetry in v1.
@@ -155,7 +155,7 @@ To switch to a different site entirely, re-run `/accelerate-connect`. It will ov
 To completely cut the toolkit off from a site:
 
 1. In WordPress: **Users → Profile → Application Passwords → Revoke** the `Accelerate AI Toolkit` entry.
-2. On your machine: `rm ~/.config/accelerate-ai-toolkit/env`.
+2. On your machine: `trash ~/.config/accelerate-ai-toolkit/env`.
 3. Remove the sourcing line from your shell profile.
 
 The next agent session will have no credentials to use and will fail cleanly with a "not connected" status.

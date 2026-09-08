@@ -12,24 +12,38 @@ You are the "what matters now" front door for a non-technical marketer running a
 
 This skill is read-only. You never create anything. You look at the data, decide what's worth doing, and offer to hand off to the right follow-up skill for the user to act on with confirmation.
 
-## What to fetch
+## Bounded retrieval
 
-Make these calls via `mcp__wordpress__mcp-adapter-execute-ability` in parallel:
+Use the smallest read set that can answer the request. A complete weekly operating plan may use at most **eight reads**, **1.25 MiB of returned data**, and **30 seconds elapsed**. A narrow question (for example, "what changed?" or "what should I do about this page?") has a tighter limit of **five reads**, **768 KiB**, and **20 seconds**. Stop before the next read would exceed a limit; tell the user when a missing optional view makes a recommendation less certain. Keep an in-session-only receipt of read count, returned bytes, elapsed time, reused results, and exhausted limits. Never send or persist it.
 
-1. `accelerate/get-performance-summary` with `entity_type: "site"` and `date_range_preset: "7d"` — weekly baseline.
-2. `accelerate/get-performance-summary` with `entity_type: "site"` and `date_range_preset: "30d"` — monthly baseline, for period-over-period context.
-3. `accelerate/get-top-content` with `limit: 10` — what's working.
-4. `accelerate/get-landing-pages` with `limit: 10` — where visitors are arriving and how they're doing.
-5. `accelerate/get-engagement-metrics` with `entity_type: "site"` — bounce rate, scroll depth, recirculation, exit pages.
-6. `accelerate/list-active-experiments` — what's already running (and whether anything is close to a winner).
-7. `accelerate/get-source-breakdown` with `group_by: "source"` — where the traffic is coming from.
-8. `accelerate/get-audience-segments` — what audiences already exist (so you don't suggest building ones that are already there).
+Choose the scope before reading: a request for today's focus, one page, or what changed is narrow. Use the weekly budget only when the user asks for a weekly or broader operating plan. Do not expand a narrow request into a weekly plan because more opportunities appear in the data.
 
-If the user specified a window ("this week", "this month", "next 30 days"), adjust the date-range presets accordingly. Default is weekly framing.
+Results can be reused only during the same session when the full site identity and the exact inputs, including date window, match. Reuse a completed result or a recorded optional-source failure once; never retry the same failed optional read during the plan. Do not reuse a weekly result as a monthly comparison.
 
-**If `accelerate/get-landing-pages` errors**, do not retry and do not show the error to the user. Continue with the other seven data sources and skip Rule 1 on this run — the bounce-priority signal can still partially fire from `get-engagement-metrics` (site-wide bounce rate) combined with `get-top-content` (high-volume pages). If the result materially depends on the missing data, include one plain sentence such as: "Entry-page details aren't available on this site right now, so this view is based on top content and engagement instead." Never mention issue numbers, error text, or "known issue/bug" language. If the user asks why the data is unavailable, suggest running `/accelerate-status`, which checks whether the site's Accelerate plugin is up to date.
+### Stage 1 — required context
 
-**If `get-source-breakdown` returns an empty `sources` array**, fall back to `accelerate/get-traffic-breakdown` with `dimension: "referrer"` for the same window and use that for Rule 3. If the result materially depends on source data, add one plain sentence: "This view is based on referrer data since source attribution isn't available for this window."
+Make these independent reads in parallel, unless an exact in-session result already exists:
+
+1. `accelerate/get-site-context` with `blocks: "none"` — site identity and the learning-journal key.
+2. `accelerate/get-performance-summary` with `entity_type: "site"` and the requested window (default `date_range_preset: "7d"`) — the baseline.
+3. `accelerate/get-top-content` with `limit: 10` and the same window — high-volume content candidates.
+4. `accelerate/list-active-experiments` — work already in progress.
+
+If the user specified a window, carry that exact window into every later time-bound read. Do not fetch a monthly comparison just because the plan is weekly.
+
+### Stage 2 — targeted follow-up
+
+Fetch an optional source only when it can change a recommendation:
+
+- `accelerate/get-landing-pages` with `limit: 10` and the requested window when entry-page bounce or conversion friction is a plausible priority, or the user asks about landing pages.
+- `accelerate/get-engagement-metrics` with `entity_type: "site"` and the requested window when the plan needs engagement, bounce, or exit evidence.
+- A second `accelerate/get-performance-summary` with a **compatible prior comparison window** only when the user asks what changed, or the Stage 1 result suggests a meaningful decline or spike.
+- `accelerate/get-source-breakdown` with `group_by: "source"`, `limit: 20`, and the requested window only when a traffic-source or personalisation recommendation is plausible, or the user asks about sources.
+- `accelerate/get-audience-segments` with `include_estimates: false` only after a source opportunity remains credible, to avoid suggesting an audience that already exists.
+
+For a narrow request, Stage 1 leaves at most **one** Stage 2 read: choose the one that can change the first action, then answer. For a weekly plan, read at most four Stage 2 sources. If more would be relevant, choose the reads that answer the user's stated question and can change the first action; reserve both the source and audience reads when personalisation is the credible action within the weekly budget. Say which view was unavailable when the omitted read would materially affect the ranking.
+
+If an optional source fails, do not retry it. Continue with the evidence already available. If it materially limits an action, use one plain sentence such as: "Entry-page details aren't available right now, so this view is based on top content and site-wide engagement." Do not show internal error text.
 
 ## How to think
 
@@ -37,14 +51,14 @@ You're looking for the 3 highest-leverage moves this user could make next, groun
 
 ### Rule 0 — Consult the learning journal first
 
-Derive the site key from `get-site-context` using the site key derivation rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/sites/<key>/journal.json` if it exists.
+Use the Stage 1 site-context result to derive the site key with the rule in `accelerate-learn`. Read `~/.config/accelerate-ai-toolkit/sites/<key>/journal.json` if it exists; do not make another site-context read.
 
 - **File missing or unreadable:** Skip silently. Use the generic rules below.
 - **Valid journal:** Patterns with `status: "won"` get a priority bump -- when choosing between two similar-impact actions, prefer the one that maps to a won pattern. When you lean on a won pattern, say so: *"I'm leaning on [pattern name] because it's won [N] of [M] tests on your site."* Patterns with `status: "lost"` get demoted -- push them below won and neutral patterns, but don't exclude them entirely. If a lost pattern is the only option or the user asks, surface it with context: *"[Pattern name] has lost [N] of [M] tests on your site, so I'm not leading with it."* Ignore `inconclusive` and `mixed` -- not enough data to shift the ranking.
 
 ### Rule 1 — A landing page with high entries, high bounce, and low conversion is almost always the biggest lever
 
-If `get-landing-pages` shows a page with hundreds or thousands of entries but 70%+ bounce, that's the top priority. Low-effort change (rewrite hero, move CTA, add social proof) against high-volume traffic = largest expected lift. Hand off to `accelerate-optimize-landing-page`.
+If the targeted landing-page read shows a page with hundreds or thousands of entries but 70%+ bounce, that's the top priority. Low-effort change (rewrite hero, move CTA, add social proof) against high-volume traffic = largest expected lift. Hand off to `accelerate-optimize-landing-page`. If landing-page evidence was not needed or did not fit the budget, do not infer this rule from site-wide bounce alone.
 
 ### Rule 2 — A running experiment that's close to a winner is a fast-follow
 
@@ -52,11 +66,11 @@ If `list-active-experiments` returns a test with one variant already at ~80%+ pr
 
 ### Rule 3 — A new or spiking source with a high conversion rate is a personalisation opportunity
 
-If `get-source-breakdown` shows a referrer or UTM source punching above its weight on conversion rate but below on volume, the move is to personalise the landing content for that source (reduce friction, match their expectation). Hand off to `accelerate-personalize`.
+If the targeted source read shows a referrer or UTM source punching above its weight on conversion rate but below on volume, and the audience read does not already cover it, the move is to personalise the landing content for that source (reduce friction, match their expectation). Hand off to `accelerate-personalize`.
 
 ### Rule 4 — A source that's dropped sharply vs last month is worth diagnosing
 
-Compare the `7d` and `30d` performance summaries. If a specific channel used to drive a lot of traffic and has collapsed, don't guess the cause — diagnose. Hand off to `accelerate-diagnose`.
+Compare the requested window with the compatible prior summary only when that targeted comparison was read. If a specific channel used to drive a lot of traffic and has collapsed, don't guess the cause — diagnose. Hand off to `accelerate-diagnose`.
 
 ### Rule 5 — Engagement is flat across the board, no spikes, no drops
 
@@ -68,16 +82,16 @@ Apply the router's guidance: for sites under ~1,000 weekly visitors, only recomm
 
 ### Avoid duplicates
 
-Check `list-active-experiments` and `get-audience-segments` before recommending. Don't suggest running a test on a block that already has an active test. Don't suggest creating an audience that matches one already defined.
+Always check `list-active-experiments` before recommending a test. Check `get-audience-segments` before recommending a new audience only when a targeted source read made personalisation a credible action. Don't suggest creating an audience that matches one already defined.
 
 ## Output format
 
 Exactly **three** prioritised actions. Not two, not five. Three.
 
 ```markdown
-## This week's plan for [site name]
+## [Requested focus or period] for [site name]
 
-[One-sentence framing — what the data says overall. Example: "Traffic is flat this week but bounce on the pricing page is climbing — here's where I'd focus."]
+[One sentence describing the returned current-period facts. Only describe traffic as flat, rising, or falling when a matching prior comparison was actually read; one period alone does not establish a trend.]
 
 ### 🔴 Priority 1 — [one-line action]
 **What:** [concrete action the user can take]

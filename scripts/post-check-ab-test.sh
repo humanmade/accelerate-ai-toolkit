@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# PostToolUse hook filter: only output verification instructions for successful
-# create-ab-test calls. For all other ability calls, exit silently so Claude
-# continues uninterrupted.
+# PostToolUse filter. Keep this advisory because hook output cannot prove the
+# server-side restore or its read-back. The workflow records the response and
+# verifies the block and experiment state before it reports a result.
 
-INPUT=$(cat)
-ABILITY=$(echo "$INPUT" | python3 -c "import json,sys; print(json.load(sys.stdin).get('tool_input',{}).get('ability_name',''))" 2>/dev/null)
-
-if [ "$ABILITY" = "accelerate/create-ab-test" ]; then
-  echo "IMPORTANT: A/B test was just created. You MUST now verify the block content was saved correctly. Fetch the block content and check that no variant is empty (self-closing <!-- wp:altis/variant .../-->  tags with no inner content). If any variant is empty, immediately restore the backup you saved earlier and tell the user the test creation failed and the original content has been restored. Do not report success until verification passes."
-fi
+python3 -c '
+import json, sys
+try:
+    event = json.load(sys.stdin)
+except json.JSONDecodeError:
+    raise SystemExit(0)
+if event.get("tool_input", {}).get("ability_name") == "accelerate/create-ab-test":
+    print("A/B test creation needs a fresh block and experiment read now. Record a known response; on any timeout or malformed result, mark the outcome unknown and reconcile it. Only report restoration after the supported restore operation and read-back both match the receipt.")
+'
