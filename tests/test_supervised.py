@@ -121,6 +121,16 @@ class SupervisedReceiptTests(unittest.TestCase):
         self.assertIn("invalid evidence path: state-1", errors)
         self.assertIn("frontend.narrow proof is not observed", errors)
 
+    def test_unreferenced_evidence_is_still_verified(self):
+        receipt = copy.deepcopy(self.receipt)
+        artifact = self.root / "evidence" / "performance.json"
+        artifact.write_text("recorded performance\n")
+        receipt["evidence"]["performance"] = {
+            "path": "evidence/performance.json",
+            "sha256": "sha256:" + "0" * 64,
+        }
+        self.assertIn("evidence hash mismatch: performance", VERIFY.verify(receipt, self.root))
+
     def test_receipt_path_is_accepted(self):
         receipt_path = self.root / "receipt.json"
         receipt_path.write_text(json.dumps(self.receipt))

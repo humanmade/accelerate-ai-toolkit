@@ -175,7 +175,9 @@ def verify(receipt, base):
     for reference in references:
         item = evidence.get(str(reference)) if isinstance(evidence, dict) else None
         require(isinstance(item, dict), f"missing evidence artifact: {reference}")
+    for reference, item in evidence.items() if isinstance(evidence, dict) else ():
         if not isinstance(item, dict):
+            errors.append(f"invalid evidence artifact: {reference}")
             continue
         path, digest = item.get("path"), item.get("sha256")
         valid_path = isinstance(path, str) and path and not Path(path).is_absolute() and ".." not in Path(path).parts
