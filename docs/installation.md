@@ -12,7 +12,7 @@ Before you install the toolkit, confirm you have:
 
   > **Running Accelerate from source?** Development checkouts do not bundle the adapter, so the MCP route (`/wp-json/mcp/mcp-adapter-default-server`) returns 404 even with the feature flag on. Install it manually: download `mcp-adapter.zip` from the [WordPress/mcp-adapter releases](https://github.com/WordPress/mcp-adapter/releases), extract into `wp-content/plugins/`, and `wp plugin activate mcp-adapter`. Diagnostic tell: if `/wp-json/wp-abilities/v1/abilities` lists the `accelerate/*` abilities but the MCP route 404s, the missing adapter is the cause.
 - **WordPress 6.9 or newer.** The Abilities API requires WordPress core's `wp_register_ability()` function.
-- **A recent Node.js LTS runtime.** The toolkit uses `@automattic/mcp-wordpress-remote` as its MCP client, which runs on Node via `npx`. The upstream client doesn't document a specific minimum version; if you're on a current Node LTS you're fine.
+- **Node.js 18 or newer.** The toolkit uses the tested `@automattic/mcp-wordpress-remote@0.4.0` client through `npx`; that release declares Node 18 as its minimum.
 - **An agent that supports plugins:**
   - [Claude Code](https://claude.com/claude-code), or
   - [Codex CLI](https://github.com/openai/codex)
@@ -99,7 +99,7 @@ A healthy response looks like:
 ```
 ✅ Connected to [your site name]
    URL: [your site URL]
-   Accelerate capabilities available: 39
+   Accelerate capabilities available: 42
    Ready for questions.
 ```
 
@@ -150,7 +150,7 @@ The credentials didn't load, or the server couldn't start. Check these in order:
      "mcpServers": {
        "wordpress": {
          "command": "/absolute/path/to/npx",
-         "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+         "args": ["-y", "@automattic/mcp-wordpress-remote@0.4.0"],
          "env": {
            "WP_API_URL": "${WP_API_URL}",
            "WP_API_USERNAME": "${WP_API_USERNAME}",
@@ -181,7 +181,7 @@ If `/accelerate-status` reports that the connector address check passed, the 404
 
 ### "Permission denied" when a skill tries to fetch data
 
-Your WordPress account lacks the right capability for the failing call. Accelerate uses three tiers: `view_accelerate_analytics` (or `edit_posts`) for read-only analytics, `edit_posts` for creating experiments and audiences, and `manage_options` for stopping experiments, broadcasting, or exporting raw events. Ask your site admin to grant the appropriate role — Editor (or higher) covers analytics + experiment creation; administrator covers everything. See [authentication.md](./authentication.md#required-wordpress-capabilities) for the full tier breakdown.
+Your WordPress account lacks the right capability for the failing call. Accelerate uses three tiers: `view_accelerate_analytics` (or `edit_posts`) for read-only analytics, `edit_posts` for creating experiments and audiences, and `manage_options` for stopping experiments, broadcasting, or exporting raw events. Content access is separate: reading a post requires `edit_posts` and permission for that post, while media listing requires `upload_files`. Ask your site admin to grant the appropriate role — Editor (or higher) covers analytics + experiment creation; administrator covers everything. See [authentication.md](./authentication.md#required-wordpress-capabilities) for the full tier breakdown.
 
 ### Application Passwords section is missing from your profile
 
@@ -196,7 +196,7 @@ Either:
 To remove the toolkit:
 
 1. In Claude Code: `/plugin uninstall accelerate-ai-toolkit`. In Codex: use the plugins UI.
-2. Delete the credentials file: `rm ~/.config/accelerate-ai-toolkit/env`
+2. Move the credentials file to the Bin: `trash ~/.config/accelerate-ai-toolkit/env`
 3. Remove the `. ~/.config/accelerate-ai-toolkit/env` line from your shell profile.
 4. Optionally, revoke the Application Password in WordPress (Users → Profile → Application Passwords → Revoke).
 5. Delete the cloned repository.

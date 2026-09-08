@@ -22,17 +22,19 @@ Inside your agent session:
 /accelerate-learn
 ```
 
-The skill reads your completed A/B test results, classifies each one, updates the journal, and prints a summary of what it found. This is the default path -- zero setup beyond what you already have.
+The skill checks a bounded recent history of completed A/B tests, updates only new or changed records, and prints a summary of what it found. A repeat check with no changes does not re-read every past result. This is the default path -- zero setup beyond what you already have.
 
 **When to run it:** After experiments conclude. A good cadence is every 1-2 weeks, or whenever you see a test reach a verdict. Running it more often is harmless but won't produce new signal until experiments finish.
 
-**What it reads:** Completed experiment results from your site (via the same connection you set up with `/accelerate-connect`).
+**What it reads:** Completed experiment results from your site (via the same connection you set up with `/accelerate-connect`). A normal refresh checks up to the newest 500 completed tests and reads details for up to eight new or changed entries. If there is more history than that, it says so plainly rather than implying it covered every old test.
 
 **What it writes:** Two files on your machine:
 - A machine-readable journal (used by other skills to tailor recommendations)
 - A human-readable summary you can open and read any time
 
 Both live at `~/.config/accelerate-ai-toolkit/` and are private to your machine.
+
+The journal also records what it could cover: how much history was checked, whether the result is complete or partial, and whether your installed site can notice a correction to an old result. That record stays on your machine; the toolkit does not send usage data anywhere.
 
 ---
 
@@ -55,6 +57,8 @@ Each pattern gets one of four statuses:
 - **Lost** -- at least 3 decisive tests, 25% or lower win rate. The toolkit warns you.
 - **Mixed** -- enough tests, but no clear trend. Treated as neutral.
 - **Not enough data** -- fewer than 3 decisive tests. Ignored until more evidence arrives.
+
+A manually chosen variant is kept as a note, separate from the evidence above. The toolkit also keeps older results whose decision history is unknown, but does not call them wins or losses simply because one version was selected. That keeps a past manual choice from quietly becoming proof that a pattern works.
 
 You can read the journal any time by opening `~/.config/accelerate-ai-toolkit/sites/<your-site-key>/journal.md` in any text editor.
 
@@ -113,11 +117,11 @@ The toolkit always tells you when it's leaning on learned data: *"I'm suggesting
 
 ### "No learning data yet"
 
-Run `/accelerate-learn`. If your site has no completed A/B tests, the journal will be empty. Run some tests first and check back in a few weeks.
+Run `/accelerate-learn`. If your site has no completed A/B tests, the journal will be empty. Run some tests first and check back in a few weeks. If the summary says it only checked recent history, that is an honest coverage limit rather than a claim that older tests do not exist.
 
 ### The journal seems wrong
 
-You can delete `~/.config/accelerate-ai-toolkit/sites/<your-site-key>/journal.json` and run `/accelerate-learn` again to rebuild from scratch. The skill reads all completed experiments from your site, so nothing is lost.
+Ask the toolkit to rebuild the journal. It keeps a private backup of an older readable journal before replacing it. A rebuild is still bounded, so it labels the result as partial when the site has more completed tests than it could safely inspect in one run.
 
 ### The scheduled workflow fails
 
@@ -144,7 +148,7 @@ No. The default path is manual: run `/accelerate-learn` inside your agent. GitHu
 No. Each site has its own journal. A pattern that wins on one site does not automatically apply to another.
 
 **Can I edit the journal by hand?**
-Yes, but the next `/accelerate-learn` run may overwrite your changes if the pattern you edited also gets updated from new test results.
+Yes, but the next `/accelerate-learn` run may update the matching experiment when the site reports a newer version of its result.
 
 **What if I've never run an A/B test?**
 The journal will be empty and the toolkit falls back to its generic recommendations. Start testing, and the journal fills up naturally.

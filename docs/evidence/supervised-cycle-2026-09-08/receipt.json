@@ -1,0 +1,174 @@
+{
+  "format": "accelerate-supervised-receipt/v1",
+  "provenance": {
+    "kind": "synthetic",
+    "recorded_at": "2026-09-08T02:00:00Z",
+    "toolkit_revision": "e136dbb plus this receipt's change set",
+    "producer_revision": "92503f97f5f45a937512cab97ca1e15eb9c9033f",
+    "wordpress_version": "7.1",
+    "connector_version": "0.4.0",
+    "mcp_adapter_version": "0.5.0",
+    "host_version": "Claude Code 2.1.263"
+  },
+  "identity": {
+    "run_id": "supervised-cycle-2026-09-08",
+    "experiment_id": "redacted-experiment-1",
+    "site_url": "https://staging.example.test",
+    "block_id": "redacted-block-1"
+  },
+  "states": [
+    {
+      "state": "connect",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "choose",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "approve",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "create",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "observe",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "resolve",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "apply",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    },
+    {
+      "state": "learn",
+      "status": "complete",
+      "evidence_id": "cycle-state"
+    }
+  ],
+  "control": {
+    "content_hash": "sha256:b792a6c135234afbe9fb2e7964cb8e4aec5a3efde1203d7b3da616a154e97275"
+  },
+  "challenger": {
+    "content_hash": "sha256:de3a71e21d93e965c850229a4b5c36fc65849c982a3fbe3b3c8487df72d8a916",
+    "approval": {
+      "approved_at": "2026-09-08T01:40:00Z",
+      "approved_by": "supervised-operator",
+      "operation_id": "cycle-state"
+    }
+  },
+  "exposure": {
+    "control": {
+      "observed_count": 119,
+      "observation_id": "cycle-state"
+    },
+    "challenger": {
+      "observed_count": 101,
+      "observation_id": "cycle-state"
+    }
+  },
+  "application": {
+    "applied_arm": "challenger",
+    "readback_content_hash": "sha256:de3a71e21d93e965c850229a4b5c36fc65849c982a3fbe3b3c8487df72d8a916",
+    "operation_id": "cycle-state",
+    "outcome": "manual_selection"
+  },
+  "journal": {
+    "entry_id": "cycle-state",
+    "experiment_id": "redacted-experiment-1",
+    "applied_arm": "challenger",
+    "outcome": "manual_selection"
+  },
+  "failure_cases": {
+    "empty_or_partial_response": {
+      "action": "withheld",
+      "evidence_id": "lifecycle-cases"
+    },
+    "permission_denied": {
+      "action": "withheld",
+      "evidence_id": "lifecycle-cases"
+    },
+    "untrusted_page_instruction": {
+      "action": "withheld",
+      "evidence_id": "lifecycle-cases"
+    },
+    "concurrent_edit": {
+      "action": "withheld",
+      "evidence_id": "lifecycle-cases"
+    },
+    "interrupted_or_ambiguous_write": {
+      "action": "recovery_required",
+      "evidence_id": "lifecycle-cases"
+    },
+    "recovery_failure": {
+      "action": "escalated",
+      "evidence_id": "lifecycle-cases"
+    },
+    "already_applied_winner": {
+      "action": "idempotent",
+      "evidence_id": "lifecycle-cases"
+    }
+  },
+  "editor": {
+    "desktop": {
+      "proof_id": "editor-desktop",
+      "status": "observed"
+    },
+    "narrow": {
+      "proof_id": "editor-narrow",
+      "status": "observed"
+    }
+  },
+  "frontend": {
+    "desktop": {
+      "proof_id": "frontend-desktop",
+      "status": "observed"
+    },
+    "narrow": {
+      "proof_id": "frontend-narrow",
+      "status": "observed"
+    }
+  },
+  "evidence": {
+    "cycle-state": {
+      "path": "artifacts/cycle-states.json",
+      "sha256": "sha256:072030863742d0968fc3eda85b5a4d47595ad5dc8c14d2806053eb2e61470599"
+    },
+    "lifecycle-cases": {
+      "path": "artifacts/lifecycle-evaluation.json",
+      "sha256": "sha256:e3e55b20ab5f204dd13da0f1dc5e66f5fc75c5de84006629d5e63f5d97e9384e"
+    },
+    "editor-desktop": {
+      "path": "editor-desktop.png",
+      "sha256": "sha256:3672c7b8a992676ee330951a02cc91d9934a6e115f67c638abbfdfb56661e3fb"
+    },
+    "editor-narrow": {
+      "path": "editor-mobile.png",
+      "sha256": "sha256:79b1f5dfdb0443c8163d1fa30f579bfd1742e230e3ed1154da0d3c19c0b9934c"
+    },
+    "frontend-desktop": {
+      "path": "frontend-desktop.png",
+      "sha256": "sha256:3b9a1d6345e26e37e178353104e5af0de0655c40de3297738b80afd8191aa0b0"
+    },
+    "frontend-narrow": {
+      "path": "frontend-mobile.png",
+      "sha256": "sha256:2725f686d9f95e969523f509777cf86c1bcbd3d82709c58bf7c8bb9a01d133da"
+    },
+    "performance-evaluation": {
+      "path": "artifacts/performance-evaluation.json",
+      "sha256": "sha256:2675b24c0f980be0c928b9d6f62c259015e49e5c28bf9a7273515bfcf816a58b"
+    }
+  }
+}

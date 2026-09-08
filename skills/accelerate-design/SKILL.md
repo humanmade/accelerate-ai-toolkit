@@ -30,7 +30,7 @@ Lead with the concept, not the markup. Example:
 >
 > Want me to set this up as an A/B test against your current hero, or just hand you the content to drop in?
 
-Show the variant's copy in the presentation. Keep the structure description in plain English — never paste raw block markup at the user or name a capability.
+Show the variant's copy in the presentation. Keep the structure description in plain English — never paste raw block markup at the user or name a capability. Apply the router's full terminology ban to the entire answer, including setup and verification notes; never call a site operation an "ability".
 
 ## Rules
 

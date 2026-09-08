@@ -18,18 +18,14 @@ If a callback's WordPress capability changes (e.g. a new dedicated capability is
 - `skills/accelerate/SKILL.md` — model permission-error guidance
 - `AGENTS.md` — permission-model-is-three-tiers note
 
-## 2. Total ability count matches upstream registrations
+## 2. Contract snapshot matches the producer
 
 ```bash
-grep -rh "wp_register_ability( 'accelerate/" ../altis-accelerate/inc/abilities/*.php | sort -u | wc -l
+python3 scripts/check-contract.py
+python3 scripts/check-contract.py --producer ../altis-accelerate
 ```
 
-If the count changes, update:
-- `docs/ability-reference.md` — section header counts and total
-- `skills/accelerate-abilities-reference/SKILL.md` — add or remove the entry
-- `README.md` — `All N Accelerate capabilities` link text
-- `AGENTS.md` — `N-capability Abilities API` mentions
-- `docs/installation.md` — sample healthy status block
+The first command works in a clean toolkit checkout and checks the committed snapshot against both references. The second compares registrations, required inputs, every output-field path, and permission callback against a local producer checkout. Refresh the snapshot only from a known producer base revision; if the producer has companion ability changes, record its SHA-256 diff in the snapshot too.
 
 ## 3. Per-tier counts are correct
 

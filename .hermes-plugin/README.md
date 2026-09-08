@@ -33,7 +33,7 @@ Every skill needs a live connection to your WordPress site through the
    {
      "wordpress": {
        "command": "npx",
-       "args": ["-y", "@automattic/mcp-wordpress-remote@latest"],
+       "args": ["-y", "@automattic/mcp-wordpress-remote@0.4.0"],
        "env": {
          "WP_API_URL": "$WP_API_URL",
          "WP_API_USERNAME": "$WP_API_USERNAME",

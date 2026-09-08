@@ -1,0 +1,25 @@
+{
+  "provenance": "Recorded host runs against deterministic producer-shaped responses",
+  "opportunities": {
+    "narrow_baseline_reads": 10,
+    "narrow_current_reads": 5,
+    "weekly_current_reads": 7,
+    "weekly_optional_failure_retries": 0,
+    "note": "Baseline and current response envelopes differed, so payload bytes are not presented as a like-for-like improvement."
+  },
+  "brand_collection": {
+    "reads": 15,
+    "response_bytes": 66398,
+    "collection_elapsed_seconds": 41,
+    "budget_exhausted": true,
+    "usable_fragments_preserved": 3,
+    "cache_mode": "0600"
+  },
+  "learning": {
+    "first_refresh_listing_reads": 2,
+    "first_refresh_detail_reads": 2,
+    "unchanged_refresh_listing_reads": 2,
+    "unchanged_refresh_detail_reads": 0,
+    "duplicate_entries": 0
+  }
+}

@@ -154,8 +154,10 @@ If `shape=unknown`, treat it as a bare-root for the curl checks but stop after L
 Use the Bash tool:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' "$SITE_ROOT/wp-json/" 2>/dev/null
+python3 scripts/connection.py probe --site "$SITE_ROOT" --check site
 ```
+
+The helper stops each request after a 5-second connection limit or 15-second overall limit.
 
 If the response is not `200`:
 
@@ -172,7 +174,7 @@ Stop here.
 Use the Bash tool:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/wp/v2/users/me" 2>/dev/null
+python3 scripts/connection.py probe --site "$SITE_ROOT" --check auth
 ```
 
 If the response is `401` or `403`:
@@ -190,7 +192,7 @@ Stop here.
 Use the Bash tool:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/accelerate/v1" 2>/dev/null
+python3 scripts/connection.py probe --site "$SITE_ROOT" --check accelerate
 ```
 
 If the response is `404`:
@@ -210,9 +212,7 @@ Stop here.
 Use the Bash tool:
 
 ```bash
-ADAPTER=$(curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/mcp/mcp-adapter-default-server" 2>/dev/null)
-LEGACY=$(curl -s -o /dev/null -w '%{http_code}' -u "$WP_API_USERNAME:$WP_API_PASSWORD" "$SITE_ROOT/wp-json/wp/v2/wpmcp" 2>/dev/null)
-echo "adapter=$ADAPTER legacy=$LEGACY shape=$shape"
+python3 scripts/connection.py probe --site "$SITE_ROOT" --check routes
 ```
 
 Decide the outcome from `shape`, `adapter`, and `legacy`:
@@ -274,7 +274,7 @@ Use the Bash tool:
 
 ```bash
 MIN_VERSION="4.2.0"
-DETECTED=$(curl -s "$SITE_ROOT/" 2>/dev/null | grep -oE 'accelerate\.[0-9][0-9a-z.]*\.js' | head -1 | sed -E 's/^accelerate\.(.*)\.js$/\1/')
+DETECTED=$(curl -s --connect-timeout 5 --max-time 15 "$SITE_ROOT/" 2>/dev/null | grep -oE 'accelerate\.[0-9][0-9a-z.]*\.js' | head -1 | sed -E 's/^accelerate\.(.*)\.js$/\1/')
 if [ -z "$DETECTED" ]; then
   echo "version=none"
 else
@@ -304,7 +304,7 @@ When the remaining layers all pass, render the healthy status from Layer 9 as no
 If all layers pass, do all three of these in order:
 
 1. **Count the Accelerate surface.** Call `mcp__wordpress__mcp-adapter-discover-abilities` and count the returned entries whose `name` starts with `accelerate/`. Ignore the `mcp-adapter/*` wrapper tools — those are transport, not capabilities.
-2. **Smoke-test a read.** Call `accelerate/get-site-context` with `include_blocks: false` to grab basic site info.
+2. **Smoke-test a read.** Call `accelerate/get-site-context` with `blocks: "none"` to grab basic site info. On an older site that rejects `blocks`, retry once with `include_blocks: false`.
 3. **Smoke-test a second read.** Call `accelerate/get-audience-fields` as a capability ping.
 
 Present the healthy status using the dynamic count from step 1:
@@ -312,7 +312,7 @@ Present the healthy status using the dynamic count from step 1:
 ```
 ✅ Connected to [site name]
    URL: [site URL]
-   Accelerate capabilities available: [count from step 1, e.g. "39"]
+   Accelerate capabilities available: [count from step 1, e.g. "42"]
    Ready for questions.
 ```
 

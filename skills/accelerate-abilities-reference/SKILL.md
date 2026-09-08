@@ -50,15 +50,17 @@ Every capability below is invoked via `mcp__wordpress__mcp-adapter-execute-abili
 - **`accelerate/get-content-diff`** — period-over-period comparison. Inputs: **`post_ids`**, **`current_period`**, `comparison_period`.
 - **`accelerate/get-traffic-breakdown`** — breakdown by country / browser / os / referrer. Inputs: `dimension` (default country), `date_range`, `limit`.
 - **`accelerate/get-taxonomy-performance`** — performance by category / tag / taxonomy. Inputs: `taxonomy` (default category), `date_range`, `limit`. Output includes `underserved_score`.
-- **`accelerate/get-site-context`** — site design system (colours, typography, spacing, blocks). Inputs: `include_blocks` (default false).
+- **`accelerate/get-site-context`** — site design system (colours, typography, spacing, blocks). Inputs: `blocks` (`none`|`styled`|`all`, default `none`). `include_blocks` remains accepted for older sites but is deprecated; use `blocks` for new calls.
 - **`accelerate/get-engagement-metrics`** — bounce rate, time on page, scroll depth, recirculation, return visitor rate, exit pages. Inputs: `entity_type` (site|post), `entity_id`, `date_range`.
 - **`accelerate/list-active-experiments`** — running tests and personalisation rules. Inputs: `type` (all|abtest|personalization), `post_id`.
-- **`accelerate/list-experiments`** — historical and active experiments with pagination, status / type / date / annotation filters. Use this for "every experiment ever", not just live ones. Inputs: `status` (all|active|running|completed|paused|draft), `type` (all|abtest|personalization), `date_range`, `subject_post_id`, `annotation_key`, `annotation_value`, `page`, `per_page` (1–100, default 50). Returns paginated experiments with `total` and `pages`.
+- **`accelerate/list-experiments`** — historical and active experiments with pagination, status / type / date / annotation filters. Use this for "every experiment ever", not just live ones. Inputs: `status` (all|active|running|completed|paused|draft), `type` (all|abtest|personalization), `date_range`, `subject_post_id`, `annotation_key`, `annotation_value`, `page`, `per_page` (1–100, default 50). Returns paginated experiments with `total` and `pages`; each result includes `updated_at` and `result_revision` for safe historical-result refreshes.
 - **`accelerate/get-audience-segments`** — defined audiences. Inputs: `include_estimates`.
 - **`accelerate/get-audience-fields`** — available targeting fields. Inputs: `refresh`.
 - **`accelerate/get-author-performance`** — metrics for one or all authors. Inputs: `author_id`, `date_range`, `limit`, `order_by` (views|conversions|conversion_rate|posts_count).
 - **`accelerate/get-author-content`** — posts by an author with metrics. Inputs: **`author_id`**, `date_range`, `order_by`, `limit`.
 - **`accelerate/search-content`** — find content by title / URL / text. Inputs: **`query`**, `search_in`, `post_type`, `limit`.
+- **`accelerate/get-content`** — retrieve a post or page by ID or URL. Inputs: `id`, `url` (one is required; ID takes precedence when both are provided). Requires permission to edit content and the normal per-item reading permission.
+- **`accelerate/get-media`** — list media-library items. Inputs: `limit` (1–100, default 20), `offset`, `search`, `mime_type`. Requires permission to upload files; private media stays scoped to content the account may read.
 
 ### Real-time
 
@@ -78,10 +80,11 @@ Every capability below is invoked via `mcp__wordpress__mcp-adapter-execute-abili
 - **`accelerate/add-variant`** — add one variant to a block. Inputs: **`block_id`**, **`content`**, `title`, `percentage`, `audience_id`.
 - **`accelerate/update-variant`** — modify an existing variant. Inputs: **`block_id`**, **`variant_index`**, `content`, `title`, `percentage`, `audience_id`.
 - **`accelerate/remove-variant`** — delete a variant. Inputs: **`block_id`**, **`variant_index`**. Destructive.
-- **`accelerate/create-ab-test`** — create a multi-variant test on a block. Inputs: **`block_id`**, **`variants`** (min 2), `hypothesis`, `goal` (engagement|click_any_link|submit_form), `traffic_percentage`.
+- **`accelerate/create-ab-test`** — create a multi-variant test on a block. Inputs: **`block_id`**, **`variants`** (min 2), `hypothesis`, `goal` (engagement|click_any_link|submit_form), `traffic_percentage`, `annotations`. For a recoverable creation, include both `expected_content_hash` and a stable `request_id`.
+- **`accelerate/restore-ab-test`** — restore a recoverable A/B-test creation only after showing the user the exact restoration and receiving confirmation. Inputs: **`block_id`**, **`request_id`**, **`expected_current_hash`**. It refuses to overwrite content that changed after the test was created.
 - **`accelerate/set-block-goal`** — set a block's success metric. Inputs: **`block_id`**, **`goal`**.
 - **`accelerate/set-traffic-percentage`** — adjust how much traffic enters the experiment. Inputs: **`block_id`**, **`percentage`**.
-- **`accelerate/get-experiment-results`** — full statistical results with winner recommendation. Inputs: **`block_id`**, `refresh`.
+- **`accelerate/get-experiment-results`** — full results with winner recommendation and `selection_provenance` (`manual` or null), so a selected version is not mistaken for statistical evidence. Inputs: `block_id` or `experiment_id` (one is required), `refresh`. Use `experiment_id` for a completed experiment found through `list-experiments`.
 - **`accelerate/stop-experiment`** — pause / resume / stop / declare winner. Inputs: **`block_id`**, **`action`** (pause|resume|stop|declare_winner), `winner_variant_index` (required for declare_winner).
 
 ### Personalisation (write, requires confirmation)
@@ -103,4 +106,4 @@ Every capability below is invoked via `mcp__wordpress__mcp-adapter-execute-abili
 
 - Always check capability existence before suggesting it. If a user asks about something Accelerate doesn't support (multivariate tests, revenue, heatmaps, etc.), say so directly.
 - The reference above is exhaustive for the current toolkit. If a capability you expected isn't listed, it genuinely isn't available.
-- Permission tiers: most "understanding" capabilities require `can_view_analytics`. Writing requires `can_create_experiments`. Broadcasts and exports require `can_manage_experiments`. If a call fails with a permission error, tell the user their WordPress account needs the right capability and suggest they check with their site admin.
+- Permission tiers: read analytics accepts either `edit_posts` or `view_accelerate_analytics`; testing and audience changes require `edit_posts`; broadcasts, stopping experiments, and event exports require `manage_options`. Reading content and media has additional WordPress content permissions: `get-content` requires `edit_posts` plus the relevant post-reading permission, while `get-media` requires `upload_files` and keeps private items scoped. If a call fails with a permission error, tell the user their WordPress account needs the appropriate role and suggest they check with their site admin.

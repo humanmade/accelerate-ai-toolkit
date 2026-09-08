@@ -16,18 +16,19 @@ This is the "status" surface, not the "prioritisation" surface. If the user asks
 
 Make these calls via `mcp__wordpress__mcp-adapter-execute-ability` in parallel where possible:
 
-1. `accelerate/get-performance-summary` with `entity_type: "site"` and `date_range_preset: "7d"` (default; adjust if the user named a different window). This gives you total views, visitors, bounce rate, time series.
-2. `accelerate/get-top-content` with `limit: 10` and `date_range: {preset: "7d"}` (match the window from step 1). Top performing content.
-3. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` and `date_range: {preset: "7d"}` (match the window from step 1). Where visitors are coming from.
-4. `accelerate/list-active-experiments` to see what tests and personalisation rules are currently running.
+1. `accelerate/get-performance-summary` with `entity_type: "site"` and `date_range_preset: "7d"` (default; adjust if the user named a different window). This gives total views, visitors, conversions, and the time series.
+2. `accelerate/get-engagement-metrics` with `entity_type: "site"` and `date_range: {preset: "7d"}` (match the window from step 1). This is the source for bounce rate, time on page, scroll depth, and related engagement metrics.
+3. `accelerate/get-top-content` with `limit: 10` and `date_range: {preset: "7d"}` (match the window from step 1). Top performing content.
+4. `accelerate/get-traffic-breakdown` with `dimension: "referrer"` and `date_range: {preset: "7d"}` (match the window from step 1). Where visitors are coming from.
+5. `accelerate/list-active-experiments` to see what tests and personalisation rules are currently running.
 
-If the user asked about a specific time window (e.g. "this month", "last 30 days", "yesterday"), use the matching preset for `date_range_preset` on `get-performance-summary` and the equivalent `date_range: {preset: "..."}` on the other calls:
+If the user asked about a specific time window (e.g. "this month", "last 30 days", "yesterday"), use the matching preset for `date_range_preset` on `get-performance-summary` and the equivalent `date_range: {preset: "..."}` on the engagement, content, and traffic calls:
 - "today" / "last hour" → `1h`, `4h`, `12h`, or `24h`
 - "this week" / "last 7 days" → `7d`
 - "this month" / "last 30 days" → `30d`
 - "last quarter" / "last 90 days" → `90d`
 
-For windows that don't match a preset (e.g. "last 45 days"), use `date_range: {start: "<ISO>", end: "<ISO>"}` on the data calls and omit `date_range_preset` on `get-performance-summary`.
+For windows that don't match a preset (e.g. "last 45 days"), use the same `date_range: {start: "<ISO>", end: "<ISO>"}` on engagement, content, and traffic calls and omit `date_range_preset` on `get-performance-summary`.
 
 ## How to present it
 
@@ -47,6 +48,8 @@ Use a **summary card → tables → highlights** structure. No ASCII boxes. Clea
 ```
 
 (Only include the "vs. previous period" column if you have comparison data. If not, omit it — don't fabricate.)
+
+Only include bounce rate or another engagement measure when `get-engagement-metrics` returned it for the same date window. If that call fails, omit the row and say the review could not retrieve engagement metrics; do not infer them from the performance summary.
 
 ### Top pages
 

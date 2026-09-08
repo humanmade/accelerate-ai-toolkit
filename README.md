@@ -79,7 +79,7 @@ The toolkit is not a wrapper around your analytics API. It's 16 purpose-built sk
 | **Optimize landing page** | Deep-dive on one page: engagement metrics, 2-3 testable improvements, A/B test hand-off |
 | **Test** | Full A/B test lifecycle: plan, create, monitor, review, declare a winner |
 | **Design** | Make a new on-brand version of a block or a fresh section on demand — offers to A/B test it, never forces |
-| **Evolve** | Multi-round optimization loop: generate bold versions, test, keep the winner, repeat — attended or autopilot |
+| **Evolve** | Supervised multi-round optimization: generate bold versions, test, review the applied result, repeat |
 | **Personalize** | Audience creation and content personalization: by referrer, geography, behaviour, device |
 | **Content plan** | Proposes upcoming posts grounded in what's actually working on your site |
 | **Realtime** | What's happening right now: concurrent visitors, trending content, spike investigation |
@@ -114,7 +114,7 @@ Two things have to work on any agent: the **skills** must load, and the toolkit 
 - [Installation guide](./docs/installation.md)
 - [Harness support (Codex, Cursor, Gemini, Copilot, Hermes)](./docs/harness-support.md)
 - [Authentication & security](./docs/authentication.md)
-- [All 39 Accelerate capabilities](./docs/ability-reference.md)
+- [All 42 Accelerate capabilities](./docs/ability-reference.md)
 - [Adding your own skills](./docs/skill-development.md)
 - [Design standards for A/B test variants](./docs/design-standards.md)
 - [Gutenberg markup pre-flight](./docs/block-runner.md)

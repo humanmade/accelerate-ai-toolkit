@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "purpose": "Deterministic host-evaluation scenarios for bounded Accelerate workflows. Responses are supplied by an external read-only mock MCP server; the recorded trace is the evidence.",
+  "scenarios": {
+    "opportunities_narrow": {
+      "prompt": "What should I focus on today?",
+      "expect": {
+        "max_calls": 5,
+        "required_abilities": [
+          "accelerate/get-site-context",
+          "accelerate/get-performance-summary",
+          "accelerate/get-top-content",
+          "accelerate/list-active-experiments",
+          "accelerate/get-landing-pages"
+        ],
+        "forbidden_abilities": [
+          "accelerate/get-source-breakdown",
+          "accelerate/get-audience-segments"
+        ]
+      }
+    },
+    "opportunities_weekly_optional_failure": {
+      "prompt": "Give me this week's plan; entry-page bounce concerns me.",
+      "expect": {
+        "max_calls": 8,
+        "required_abilities": [
+          "accelerate/get-site-context",
+          "accelerate/get-performance-summary",
+          "accelerate/get-top-content",
+          "accelerate/list-active-experiments",
+          "accelerate/get-landing-pages"
+        ],
+        "max_calls_by_ability": {
+          "accelerate/get-landing-pages": 1
+        }
+      }
+    },
+    "brand_repeated_references": {
+      "prompt": "Prepare a brand pack for a hero proposal.",
+      "expect": {
+        "max_calls": 40,
+        "max_calls_by_ability": {
+          "accelerate/get-content": 36
+        },
+        "required_abilities": [
+          "accelerate/get-site-context",
+          "accelerate/get-top-content",
+          "accelerate/get-landing-pages"
+        ]
+      }
+    },
+    "learning_reconciliation": {
+      "prompt": "Refresh what we have learned from completed tests.",
+      "expect": {
+        "max_calls": 14,
+        "required_abilities": [
+          "accelerate/get-site-context",
+          "accelerate/list-experiments"
+        ],
+        "detail_calls": {
+          "unchanged": 0,
+          "new": 1,
+          "changed": 1
+        }
+      }
+    }
+  }
+}

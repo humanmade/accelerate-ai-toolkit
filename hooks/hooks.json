@@ -1,5 +1,5 @@
 {
-  "description": "Safety guardrails for A/B test mutations. Ensures block content is backed up before test creation and verified after. The command scripts filter by ability name so non-create-ab-test calls pass through silently.",
+  "description": "Claude Code safety reminders for A/B test mutations. They check a complete local recovery context when a host supplies it and otherwise direct the workflow to save and verify its receipt. The command scripts ignore non-create-ab-test calls.",
   "hooks": {
     "PreToolUse": [
       {

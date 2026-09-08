@@ -1,0 +1,1334 @@
+{
+  "abilities": {
+    "accelerate/add-variant": {
+      "required_inputs": [
+        "block_id",
+        "content"
+      ],
+      "input_fields": [
+        "block_id",
+        "content",
+        "title",
+        "percentage",
+        "audience_id",
+        "annotations"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "content": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "percentage": {
+          "type": "integer"
+        },
+        "audience_id": {
+          "type": "integer"
+        },
+        "annotations": {
+          "type": "object"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "variant_index",
+        "variant_count",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/aggregate": {
+      "required_inputs": [
+        "metrics"
+      ],
+      "input_fields": [
+        "dimensions",
+        "metrics",
+        "filters",
+        "date_range",
+        "limit"
+      ],
+      "input_semantics": {
+        "dimensions": {
+          "type": "array"
+        },
+        "metrics": {
+          "type": "array",
+          "enum": [
+            "count",
+            "countDistinct",
+            "sum",
+            "avg",
+            "min",
+            "max"
+          ]
+        },
+        "filters": {
+          "type": "array"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "rows",
+        "query_time_ms"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/broadcast-content": {
+      "required_inputs": [
+        "block_ids",
+        "title"
+      ],
+      "input_fields": [
+        "block_ids",
+        "title"
+      ],
+      "input_semantics": {
+        "block_ids": {
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "success",
+        "broadcast_id",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_manage_experiments'"
+    },
+    "accelerate/create-ab-test": {
+      "required_inputs": [
+        "block_id",
+        "variants"
+      ],
+      "input_fields": [
+        "block_id",
+        "hypothesis",
+        "goal",
+        "variants",
+        "traffic_percentage",
+        "annotations",
+        "expected_content_hash",
+        "request_id"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "hypothesis": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "variants": {
+          "type": "array"
+        },
+        "traffic_percentage": {
+          "type": "integer"
+        },
+        "annotations": {
+          "type": "object"
+        },
+        "expected_content_hash": {
+          "type": "string"
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "variants_count",
+        "edit_url",
+        "request_id",
+        "experiment_id",
+        "original_content_hash",
+        "current_content_hash",
+        "recovery_available"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/create-audience": {
+      "required_inputs": [
+        "title",
+        "rules"
+      ],
+      "input_fields": [
+        "title",
+        "description",
+        "rules"
+      ],
+      "input_semantics": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "success",
+        "audience_id",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/create-personalization-rule": {
+      "required_inputs": [
+        "block_id",
+        "audience_id",
+        "personalized_content"
+      ],
+      "input_fields": [
+        "block_id",
+        "audience_id",
+        "personalized_content",
+        "fallback_content",
+        "annotations"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "audience_id": {
+          "type": "integer"
+        },
+        "personalized_content": {
+          "type": "string"
+        },
+        "fallback_content": {
+          "type": "string"
+        },
+        "annotations": {
+          "type": "object"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/export-events": {
+      "required_inputs": [
+        "date"
+      ],
+      "input_fields": [
+        "date",
+        "format"
+      ],
+      "input_semantics": {
+        "date": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "json",
+            "csv"
+          ]
+        }
+      },
+      "output_fields": [
+        "success",
+        "export_url",
+        "total_events",
+        "format"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_manage_experiments'"
+    },
+    "accelerate/get-attribution-comparison": {
+      "required_inputs": [],
+      "input_fields": [
+        "date_range",
+        "conversion_goal"
+      ],
+      "input_semantics": {
+        "conversion_goal": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "channels",
+        "insights",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-audience-fields": {
+      "required_inputs": [],
+      "input_fields": [
+        "refresh",
+        "fields"
+      ],
+      "input_semantics": {
+        "refresh": {
+          "type": "boolean"
+        },
+        "fields": {
+          "type": "array"
+        }
+      },
+      "output_fields": [
+        "name",
+        "label",
+        "type",
+        "operators",
+        "values"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-audience-segments": {
+      "required_inputs": [],
+      "input_fields": [
+        "include_estimates"
+      ],
+      "input_semantics": {
+        "include_estimates": {
+          "type": "boolean"
+        }
+      },
+      "output_fields": [
+        "id",
+        "title",
+        "description",
+        "rules",
+        "estimate"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-author-content": {
+      "required_inputs": [
+        "author_id"
+      ],
+      "input_fields": [
+        "author_id",
+        "date_range",
+        "order_by",
+        "limit"
+      ],
+      "input_semantics": {
+        "author_id": {
+          "type": "integer"
+        },
+        "order_by": {
+          "type": "string",
+          "enum": [
+            "views",
+            "conversions",
+            "publish_date"
+          ]
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "author",
+        "posts",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-author-performance": {
+      "required_inputs": [],
+      "input_fields": [
+        "author_id",
+        "date_range",
+        "limit",
+        "order_by"
+      ],
+      "input_semantics": {
+        "author_id": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "order_by": {
+          "type": "string",
+          "enum": [
+            "views",
+            "conversions",
+            "conversion_rate",
+            "posts_count"
+          ]
+        }
+      },
+      "output_fields": [
+        "authors",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-concurrent-visitors": {
+      "required_inputs": [],
+      "input_fields": [
+        "post_id",
+        "active_window_minutes",
+        "include_breakdown"
+      ],
+      "input_semantics": {
+        "post_id": {
+          "type": "integer"
+        },
+        "active_window_minutes": {
+          "type": "integer"
+        },
+        "include_breakdown": {
+          "type": "boolean"
+        }
+      },
+      "output_fields": [
+        "concurrent_visitors",
+        "breakdown",
+        "comparison",
+        "polling"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-content": {
+      "required_inputs": [],
+      "input_fields": [
+        "id",
+        "url"
+      ],
+      "input_semantics": {
+        "id": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "id",
+        "type",
+        "status",
+        "slug",
+        "title",
+        "content",
+        "template"
+      ],
+      "permission_callback": "__NAMESPACE__ . '\\\\can_read_content'"
+    },
+    "accelerate/get-content-diff": {
+      "required_inputs": [
+        "post_ids",
+        "current_period"
+      ],
+      "input_fields": [
+        "post_ids",
+        "current_period",
+        "comparison_period"
+      ],
+      "input_semantics": {
+        "post_ids": {
+          "type": "array"
+        }
+      },
+      "output_fields": [
+        "current",
+        "previous",
+        "change_percent"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-engagement-metrics": {
+      "required_inputs": [],
+      "input_fields": [
+        "entity_type",
+        "entity_id",
+        "post_id",
+        "date_range"
+      ],
+      "input_semantics": {
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "post",
+            "site"
+          ]
+        },
+        "entity_id": {
+          "type": "integer"
+        },
+        "post_id": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "avg_time_on_page_seconds",
+        "bounce_rate",
+        "pages_per_session",
+        "recirculation_rate",
+        "return_visitor_rate",
+        "scroll_depth",
+        "exit_pages",
+        "engaged_seconds_total",
+        "engaged_seconds_avg",
+        "engaged_sessions",
+        "engaged_pageviews",
+        "engaged_first_seen",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-event-schema": {
+      "required_inputs": [],
+      "input_fields": [
+        "refresh"
+      ],
+      "input_semantics": {
+        "refresh": {
+          "type": "boolean"
+        }
+      },
+      "output_fields": [
+        "fields"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-experiment-results": {
+      "required_inputs": [],
+      "input_fields": [
+        "block_id",
+        "experiment_id",
+        "refresh"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "experiment_id": {
+          "type": "integer"
+        },
+        "refresh": {
+          "type": "boolean"
+        }
+      },
+      "output_fields": [
+        "block_id",
+        "experiment_id",
+        "experiment_type",
+        "status",
+        "started_at",
+        "ended_at",
+        "traffic_percentage",
+        "confidence_threshold",
+        "has_winner",
+        "winner_variant_index",
+        "selection_provenance",
+        "variants",
+        "recommendation",
+        "annotations",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-export-status": {
+      "required_inputs": [
+        "date"
+      ],
+      "input_fields": [
+        "date"
+      ],
+      "input_semantics": {
+        "date": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "available",
+        "total_events",
+        "export_url",
+        "retention"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-landing-pages": {
+      "required_inputs": [],
+      "input_fields": [
+        "date_range",
+        "limit"
+      ],
+      "input_semantics": {
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "pages",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-media": {
+      "required_inputs": [],
+      "input_fields": [
+        "limit",
+        "offset",
+        "search",
+        "mime_type"
+      ],
+      "input_semantics": {
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "search": {
+          "type": "string"
+        },
+        "mime_type": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "media",
+        "total_count"
+      ],
+      "permission_callback": "__NAMESPACE__ . '\\\\can_read_media'"
+    },
+    "accelerate/get-performance-summary": {
+      "required_inputs": [],
+      "input_fields": [
+        "entity_type",
+        "entity_id",
+        "date_range_preset",
+        "date_range",
+        "granularity",
+        "segment"
+      ],
+      "input_semantics": {
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "block",
+            "post",
+            "experiment",
+            "site"
+          ]
+        },
+        "entity_id": {
+          "type": "integer"
+        },
+        "date_range_preset": {
+          "type": "string",
+          "enum": [
+            "1h",
+            "4h",
+            "12h",
+            "24h",
+            "7d",
+            "30d",
+            "90d"
+          ]
+        },
+        "granularity": {
+          "type": "string",
+          "enum": [
+            "5min",
+            "15min",
+            "30min",
+            "1h",
+            "hourly",
+            "daily",
+            "weekly",
+            "aggregate",
+            "auto"
+          ]
+        },
+        "segment": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "views",
+        "visitors",
+        "conversions",
+        "conversion_rate",
+        "confidence_interval",
+        "time_series"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-post-performance": {
+      "required_inputs": [
+        "post_id"
+      ],
+      "input_fields": [
+        "post_id",
+        "date_range"
+      ],
+      "input_semantics": {
+        "post_id": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "post",
+        "metrics",
+        "comparison",
+        "experiment",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-site-context": {
+      "required_inputs": [],
+      "input_fields": [
+        "blocks",
+        "include_blocks"
+      ],
+      "input_semantics": {
+        "blocks": {
+          "type": "string",
+          "enum": [
+            "none",
+            "styled",
+            "all"
+          ]
+        },
+        "include_blocks": {
+          "type": "boolean"
+        }
+      },
+      "output_fields": [
+        "site",
+        "colors",
+        "typography",
+        "spacing",
+        "patterns",
+        "blocks"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-source-breakdown": {
+      "required_inputs": [],
+      "input_fields": [
+        "date_range",
+        "group_by",
+        "limit"
+      ],
+      "input_semantics": {
+        "group_by": {
+          "type": "string",
+          "enum": [
+            "source",
+            "medium",
+            "campaign",
+            "referrer_domain"
+          ]
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "sources",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-taxonomy-performance": {
+      "required_inputs": [],
+      "input_fields": [
+        "taxonomy",
+        "date_range",
+        "limit"
+      ],
+      "input_semantics": {
+        "taxonomy": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "terms",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-top-content": {
+      "required_inputs": [],
+      "input_fields": [
+        "type",
+        "limit",
+        "date_range"
+      ],
+      "input_semantics": {
+        "type": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "id",
+        "title",
+        "type",
+        "views",
+        "conversions",
+        "url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-traffic-breakdown": {
+      "required_inputs": [],
+      "input_fields": [
+        "dimension",
+        "date_range",
+        "limit"
+      ],
+      "input_semantics": {
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "country",
+            "browser",
+            "os",
+            "referrer"
+          ]
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "key",
+        "value",
+        "percent"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-trending-content": {
+      "required_inputs": [],
+      "input_fields": [
+        "window",
+        "metric",
+        "content_type",
+        "limit",
+        "min_threshold"
+      ],
+      "input_semantics": {
+        "window": {
+          "type": "string",
+          "enum": [
+            "1h",
+            "4h",
+            "12h",
+            "24h"
+          ]
+        },
+        "metric": {
+          "type": "string",
+          "enum": [
+            "views",
+            "conversions",
+            "visitors"
+          ]
+        },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "post",
+            "page",
+            "block",
+            "all"
+          ]
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "min_threshold": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "trending",
+        "window"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-utm-performance": {
+      "required_inputs": [],
+      "input_fields": [
+        "date_range",
+        "group_by",
+        "campaign"
+      ],
+      "input_semantics": {
+        "group_by": {
+          "type": "string",
+          "enum": [
+            "campaign",
+            "source",
+            "medium",
+            "term",
+            "content"
+          ]
+        },
+        "campaign": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "campaigns",
+        "period"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/get-variants": {
+      "required_inputs": [
+        "block_id"
+      ],
+      "input_fields": [
+        "block_id"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "block_id",
+        "block_type",
+        "variants",
+        "raw_markup",
+        "experiment",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/list-active-experiments": {
+      "required_inputs": [],
+      "input_fields": [
+        "type",
+        "post_id"
+      ],
+      "input_semantics": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "all",
+            "abtest",
+            "personalization"
+          ]
+        },
+        "post_id": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "id",
+        "type",
+        "title",
+        "status",
+        "start_time",
+        "variants_count"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/list-experiments": {
+      "required_inputs": [],
+      "input_fields": [
+        "status",
+        "type",
+        "date_range",
+        "subject_post_id",
+        "annotation_key",
+        "annotation_value",
+        "page",
+        "per_page"
+      ],
+      "input_semantics": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "all",
+            "active",
+            "running",
+            "completed",
+            "paused",
+            "draft"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "all",
+            "abtest",
+            "personalization"
+          ]
+        },
+        "subject_post_id": {
+          "type": "integer"
+        },
+        "annotation_key": {
+          "type": "string"
+        },
+        "annotation_value": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "per_page": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "experiments",
+        "experiments[].experiment_id",
+        "experiments[].block_id",
+        "experiments[].test_id",
+        "experiments[].type",
+        "experiments[].status",
+        "experiments[].title",
+        "experiments[].goal",
+        "experiments[].started_at",
+        "experiments[].ended_at",
+        "experiments[].updated_at",
+        "experiments[].result_revision",
+        "experiments[].has_winner",
+        "experiments[].winner_variant_index",
+        "experiments[].annotations",
+        "total",
+        "pages"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/query-events": {
+      "required_inputs": [],
+      "input_fields": [
+        "filters",
+        "fields",
+        "date_range",
+        "limit",
+        "offset"
+      ],
+      "input_semantics": {
+        "filters": {
+          "type": "array",
+          "enum": [
+            "eq",
+            "neq",
+            "contains",
+            "gt",
+            "lt",
+            "in"
+          ]
+        },
+        "fields": {
+          "type": "array"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "offset": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "events",
+        "total_count",
+        "query_time_ms"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/remove-variant": {
+      "required_inputs": [
+        "block_id",
+        "variant_index"
+      ],
+      "input_fields": [
+        "block_id",
+        "variant_index"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "variant_index": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "remaining_variants",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/restore-ab-test": {
+      "required_inputs": [
+        "block_id",
+        "request_id",
+        "expected_current_hash"
+      ],
+      "input_fields": [
+        "block_id",
+        "request_id",
+        "expected_current_hash"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "expected_current_hash": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "request_id",
+        "original_content_hash",
+        "current_content_hash",
+        "restored",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/search-content": {
+      "required_inputs": [
+        "query"
+      ],
+      "input_fields": [
+        "query",
+        "search_in",
+        "post_type",
+        "limit"
+      ],
+      "input_semantics": {
+        "query": {
+          "type": "string"
+        },
+        "search_in": {
+          "type": "string",
+          "enum": [
+            "title",
+            "url",
+            "content"
+          ]
+        },
+        "post_type": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "results"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_view_analytics'"
+    },
+    "accelerate/set-block-goal": {
+      "required_inputs": [
+        "block_id",
+        "goal"
+      ],
+      "input_fields": [
+        "block_id",
+        "goal"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "goal": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "goal"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/set-traffic-percentage": {
+      "required_inputs": [
+        "block_id",
+        "percentage"
+      ],
+      "input_fields": [
+        "block_id",
+        "percentage"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "percentage": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "percentage"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/stop-experiment": {
+      "required_inputs": [
+        "block_id",
+        "action"
+      ],
+      "input_fields": [
+        "block_id",
+        "action",
+        "winner_variant_index"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "pause",
+            "resume",
+            "stop",
+            "declare_winner"
+          ]
+        },
+        "winner_variant_index": {
+          "type": "integer"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "action",
+        "new_status",
+        "message",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_manage_experiments'"
+    },
+    "accelerate/update-audience": {
+      "required_inputs": [
+        "audience_id"
+      ],
+      "input_fields": [
+        "audience_id",
+        "title",
+        "description",
+        "rules"
+      ],
+      "input_semantics": {
+        "audience_id": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "output_fields": [
+        "success",
+        "audience_id"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    },
+    "accelerate/update-variant": {
+      "required_inputs": [
+        "block_id",
+        "variant_index"
+      ],
+      "input_fields": [
+        "block_id",
+        "variant_index",
+        "content",
+        "title",
+        "percentage",
+        "audience_id",
+        "annotations"
+      ],
+      "input_semantics": {
+        "block_id": {
+          "type": "integer"
+        },
+        "variant_index": {
+          "type": "integer"
+        },
+        "content": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "percentage": {
+          "type": "integer"
+        },
+        "audience_id": {
+          "type": "integer"
+        },
+        "annotations": {
+          "type": "object"
+        }
+      },
+      "output_fields": [
+        "success",
+        "block_id",
+        "variant_index",
+        "variant_title",
+        "edit_url"
+      ],
+      "permission_callback": "'Altis\\\\Accelerate\\\\Abilities\\\\can_create_experiments'"
+    }
+  },
+  "producer_base_revision": "92503f97f5f45a937512cab97ca1e15eb9c9033f",
+  "semantic_contract": {
+    "accelerate/get-site-context": {
+      "input_enums": {
+        "blocks": [
+          "none",
+          "styled",
+          "all"
+        ]
+      }
+    },
+    "accelerate/get-experiment-results": {
+      "one_of_inputs": [
+        "block_id",
+        "experiment_id"
+      ]
+    },
+    "accelerate/create-ab-test": {
+      "paired_inputs": [
+        "expected_content_hash",
+        "request_id"
+      ],
+      "source_markers": [
+        "expected_content_hash and request_id must be supplied together"
+      ]
+    }
+  }
+}
